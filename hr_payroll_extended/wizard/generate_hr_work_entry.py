@@ -3,6 +3,7 @@ from odoo import api, fields, models, _
 from datetime import date
 from datetime import datetime
 
+
 class GenerateHRWorkEntry(models.TransientModel):
     _name = "generate.hr.work.entry"
 
@@ -29,7 +30,7 @@ class GenerateHRWorkEntry(models.TransientModel):
         if self.modo == '1':
             vals_list = []
             contract_id = self.env['hr.contract'].search([('employee_id', '=', self.employee_id.id)])
-            vals_list += contract_id._get_work_entries_values(date_start, date_stop)
+            vals_list += contract_id._get_work_entries_total_values(date_start, date_stop)
             self.env['hr.work.entry'].create(vals_list)
 
         elif self.modo == '2':
@@ -37,7 +38,7 @@ class GenerateHRWorkEntry(models.TransientModel):
             for record in payslip:
                 vals_list = []
                 contract_id = self.env['hr.contract'].search([('employee_id', '=', record.employee_id.id)])
-                vals_list += contract_id._get_work_entries_values(date_start, date_stop)
+                vals_list += contract_id._get_work_entries_total_values(date_start, date_stop)
                 self.env['hr.work.entry'].create(vals_list)
 
         return {'type': 'ir.actions.act_window_close'}

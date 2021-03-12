@@ -15,6 +15,7 @@ from odoo.tools.float_utils import float_round
 from odoo.tools.translate import _
 from odoo.osv import expression
 from odoo.exceptions import except_orm, Warning, RedirectWarning, ValidationError
+import pytz
 _logger = logging.getLogger(__name__)
 
 # Used to agglomerate the attendances in order to find the hour_from and hour_to
@@ -49,6 +50,36 @@ class HrLeave(models.Model):
                           'El empleado no tiene suficientes días de vacaciones ('+str(self.days_vacations)+')')
         return super(HrLeave, self).write(values)
     '''
+
+    def _create_resource_leave(self):
+        """ This method will create entry in resource calendar time off object at the time of holidays validated
+        :returns: created `resource.calendar.leaves`
+        """
+        vals_list = []
+        calendar = self.employee_id.resource_calendar_id
+        resource = self.employee_id.resource_id
+        tz = pytz.timezone(calendar.tz)
+        attendances = calendar._work_intervals_batch(
+            pytz.utc.localize(self.date_from) if not self.date_from.tzinfo else self.date_from,
+            pytz.utc.localize(self.date_to) if not self.date_to.tzinfo else self.date_to,
+            resources=resource, tz=tz
+        )[resource.id]
+        # Attendances
+        for interval in attendances:
+            # All benefits generated here are using datetimes converted from the employee's timezone
+            vals_list += [{
+                'name': self.name,
+                'date_from': interval[0].astimezone(pytz.utc).replace(tzinfo=None),
+                'holiday_id': self.id,
+                'date_to': interval[1].astimezone(pytz.utc).replace(tzinfo=None),
+                'resource_id': self.employee_id.resource_id.id,
+                'calendar_id': self.employee_id.resource_calendar_id.id,
+                'time_type': self.holiday_status_id.time_type,
+            }]
+        return self.env['resource.calendar.leaves'].sudo().create(vals_list)
+
+
+
     # @api.onchange('request_date_from_period', 'request_hour_from', 'request_hour_to',
     #               'request_date_from', 'request_date_to',
     #               'employee_id')
