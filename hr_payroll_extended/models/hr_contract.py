@@ -133,9 +133,11 @@ class HrContract(models.Model):
             contract_vals = []
             employee = contract.employee_id
             #calendar = contract.resource_calendar_id
-            resource = employee.resource_id
             calendar = self.env['resource.calendar'].search([("name", "=", 'NOMINA')], limit=1)
+            resource = employee.resource_id
             tz = pytz.timezone(calendar.tz)
+            if not calendar:
+                calendar = contract.resource_calendar_id
 
             attendances = calendar._work_intervals_batch(
                 pytz.utc.localize(date_start) if not date_start.tzinfo else date_start,
