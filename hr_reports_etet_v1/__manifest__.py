@@ -2,10 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'volante de nomina',
+    'name': 'Reportes nomina y liquidacion',
     'version': '1.0',
     'summary': 'summary',
-    'description': "reporte generado en excel libro vacaciones empleados",
+    'description': "reporte generado en epdf nomina empleados",
     'website': 'https://www.endtoendt.com',
     'depends': ['account'],
     'category': 'category',
@@ -19,6 +19,7 @@
         'views/report_payslip_inherit.xml',
         'views/liquidacion_contrato_report.xml',
         'views/hr_payslip_inherit_view.xml',
+        'views/cert_ingresos_retencion.xml',
 
 
     ],

@@ -1,162 +1,590 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-<template id="liquidacion_contrato_report">
-    <t t-call="web.html_container">
+    <data>
+
+        <report
+                id="liquidacion_contrato_report"
+                model="hr.payslip"
+                string="Liquidacion de Contrato"
+                name="hr_reports_etet_v1.liquidacion_contrato_report"
+                report_type="qweb-pdf"/>
+
+        <template id="liquidacion_contrato_report">
+        <t t-call="web.html_container">
         <t t-foreach="docs" t-as="doc">
             <t t-call="web.basic_layout">
-                <div class="page">
+                <t t-if="doc.type_payslip_id.name == 'Liquidación de Contrato'">
+
+                    <div class="page">
                     <div class="page" style="margin-left: 5%; margin-right: 5%; margin-top: 9%">
-                    <div>
-                        <table style="width:100%;" add="small">
-                        <tr>
-                            <td style="width:25%" ><img src="/hr_reports_etet_v1/static/src/imagenes/descarga.jpeg" class="text-center" style="font-size:12px; width:90%; padding-top: 40%; margin-left: 5%;" alt="Responsive image"/></td>
-                                <!--<td style="margin-top:-25px; width:35%" add="small">
-                                    <div><b><span t-field="o.company_id.name"/></b></div>
-                                    <div>N.I.T<span t-field="o.company_id.vat"/></div>
-                                    <div><span t-field="o.company_id.street"/></div>
-                                    <div>
-                                        <span t-field="o.company_id.city"/>
-                                        <span t-field="o.company_id.state_id"/>
-                                        <span t-field="o.company_id.zip"/>
-                                    </div>
-                                    <div><span t-field="o.company_id.country_id"/></div>
-                                </td>-->
-                            <td style="font-size:12px; margin-top:-15px" class="text-center">LIQUIDACIÓN DEFINITIVA DE CONTRATO<p><span t-field="o.number"/></p></td>
-                        </tr>
-                        <tr></tr>
-                        <tr>
-                           <table style="width:100%"  add="small" name="employee-infos" >
-                                <td style="width:55%;">
-                                    <table style="width:100%; margin-left:5px; font-size:12px">
-                                        <tr style="height:150%;">
-                                            <td><strong>Ciudad y Fecha : </strong></td>
-                                            <td>Nomina Principal</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Periodo de Pago</strong></td>
-                                            <td>del<span t-field="o.date_from"/> a <span t-field="o.date_to"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Nombre</strong></td>
-                                            <td><span t-field="o.employee_id"/> C.C. <span t-field="o.employee_id.identification_id"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Contrato</strong></td>
-                                            <td colspan="3"><span t-field="o.contract_id.type_id.name"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Sueldo Basico</strong></td>
-                                            <td><span t-esc="o.contract_id.wage"/></td>
-                                        </tr>
+                        <table style="width:100%; margin-right:25%" add="small">
+                            <tr style="border-bottom: 1px solid black">
+                                <td style="width:20%" ><img src="/hr_reports_etet_v1/static/src/imagenes/descarga.jpeg"  class="text-center" style="font-size:12px; width:55%; padding-bottom: 5%; padding-top: 10%; margin-left:20%;" alt="Responsive image"/></td>
+
+                                    <td class="text-center" style="margin-top:-25px; width:35%" add="small">
+                                        <div><b><span style="font-size:20px" t-field="doc.company_id.name"/></b></div>
+                                        <div>N.I.T <span t-field="doc.company_id.vat"/></div>
+                                        <div><span t-field="doc.company_id.street"/></div>
+                                        <div>
+                                            <span t-field="doc.company_id.city"/>
+                                            <span t-field="doc.company_id.state_id"/>
+                                            <span t-field="doc.company_id.zip"/>
+                                        </div>
+
+                                    </td>
+
+                            </tr>
+                        </table>
+                        <table style="width:100%">
+                            <tr>
+                                <td style="font-size:20px" class="text-center"><b>LIQUIDACIÓN CONTRATO DE TRABAJO</b></td>
+                            </tr>
+                        </table>
+                        <table style="width:100%">
+                            <tr>
+                                <td style="width:60%">
+                                    <table style="width:100%; margin-left:5px; font-size:12px; margin-top:15px">
+                                        <td style="width:40%"><strong>Ciudad y Fecha : </strong></td>
+                                        <td style="width:60%"><span style="font-size:12px" t-field="doc.company_id.city"/>, <span style="font-size:12px" t-field="doc.contract_id.date_end"/></td>
                                     </table>
                                 </td>
-                                <td style="width:35%;">
-                                    <table style="width:100%; margin-left:5px; font-size:12px">
-                                        <tr>
-                                            <td style="width:40%"><strong>Fecha de Ingreso </strong></td>
-                                             <td><span t-esc="o.contract_id.date_start"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Fecha de pago </strong></td>
-                                            <td><span t-field="o.compute_date"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Area Funcional </strong></td>
-                                            <td><span t-field="o.struct_id"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Centro de Costo </strong></td>
-                                            <td><span t-esc="o.contract_id.analytic_account_id.code"/> <span t-esc="o.contract_id.analytic_account_id.tag_id.name"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Cargo </strong></td>
-                                            <td><span t-field="o.employee_id.job_id"/></td>
-                                        </tr>
+                                <td style="width:40%">
+                                    <table style="width:100%; margin-left:5px; font-size:12px; margin-top:15px">
+                                        <td style="width:40%"><strong>Contrato: </strong></td>
+                                        <td style="width:60%"> <span style="font-size:12px" t-field="doc.contract_id"/></td>
                                     </table>
                                 </td>
-                            </table>
-                        </tr>
-                    </table>
-                    <br></br>
-                    </div>
-                    <table class="table table-bordered" add="small">
-                        <thead class="text-center">
-                            <tr style="height:10%; font-size:9px">
-                                <!--<th>Code</th>-->
-                                <th>CONCEPTO</th>
-                                <!--<th>Number of Hours</th>-->
-                                <th>CANT</th>
-                                <th>DEVENGOS</th>
-                                <th>DESCUENTOS</th>
                             </tr>
-                        </thead>
-                        <tbody style="height:10%; font-size:9px" >
-                            <tr t-foreach="o.worked_days_line_ids" t-as="worked_days">
-                                <!--<td><span t-field="worked_days.code"/></td>-->
-                                <td>
-                                    <span t-field="worked_days.name"/>
+                        </table>
+                        <table style="width:100%; border-bottom: 1px solid black">
+                            <tr>
+                                <td style="width:60%">
+                                     <table style="width:100%; margin-left:5px; font-size:12px; margin-top:15px">
+                                            <tr>
+                                                <td><strong>Nombre del trabajador</strong></td>
+                                                <td><span t-field="doc.employee_id"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Identificación</strong></td>
+                                                <td colspan="3"><span t-field="doc.employee_id.identification_id"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Cargo</strong></td>
+                                                <td colspan="3"><span t-field="doc.employee_id.job_id"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Sueldo Basico</strong></td>
+                                                <td><span t-esc="doc.contract_id.wage" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                            </tr>
+                                    </table>
                                 </td>
-                                <!--<td><span t-field="worked_days.number_of_hours"/></td>-->
-                                <td class="text-right"><span t-field="worked_days.number_of_days"/></td>
-                                <td class="text-right"> 00000</td>
-                                <td class="text-right"><span t-esc="worked_days.amount" digits="[42, 2]"
-                                          t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/></td>
-                            </tr>
+                                <t t-set="fecha_1" t-value="(doc.contract_id.date_start).year"/>
+                                <t t-set="fecha_2" t-value="(doc.contract_id.date_end).year"/>
+                                <td style="width:40%">
+                                        <table style="width:100%; margin-left:5px; font-size:12px">
 
-                        </tbody>
+                                                 <t t-set="diferencia" t-value="doc.contract_id.date_end - doc.contract_id.date_start"/>
 
-                    </table>
-                    <table  add="small" style="width:100%">
-                        <tr style="height:10%; font-size:9px">
-                            <td style="width:50%">Observaciones: <p><span t-field="o.observaciones"/></p>
-                            </td>
-                            <td style="width:50%">
-                                <table class="table table-bordered" style="width:100%">
-                                    <tr>
-                                        <td style="width:40%">Total
-                                        </td>
-                                        <td class="text-right" style="width:30%">dato2
+                                            <tr>
+                                                <td style="width:60%"><strong>Fecha de Ingreso </strong></td>
+                                                 <td><span t-field="doc.contract_id.date_start"/></td>
+                                            </tr>
 
-                                        </td>
-                                        <td class="text-right" style="width:30%">dato3
-                                        </td>
-                                    </tr>
+                                            <tr>
+                                                <td><strong>Fecha de retiro </strong></td>
+                                                <td><span t-field="doc.contract_id.date_end"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Dias trabajados </strong></td>
+
+                                                <t t-if="fecha_1 == fecha_2">
+                                                    <td class="text-left" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                                <span t-esc="int(worked_days.number_of_days)"/>
+                                                        </td>
+
+                                                </t>
+                                                <t t-else="">
+                                                    <td class="text-left">
+                                                     <span t-esc="diferencia.days"/>
+                                                     </td>
+                                                </t>
+
+
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Dias Suspención </strong></td>
+                                                <td><span t-field="doc.contract_id.notice_days"/> </td>
+                                            </tr>
+
+                                        </table>
+                                    </td>
+                                </tr>
                                 </table>
-                            </td>
-                        </tr>
-                    </table>
-                    <table add="small" style="width:100%">
-                        <tr style="height:10%; font-size:9px">
+                                <table>
+                                    <tr><td style="width:55%;">
+                                    <table style="width:100%; margin-left:5px; font-size:12px">
+                                        <tr style="height:10%; font-size:12px">
 
-                            <td style="width:50%">
-                                <table style="width:100%">
-                                    <tr>
-                                        <td style="width:50%">
-                                            <table style="width:90%" class="table table-bordered">
-                                                <td >Total Pagado
-                                                </td>
-                                                <td class="text-right" style="width:30%">dato2
+                                            <th><b>SALARIO BASE DE LIQUIDACION</b></th>
 
+                                            <th><b>VALOR</b></th>
+                                            <th><b>DIAS LIQUIDADOS</b></th>
+                                            <th><b>DIAS PAGOS</b></th>
+                                            <th><b>VALOR BASE</b></th>
+                                        </tr>
+                                            <tr style="height:150%;">
+                                                <td >Salario Basico </td>
+                                                <t t-set="sueldo" t-value="int(doc.contract_id.wage)"/>
+                                                <td class="text-right"><span t-esc="sueldo"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Auxilio de transporte</td>
+                                                <t t-set="substran_nombre" t-value=""></t>
+                                                    <t t-set="substran_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'P_SUBSTRAN')" t-as="line_ids">
+                                                        <t t-set="substran_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="substran_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="substran_valor > 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="substran_valor"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                        <td></td>
+                                                        <td>
+
+                                                         </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td>Promedio horas extras</td>
+                                                <t t-set="promhextras_nombre" t-value=""></t>
+                                                <t t-set="promhextras_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PROMHEXTRAS_YEARS_NOW')" t-as="line_ids">
+                                                        <t t-set="promhextras_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="promhextras_valor" t-value="int(line_ids.total)"/>
+                                                    </t>
+                                                    <t t-if="substran_valor > 0">
+
+                                                        <td class="text-right"><span t-esc="promhextras_valor"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        <td></td>
+                                                        </td>
+                                                        <td>
+                                                         </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <t t-set="base_liquidacion_vac" t-value="sueldo + promhextras_valor"/>
+                                            <t t-set="base_liquidacion" t-value="sueldo + substran_valor + promhextras_valor"/>
+                                            <t t-set="dias_pag" t-value="base_liquidacion / 30"/>
+                                            <tr>
+                                                <td><strong><b>TOTAL SALARIO BASE DE LIQUIDACION</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="base_liq">
+                                                <t t-set="base_liquidacion_1" t-value="int(base_liq.amount)"/>
+                                                <span t-esc="base_liquidacion_1"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
                                                 </td>
+
+                                            </tr>
+                                            <tr><td><strong><b>LIQUIDACION DE PRESTACIONES SOCIALES</b></strong></td></tr>
+                                            <tr style="height:150%;">
+
+
+                                                <td>Prima Legal
+                                                    <t t-if="fecha_1 == fecha_2">
+                                                        <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                    </t>
+                                                    <t t-else="">
+                                                       01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
+                                                    </t>
+                                                </td>
+                                                <t t-set="prima_nombre" t-value=""></t>
+                                                <t t-set="prima_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PRIMA')" t-as="line_ids">
+                                                <t t-set="prima_nombre" t-value="line_ids.name"/>
+                                                <t t-set="prima_valor" t-value="line_ids.total"/>
+                                                </t>
+                                                <t t-if="prima_valor > 0">
+                                                        <td class="text-right"><span t-esc="prima_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                                <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+
+                                                        <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPRIMA')" t-as="dias_p">
+                                                            <t t-set="dias_ces" t-value="dias_p.amount"/>
+                                                            <span t-esc="'%.2f'%(dias_ces)"/>
+                                                        </td>
+                                                        <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="base_liq">
+                                                        <t t-set="base_liquidacion_1" t-value="int(base_liq.amount)"/>
+                                                        <span t-esc="base_liquidacion_1"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                    </t>
+                                                    <t t-else=""><td>0</td>
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Vacaciones
+                                                    <t t-if="fecha_1 == fecha_2">
+                                                        <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                    </t>
+                                                    <t t-else="">
+                                                       <span t-field="doc.contract_id.date_start"/> a <span t-field="doc.contract_id.date_end"/>
+                                                    </t></td>
+                                                <t t-set="vacations_nombre" t-value=""></t>
+                                                    <t t-set="vacations_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'LIQVACATION')" t-as="line_ids">
+                                                        <t t-set="vacations_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="vacations_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="vacations_valor > 0">
+                                                        <td class="text-right"><span t-esc="vacations_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                        <t t-if="fecha_1 == fecha_2">
+                                                            <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                                <span t-field="worked_days.number_of_days"/>
+                                                            </td>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <td class="text-center">
+                                                                <span t-esc="(doc.contract_id.date_end - doc.contract_id.date_start).days"></span>
+                                                            </td>
+                                                        </t>
+                                                        <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPAGADOSVAC')" t-as="dias_p">
+                                                <t t-set="dias_pagados" t-value="dias_p.total"/>
+                                                <span t-esc="'%.2f'%(dias_pagados)"/>
+                                                </td>
+                                                        <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS_VAC')" t-as="base_liq">
+                                                <t t-set="base_liquidacion_2" t-value="int(base_liq.amount)"/>
+                                                <span t-esc="base_liquidacion_2"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                                </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td>Cesantias <t t-if="fecha_1 == fecha_2">
+                                                        <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                    </t>
+                                                    <t t-else="">
+                                                       01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
+                                                    </t></td>
+                                                <t t-set="cesantias_nombre" t-value=""></t>
+                                                <t t-set="cesantias_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'CESANTIAS')" t-as="line_ids">
+                                                    <t t-set="cesantias_nombre" t-value="line_ids.name"/>
+                                                    <t t-set="cesantias_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="cesantias_valor > 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="cesantias_valor"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+
+                                                        </td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPAGCES')" t-as="dias_c">
+                                                            <t t-set="dias_ces" t-value="dias_c.amount"/>
+                                                            <span t-esc="'%.2f'%(dias_ces)"/>
+                                                        </td>
+                                                        <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="base_liq">
+                                                <t t-set="base_liquidacion_1" t-value="int(base_liq.amount)"/>
+                                                <span t-esc="base_liquidacion_1"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td>Intereses de Cesantias          <t t-if="fecha_1 == fecha_2">
+                                                        <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                    </t>
+                                                    <t t-else="">
+                                                       01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
+                                                    </t></td>
+                                                <t t-set="intcesantias_nombre" t-value=""></t>
+                                                    <t t-set="intcesantias_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'INTCESANTIAS')" t-as="line_ids">
+                                                        <t t-set="intcesantias_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="intcesantias_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="intcesantias_valor > 0">
+                                                        <td class="text-right"><span t-esc="intcesantias_valor"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+
+                                                        </td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPAGINTCES')" t-as="dias_c">
+                                                            <t t-set="dias_ces" t-value="dias_c.amount"/>
+                                                            <span t-esc="'%.2f'%(dias_ces)"/>
+                                                        </td>
+                                                        <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="base_liq">
+                                                <t t-set="base_liquidacion_1" t-value="int(base_liq.amount)"/>
+                                                <span t-esc="base_liquidacion_1"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <t t-set="t_prestaciones" t-value="cesantias_valor + prima_valor + intcesantias_valor + vacations_valor"/>
+                                            <tr>
+                                                <td><strong><b>TOTAL PRESTACIONES SOCIALES</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right"><span t-esc="t_prestaciones"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                            </tr>
+                                            <tr><td><strong><b>SALARIOS PENDIENTES</b></strong></td></tr>
+                                            <tr style="height:150%;">
+                                                <td>Sueldo Básico</td>
+                                                <t t-set="salario_nombre" t-value=""></t>
+                                                <t t-set="salario_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO')" t-as="line_ids">
+                                                        <t t-set="salario_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="salario_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="salario_valor > 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="salario_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+
+                                                        <td></td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Auxilio de Transporte</td>
+                                                <t t-set="substran_nombre" t-value=""></t>
+                                                <t t-set="substran_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SUBSTRAN')" t-as="line_ids">
+                                                        <t t-set="substran_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="substran_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="substran_valor > 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="substran_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+
+                                                        <td></td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td>Horas</td>
+                                                <t t-set="recargon_nombre" t-value=""></t>
+                                                <t t-set="recargon_valor" t-value="0"></t>
+                                                <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'RECARGONOCTURNO')" t-as="line_ids">
+                                                        <t t-set="recargon_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="recargon_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="substran_valor > 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="recargon_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+
+                                                        <td></td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+                                            </tr>
+                                            <t t-set="t_salpen" t-value="substran_valor + salario_valor + recargon_valor"/>
+                                            <tr>
+                                                <td><strong><b>TOTAL SALARIOS PENDIENTES</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right"><span t-esc="t_salpen" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><b>DEDUCCIONES</b></strong></td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td>Fondo de Salud</td>
+                                                <t t-set="saludempleado_nombre" t-value=""></t>
+                                                    <t t-set="saludempleado_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALUDEMPLEADO')" t-as="line_ids">
+                                                        <t t-set="saluempleado_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="saludempleado_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="saludempleado_valor != 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="saludempleado_valor"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                         <td></td>
+                                                         <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+
+                                            <tr>
+                                                <td>Fondo de Pensiones y Cesantias</td>
+                                                <t t-set="pensionempleado_nombre" t-value=""></t>
+                                                    <t t-set="pensionempleado_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PENSIONEMPLEADO')" t-as="line_ids">
+                                                        <t t-set="pensionempleado_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="pensionempleado_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="pensionempleado_valor != 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="pensionempleado_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                        <td></td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <tr>
+                                                <td>Descuentos</td>
+                                                <t t-set="descuentos_nombre" t-value=""></t>
+                                                    <t t-set="descuentos_valor" t-value="0"></t>
+                                                    <t t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DESCUENTOS')" t-as="line_ids">
+                                                        <t t-set="descuentos_nombre" t-value="line_ids.name"/>
+                                                        <t t-set="descuentos_valor" t-value="line_ids.total"/>
+                                                    </t>
+                                                    <t t-if="descuentos_valor != 0">
+
+
+
+                                                        <td class="text-right"><span t-esc="descuentos_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                        </td>
+                                                        <td></td>
+                                                        <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                                            <span t-field="worked_days.number_of_days"/>
+                                                        </td>
+                                                        <td class="text-right"> </td>
+
+                                                        <td class="text-right"> </td>
+
+                                                    </t>
+                                                    <t t-else="">
+                                                    </t>
+
+                                            </tr>
+                                            <t t-set="t_deducciones" t-value="pensionempleado_valor + saludempleado_valor + descuentos_valor"/>
+                                            <tr>
+                                                <td><strong><b>TOTAL DEDUCCIONES</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right"><span t-esc="t_deducciones" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
+                                            </tr>
                                             </table>
                                         </td>
-                                        <td class="text-left" style="width:50%"><p style="border-top: 1px solid black">C.C / NIT
-                                            <p>FIRMA Y SELLO DEL BENEFICIARIO</p></p>
-                                        </td>
-                                    </tr>
+                                        </tr>
+
+
+
+
 
                                 </table>
-                            </td>
-                        </tr>
-                    </table>
+                                <br></br>
+                                <table class="table table-bordered; text-center" add="small">
+                                    <tr>
+                                        <td>TOTAL A PAGAR</td>
+                                        <td><span t-esc="t_salpen + t_prestaciones + t_deducciones" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td></tr>
+                                </table>
+                                <br></br>
 
+                                <table>
+                                    <tr ><b>CONSTANCIA:  Se hace constar expresamente lo siguiente:</b>
+                                    <br></br>
+                                    <br></br>
+                                        <p style="font-size:11px" class="text-justify"> 1) El patrono ha incorporado en la anterior liquidación, en lo pertinente, la totalidad de los valores correspondientes a sal arios, horas extras,recargos
+                                            por trabajos nocturnos, descansos remunerados, cesantía, intereses de cesantía,vacaciones, y en general, todo concepto relaci onado con salarios,
+                                            descansos, prestaciones o indemnizaciones de toda especie y en general, por toda acreencia laboral, que tenga por causa el co ntrato de trabajo que
+                                            ha quedado extinguido.</p>
+                                            <p style="font-size:11px" class="text-justify">2) El trabajador acepta expresamente que el tiempo transcurrido entre la terminaci ón del contrato y la fecha de pago de esta liquidación, está
+                                            justificado.</p>
+                                            <p style="font-size:11px" class="text-justify">3) Que no obstante la anterior declaración, se hace constar por las partes, que con el pago de la suma de dinero a que hace r eferencia la anterior
+                                            liquidación, queda transada cualquier diferencia relativa al contrato de trabajo que ha quedado terminado, pues ha sido de co mún ánimo transar
+                                            definitiva-mente, como en efecto se transa, todo reclamo pasado, presente o futuro que tenga por causa el mencionado contrato.Por consig uiente ésta
+                                            transaccion tiene por efecto la extinción de las obligaciones provenientes de la relación laboral que existió entre el Patron o y el Trabajador quienes</p></tr>
+                                </table>
+                                <br></br>
+                                 <table style="width:100%" add="small">
+                                    <tr>
+                                        <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b><span t-field="doc.company_id.name"/><p>NIT: <span t-field="doc.company_id.vat"/></p></b></td>
+                                        <td></td>
+                                        <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b><span t-field="doc.employee_id"/><p><span t-field="doc.employee_id.identification_id"/></p></b></td>
+                                        <td></td>
+                                        <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b>TESTIGO<p>C.C. No.</p></b></td></tr>
+                                </table>
+                    </div>
                 </div>
-
-                </div>
+                </t>
+                <t t-else="">No se ha generado liquidación, para el recurso seleccionado
+                </t>
             </t>
         </t>
-    </t>
-</template>
+        </t>
+        </template>
+
+    </data>
 
 
 </odoo>

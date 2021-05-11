@@ -90,7 +90,7 @@
                                 <th style="width:15%">Deducciones</th>
                             </tr>
                         </thead>
-                        <tbody style="height:10%; font-size:9px">
+                        <tbody style="height:10%; font-size:15px">
                             <t t-set="salario_nombre" t-value=""></t>
                             <t t-set="salario_valor" t-value="0"></t>
                             <t t-foreach="o.line_ids.filtered(lambda x: x.code == 'SALARIO')" t-as="line_ids">
@@ -103,7 +103,7 @@
                                     <span t-esc="salario_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -127,7 +127,7 @@
                                     <span t-esc="bonificacion_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -151,7 +151,7 @@
                                     <span t-esc="substran_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -175,7 +175,7 @@
                                     <span t-esc="beneficioalim_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -290,7 +290,6 @@
                             </t>
                             <t t-else="">
                             </t>
-                            
                             <t t-set="saludempleado_nombre" t-value=""></t>
                             <t t-set="saludempleado_valor" t-value="0"></t>
                             <t t-foreach="o.line_ids.filtered(lambda x: x.code == 'SALUDEMPLEADO')" t-as="line_ids">
@@ -303,7 +302,7 @@
                                     <span t-esc="saludempleado_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -327,7 +326,7 @@
                                     <span t-esc="pensionempleado_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -338,7 +337,30 @@
                             </t>
                             <t t-else="">
                             </t>
+                            <t t-set="vacaciones_nombre" t-value=""></t>
+                            <t t-set="vacaciones_valor" t-value="0"></t>
+                            <t t-foreach="o.line_ids.filtered(lambda x: x.code == 'VACATIONS')" t-as="line_ids">
+                                <t t-set="vacaciones_nombre" t-value="line_ids.name"/>
+                                <t t-set="vacaciones_valor" t-value="line_ids.total"/>
+                            </t>
+                            <t t-if="vacaciones_valor != 0">
+                                <tr>
+                                <td>
+                                    <span t-esc="vacaciones_nombre"/>
+                                </td>
 
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Vacaciones')" t-as="worked_days">
+                                <span t-field="worked_days.number_of_days"/>
+                                </td>
+
+
+                                <td class="text-right"><span t-esc="vacaciones_valor" t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/> </td>
+                                <td class="text-right">
+                                </td>
+                            </tr>
+                            </t>
+                            <t t-else="">
+                            </t>
 
                             <t t-set="descuentos_nombre" t-value=""></t>
                             <t t-set="descuentos_valor" t-value="0"></t>
@@ -352,7 +374,7 @@
                                     <span t-esc="descuentos_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -376,7 +398,7 @@
                                     <span t-esc="fsp_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -400,7 +422,7 @@
                                     <span t-esc="rtfm1_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
@@ -420,7 +442,7 @@
 
                     </table>
                     <table  add="small" style="width:100%">
-                        <tr style="height:10%; font-size:9px">
+                        <tr style="height:10%; font-size:15px">
                             <td style="width:50%">Observaciones: <p><span t-field="o.observaciones"/></p>
                             </td>
                             <td style="width:50%">
@@ -454,7 +476,7 @@
                         </tr>
                     </table>
                     <table add="small" style="width:100%">
-                        <tr style="height:10%; font-size:9px">
+                        <tr style="height:10%; font-size:15px">
 
                             <td style="width:50%">
                                 <table style="width:100%">
