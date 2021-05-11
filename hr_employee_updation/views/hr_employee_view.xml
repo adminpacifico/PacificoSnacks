@@ -26,6 +26,20 @@
                         </field>
                     </group>
                 </xpath>
+                <xpath expr="//page[@name='personal_information']" position="after">
+                    <page name="endowment_ids" string="Dotaciones">
+                        <group name="endowment_ids" string="Dotaciones">
+                            <field name="endowment_ids">
+                                <tree editable="bottom">
+                                    <field name="description" required="1"/>
+                                    <field name="size"/>
+                                    <field name="color"/>
+                                    <field name="quantity" required="1"/>
+                                </tree>
+                            </field>
+                        </group>
+                    </page>
+                </xpath>
                 <field name="user_id" position="after">
                     <field name="joining_date"/>
                 </field>
@@ -41,6 +55,19 @@
                         <field name="passport_id"/>
                         <field name="passport_expiry_date" groups="hr.group_hr_user" attrs="{'invisible': [('passport_id', 'in', [None,False])]}"/>
                         <field name="passport_attachment_id" groups="hr.group_hr_user" widget="many2many_binary" class="oe_inline" attrs="{'invisible': [('passport_id', 'in', [None,False])]}"/>
+                    </group>
+                </xpath>
+                <xpath expr="//group[@name='identification_id']" position="after">
+                    <group name="military_service" string="Servicio Militar">
+                        <field name="military_card_number"/>
+                        <field name="military_category"/>
+                        <field name="military_district"/>
+                    </group>
+                </xpath>
+                <xpath expr="//group[@name='identification_id']" position="after">
+                    <group name="occupational health" string="Salud Ocupacional">
+                        <field name="blood_type"/>
+                        <field name="rh"/>
                     </group>
                 </xpath>
 

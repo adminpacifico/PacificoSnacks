@@ -17,5 +17,7 @@ class HrCompanySS(models.Model):
                                ('arl', 'ARL'),
                                ('eps', 'EPS'),
                                ('fsp', 'FSP'),
+                               ('icbf', 'ICBF'),
+                               ('sena', 'Sena'),
                                ('ccf', 'Caja de Compensacion'),], string='Entidad', copy=False)
     contract_id = fields.Many2one('hr.contract', string='Contract')

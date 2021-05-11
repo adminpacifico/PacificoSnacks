@@ -45,6 +45,17 @@ class HrEmployeeFamilyInfo(models.Model):
     member_contact = fields.Char(string='Contact No')
     birth_date = fields.Date(string="DOB", tracking=True)
 
+class HrEmployeeEndowment(models.Model):
+
+    _name = 'hr.employee.endowment'
+    _description = 'HR Employee Endowment'
+
+    employee_id = fields.Many2one('hr.employee', string="Employee", help='Select corresponding Employee', invisible=1)
+    description = fields.Char(string='Descripción')
+    size = fields.Char(string='Talla')
+    color = fields.Char(string='Color')
+    quantity = fields.Integer(string='Cantidad')
+
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -83,8 +94,7 @@ class HrEmployee(models.Model):
                     }
                     self.env['mail.mail'].sudo().create(main_content).send()
 
-    personal_mobile = fields.Char(string='Mobile', related='address_home_id.mobile', store=True,
-                  help="Personal mobile number of the employee")
+    personal_mobile = fields.Char(string='Mobile', related='address_home_id.mobile', store=True, help="Personal mobile number of the employee")
     joining_date = fields.Date(string='Joining Date', help="Employee joining date computed from the contract start date",compute='compute_joining', store=True)
     id_expiry_date = fields.Date(string='Expiry Date', help='Expiry date of Identification ID')
     passport_expiry_date = fields.Date(string='Expiry Date', help='Expiry date of Passport ID')
@@ -95,6 +105,13 @@ class HrEmployee(models.Model):
                                               help='You can attach the copy of Passport')
     fam_ids = fields.One2many('hr.employee.family', 'employee_id', string='Family', help='Family Information')
     partner_id = fields.Many2one('res.partner', string="Asociado")
+    endowment_ids = fields.One2many('hr.employee.endowment', 'employee_id', string='Dotación')
+    military_card_number = fields.Integer(string='Numero de tarjeta militar')
+    military_category = fields.Char(string='Categoria Militar')
+    military_district = fields.Char(string='Distrito Militar')
+    blood_type = fields.Char(string='Grupo Sanguíneo')
+    rh = fields.Char(string='RH')
+
     @api.depends('contract_id')
     def compute_joining(self):
         if self.contract_id:
@@ -117,6 +134,8 @@ class HrEmployee(models.Model):
             })
                               )
             self.fam_ids = [(6, 0, 0)] + lines_info
+
+
 
 
 class EmployeeRelationInfo(models.Model):
