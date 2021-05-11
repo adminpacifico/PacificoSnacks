@@ -6,7 +6,7 @@
             <t t-call="web.basic_layout">
                 <xpath expr="//div[hasclass('page')]" position="replace">
 
-                    <div class="page" style="margin-left: 5%; margin-right: 5%">
+                    <div class="page" style="margin-left: 5%; margin-right: 5%; margin-top: -8%">
                     <div>
                         <table style="width:100%;" add="small">
                         <tr>
@@ -36,7 +36,7 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Periodo de Pago</strong></td>
-                                            <td>del<span t-field="o.date_from"/> a <span t-field="o.date_to"/></td>
+                                            <td>del <span t-field="o.date_from"/> a <span t-field="o.date_to"/></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Nombre</strong></td>

@@ -27,7 +27,6 @@
                                         <div><span t-field="doc.company_id.street"/></div>
                                         <div>
                                             <span t-field="doc.company_id.city"/>
-                                            <span t-field="doc.company_id.state_id"/>
                                             <span t-field="doc.company_id.zip"/>
                                         </div>
 
@@ -569,9 +568,9 @@
                                  <table style="width:100%" add="small">
                                     <tr>
                                         <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b><span t-field="doc.company_id.name"/><p>NIT: <span t-field="doc.company_id.vat"/></p></b></td>
-                                        <td></td>
+                                        <td style="color:white">   ,</td>
                                         <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b><span t-field="doc.employee_id"/><p><span t-field="doc.employee_id.identification_id"/></p></b></td>
-                                        <td></td>
+                                        <td style="color:white">   ,</td>
                                         <td class="text-center" style="width:100%; border-top: 1px solid black; width:28%"><b>TESTIGO<p>C.C. No.</p></b></td></tr>
                                 </table>
                     </div>
