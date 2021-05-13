@@ -2,10 +2,10 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Reportes nomina',
+    'name': 'Libro de vacaciones',
     'version': '1.0',
-    'summary': 'summary',
-    'description': "reporte generado en pdf nomina empleados",
+    'summary': 'summarys',
+    'description': "reportes Nomina",
     'website': 'https://www.endtoendt.com',
     'depends': ['account'],
     'category': 'category',
@@ -16,18 +16,13 @@
     ],
     'data': [
 
-        'views/report_payslip_inherit.xml',
-        'views/liquidacion_contrato_report.xml',
-        'views/hr_payslip_inherit_view.xml',
-        'views/cert_ingresos_retencion.xml',
-
+        'views/vacations_report_view.xml',
 
     ],
     'qweb': [
 
     ],
     'installable': True,
-    'application': True,
     'auto_install': False,
 
 }
