@@ -238,7 +238,7 @@
                             </t>
                             <t t-else="">
                             </t>
-                            
+
                             <t t-set="recargodiurnofestivo_nombre" t-value=""></t>
                             <t t-set="recargodiurnofestivo_valor" t-value="0"></t>
                             <t t-set="recargodiurnofestivo_quantity" t-value="0"></t>
@@ -264,7 +264,7 @@
                             </t>
                             <t t-else="">
                             </t>
-                            
+
                             <t t-set="bonos_nombre" t-value=""></t>
                             <t t-set="bonos_valor" t-value="0"></t>
                             <t t-set="bonos_quantity" t-value="0"></t>
@@ -434,7 +434,7 @@
                             <t t-else="">
                             </t>
 
-                            
+
 
 
 
