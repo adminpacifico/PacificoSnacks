@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Reportes nomina',
+    'name': 'volante de nomina',
     'version': '1.0',
     'summary': 'summary',
-    'description': "reporte generado en pdf nomina empleados",
+    'description': "reporte generado en excel libro vacaciones empleados",
     'website': 'https://www.endtoendt.com',
-    'depends': ['account'],
+    'depends': ['hr_payroll_extended'],
     'category': 'category',
     'author': 'Enrrique Aguiar',
     'sequence': 13,
@@ -19,7 +19,6 @@
         'views/report_payslip_inherit.xml',
         'views/liquidacion_contrato_report.xml',
         'views/hr_payslip_inherit_view.xml',
-        'views/cert_ingresos_retencion.xml',
 
 
     ],
