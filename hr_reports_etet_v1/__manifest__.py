@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'Reportes nomina y liquidacion',
+    'name': 'Reportes nomina',
     'version': '1.0',
     'summary': 'summary',
     'description': "reporte generado en epdf nomina empleados",
