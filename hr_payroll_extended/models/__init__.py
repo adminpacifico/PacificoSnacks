@@ -15,3 +15,6 @@ from . import hr_deduction_concepts
 from . import hr_withholding_tax
 from . import hr_payroll_data
 from . import hr_payroll_account
+from . import hr_payslip_worked_days
+from . import hr_payslip_employees
+from . import hr_payroll_structure

@@ -9,4 +9,4 @@ class HrPayrollStructure(models.Model):
     _inherit = 'hr.payroll.structure'
 
 
-    struct_contract = fields.Boolean('Estructura Contrato')
+    department_id = fields.Many2one('hr.department', string="Departamento empleados")

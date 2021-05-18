@@ -888,38 +888,17 @@ class HrPayslip(models.Model):
         contract = self.contract_id
         if contract.resource_calendar_id:
             paid_amount = self._get_contract_wage()
-            absence_rate_2D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_2D')], limit=1).amount_fix
-            absence_rate_90D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_90D')], limit=1).amount_fix
-            absence_rate_M91D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_M91D')], limit=1).amount_fix
             wage_min  = self.env['hr.salary.rule'].search([("code", "=", 'SMLMV')], limit=1).amount_fix
-            loans_month_before_ids = self.get_inputs_loans_month_before(contract, self.date_from, self.date_to)
-            if loans_month_before_ids:
-                amountb = 0
-                inputb_type_id = 0
-                amountd = 0
-                inputd_type_id = 0
-                for loans in loans_month_before_ids:
-                    if loans[1] == 'BONIFICACION':
-                        amountb = amountb + loans[2]
-                    if loans[1] == 'DESCUENTOS':
-                        amountd = amountd + loans[2]
-                if not amountb == 0 and amountd == 0:
-                     paid_amount_ant = paid_amount +  amountb - amountd
-                else: paid_amount_ant = paid_amount
-            else:
-                paid_amount_ant = paid_amount
+            paid_amount_ant = paid_amount
             unpaid_work_entry_types = self.struct_id.unpaid_work_entry_type_ids.ids
             work_hours = contract._get_work_hours(self.date_from, self.date_to)
             exceed_hours = contract._get_exceed_hours(self.date_from, self.date_to)
-            if exceed_hours:
-                if 6 in  exceed_hours:
-                    exceed_hours[11] = exceed_hours.pop(6)
-                    work_hours.update(exceed_hours)
             total_hours = sum(work_hours.values()) or 1
             work_hours_ordered = sorted(work_hours.items(), key=lambda x: x[1])
             biggest_work = work_hours_ordered[-1][0] if work_hours_ordered else 0
             add_days_rounding = 0
             print ('-------444', work_hours_ordered, work_hours, total_hours)
+            novelties_days = 0
             if self.date_from != self.date_to:
                 for work_entry_type_id, hours in work_hours_ordered:
                     work_entry_type = self.env['hr.work.entry.type'].browse(work_entry_type_id)
@@ -931,40 +910,22 @@ class HrPayslip(models.Model):
                         days += add_days_rounding
                     day_rounded = self._round_days(work_entry_type, days)
                     add_days_rounding += (days - day_rounded)
-                    # El ('work_entry_type_id', '=', 6) corresponde al tipo de entrada "Ausencias por Enfermedad", en caso de modificar el registro se debe cambiar el numero a evaluar
-                    # El ('work_entry_type_id', '=', 10) corresponde al tipo de entrada "Total Ausencias por Enfermedad", en caso de modificar el registro se debe cambiar el numero a evaluar
-                    if work_entry_type_id == 6 or work_entry_type_id == 10 :
-                        if day_rounded >= 1 and day_rounded < 4:
-                                r_amount = (((paid_amount_ant) * absence_rate_2D) / 100)
-                                if r_amount >= wage_min:
-                                   r_amount = r_amount * day_rounded
-                                else:
-                                   r_amount = (wage_min/30) * day_rounded
-                        elif day_rounded >= 4 and day_rounded <= 90:
-                                r_amount = (((paid_amount_ant) * absence_rate_90D) / 100)
-                                if r_amount >= wage_min:
-                                   r_amount = r_amount * day_rounded
-                                else:
-                                   r_amount = (wage_min/30) * day_rounded
-                        elif day_rounded >= 91:
-                                r_amount = (((paid_amount_ant) * absence_rate_M91D) / 100)
-                                if r_amount >= wage_min:
-                                   r_amount = r_amount * day_rounded
-                                else:
-                                   r_amount = (wage_min/30) * day_rounded
-                    else:
-                        r_amount = day_rounded * (paid_amount_ant / 30) if is_paid else 0
-
+                    if day_rounded > 15:
+                        day_rounded = 15
                     attendance_line = {
                         'sequence': work_entry_type.sequence,
                         'work_entry_type_id': work_entry_type_id,
                         'name': work_entry_type.code,
                         'number_of_days': day_rounded,
                         'number_of_hours': hours,
-                       #'amount': hours * paid_amount / total_hours if is_paid else 0,
-                        'amount': r_amount
+                        'number_of_days_total': day_rounded,
+                        'number_of_hours_total': hours,
+                        'amount': 0,
                     }
-                    res.append(attendance_line)
+                    assistance_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
+                    if not work_entry_type_id == assistance_type.id:
+                        res.append(attendance_line)
+                        novelties_days += day_rounded
             else:
                 attendance_line = {
                     'sequence': 25,
@@ -972,12 +933,37 @@ class HrPayslip(models.Model):
                     'name': 'WORK100',
                     'number_of_days': 0,
                     'number_of_hours': 0,
+                    'number_of_days_total': 0,
+                    'number_of_hours_total': 0,
                     'amount': 0
                 }
                 res.append(attendance_line)
 
-            #total_days = days_between(self.date_from, self.date_to)
-            total_days = days360(self.date_from, self.date_to)
+            if novelties_days > 15:
+                novelties_days = 15
+
+            # Dias por rango de fecha (manejo de 30 dias)
+            all_days = days_between(self.date_from, self.date_to)
+
+            # Dias de asistencia
+            assistance_days = all_days - novelties_days
+            assistance_hours = assistance_days * contract.resource_calendar_id.hours_per_day
+            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
+            attendance_assistance = {
+                'sequence': work_entry_type.sequence,
+                'work_entry_type_id': work_entry_type.id,
+                'name': work_entry_type.code,
+                'number_of_days': assistance_days,
+                'number_of_hours': assistance_hours,
+                'number_of_days_total': assistance_days,
+                'number_of_hours_total': assistance_hours,
+                'amount': 0,
+            }
+            if not assistance_days == 0:
+                res.append(attendance_assistance)
+
+            # Dias totales
+            total_days = assistance_days + novelties_days
             total_hours = total_days*contract.resource_calendar_id.hours_per_day
             work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYS')], limit=1)
             attendances_total = {
@@ -986,17 +972,18 @@ class HrPayslip(models.Model):
                 'name': work_entry_type.code,
                 'number_of_days': total_days,
                 'number_of_hours': total_hours,
-                #'amount': total_hours * paid_amount / total_hours or 0,
-                'amount': total_days * (paid_amount / 30) or 0,
-
+                'number_of_days_total': total_days,
+                'number_of_hours_total': total_hours,
+                'amount': 0,
             }
             res.append(attendances_total)
+
+            # Dias anuales trabajados
             date_init_year = date(self.date_from.year, 1, 1)
             if contract.date_start <= date_init_year:
                 date_init = date_init_year
             else:
                 date_init = contract.date_start
-            #total_year_days = days_between(date_init, self.date_to)
             total_year_days = days360(date_init, self.date_to)
             total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
             work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
@@ -1006,31 +993,87 @@ class HrPayslip(models.Model):
                 'name': work_entry_type.code,
                 'number_of_days': total_year_days,
                 'number_of_hours': total_year_hours,
-                # 'amount': total_hours * paid_amount / total_hours or 0,
-                'amount': total_year_hours * (paid_amount / 30) or 0,
-
+                'number_of_days_total': total_year_days,
+                'number_of_hours_total': total_year_hours,
+                'amount': 0,
             }
             res.append(attendances_year_total)
 
-            leave = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
-                                                      ("date_stop", "<=", self.date_to),
-                                                      ("work_entry_type_id", "=", 6),
-                                                      ("employee_id", "=", contract.employee_id.id)])
+            # Total ausencias por enfermedad
+            absence_rate_2D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_2D')], limit=1).amount_fix
+            absence_rate_90D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_90D')], limit=1).amount_fix
+            absence_rate_M91D = self.env['hr.salary.rule'].search([("code", "=", 'P_AUSENCIAS_M91D')], limit=1).amount_fix
+            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110')], limit=1)
+            leave_sickness_amount_total = 0
+            leave_sickness_days_total = 0
+            leave_sickness_hours_total = 0
+            leave_days_t = 0
+            leave_hours_t = 0
 
-            for l in leave.leave_id:
-                total_days = l.number_of_days
-                total_hours = total_days * contract.resource_calendar_id.hours_per_day
-                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
-                totalae = {
+            loans_month_before_ids = self.get_inputs_loans_month_before(contract, self.date_from, self.date_to)
+            boni_month_before = 0
+            if loans_month_before_ids:
+                for loans in loans_month_before_ids:
+                    if loans[1] == 'BONIFICACION':
+                        boni_month_before += loans[2]
+
+            leave_sickness_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                  ("date_stop", "<=", self.date_to),
+                                                                  ("work_entry_type_id", "=", work_entry_type.id),
+                                                                  ("employee_id", "=", contract.employee_id.id)])
+            for l in leave_sickness_all.leave_id:
+                leave_days_total = l.number_of_days
+                leave_hours_total = l.number_of_days * contract.resource_calendar_id.hours_per_day
+                leave_sickness = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                   ("date_stop", "<=", self.date_to),
+                                                                   ("leave_id", "=", l.id),
+                                                                   ])
+                leave_sickness_hours = 0
+                for s in leave_sickness:
+                    leave_sickness_hours += s.duration
+
+                leave_sickness_days = leave_sickness_hours / contract.resource_calendar_id.hours_per_day
+
+                if leave_sickness_days >= 1 and leave_sickness_days <= 2:
+                    leave_sickness_amount = round(((((paid_amount + boni_month_before)/30)*leave_sickness_days)*absence_rate_2D)/100, -2)
+                elif leave_sickness_days >= 3 and leave_sickness_days <= 90:
+                    leave_sickness_amount = round(((((paid_amount + boni_month_before)/30)*leave_sickness_days)*absence_rate_90D)/100, -2)
+                elif leave_sickness_days >= 91:
+                    leave_sickness_amount = round(((((paid_amount + boni_month_before)/30)*leave_sickness_days)*absence_rate_M91D)/100, -2)
+                else:
+                    leave_sickness_amount = 0
+
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
+                leave_s = {
                     'sequence': work_entry_type.sequence,
                     'work_entry_type_id': work_entry_type.id,
                     'name': work_entry_type.code,
-                    'number_of_days': total_days,
-                    'number_of_hours': total_hours,
-                    # 'amount': total_hours * paid_amount / total_hours or 0,
-                    'amount': total_days * (paid_amount / 30) or 0,
-
+                    'number_of_days': leave_sickness_days,
+                    'number_of_hours': leave_sickness_hours,
+                    'number_of_days_total': leave_days_total,
+                    'number_of_hours_total': leave_hours_total,
+                    'amount': leave_sickness_amount,
                 }
+                leave_sickness_days_total += leave_sickness_days
+                leave_sickness_hours_total += leave_sickness_hours
+                leave_days_t += leave_days_total
+                leave_hours_t += leave_hours_total
+                leave_sickness_amount_total += leave_sickness_amount
+                res.append(leave_s)
+
+            # Total de ausencia por enfermedad
+            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
+            totalae = {
+                'sequence': work_entry_type.sequence,
+                'work_entry_type_id': work_entry_type.id,
+                'name': work_entry_type.code,
+                'number_of_days': leave_sickness_days_total,
+                'number_of_hours': leave_sickness_hours_total,
+                'number_of_days_total': leave_days_t,
+                'number_of_hours_total': leave_hours_t,
+                'amount': leave_sickness_amount_total,
+            }
+            if not  leave_sickness_days_total == 0:
                 res.append(totalae)
         return res
 
@@ -1093,86 +1136,3 @@ class HrPayslip(models.Model):
                     'slip_id': self.id,
                 }
         return result.values()
-
-
-    # @api.model
-    # def get_worked_day_lines(self, contracts, date_from, date_to):
-    #     """
-    #     @param contract: Browse record of contracts
-    #     @return: returns a list of dict containing the input that should be
-    #     applied for the given contract between date_from and date_to
-    #     """
-    #     res = []
-    #     # fill only if the contract as a working schedule linked
-    #     for contract in contracts.filtered(lambda contract: contract.resource_calendar_id):
-    #         day_from = datetime.combine(date_from, time.min)
-    #         day_to = datetime.combine(date_to, time.max)
-
-    #         # compute leave days
-    #         leaves = {}
-    #         calendar = contract.resource_calendar_id
-    #         tz = timezone(calendar.tz)
-    #         day_leave_intervals = contract.employee_id.list_leaves(
-    #             day_from, day_to, calendar=contract.resource_calendar_id
-    #         )
-    #         for day, hours, leave in day_leave_intervals:
-    #             holiday = leave[:1].holiday_id
-    #             current_leave_struct = leaves.setdefault(
-    #                 holiday.holiday_status_id,
-    #                 {
-    #                     "name": holiday.holiday_status_id.name or _("Global Leaves"),
-    #                     "sequence": 5,
-    #                     "code": holiday.holiday_status_id.name or "GLOBAL",
-    #                     "number_of_days": 0.0,
-    #                     "number_of_hours": 0.0,
-    #                     "contract_id": contract.id,
-    #                 },
-    #             )
-    #             current_leave_struct["number_of_hours"] += hours
-    #             work_hours = calendar.get_work_hours_count(
-    #                 tz.localize(datetime.combine(day, time.min)),
-    #                 tz.localize(datetime.combine(day, time.max)),
-    #                 compute_leaves=False,
-    #             )
-    #             if work_hours:
-    #                 current_leave_struct["number_of_days"] += hours / work_hours
-
-    #         # compute worked days
-    #         if contract.date_start >= self.date_from:
-    #             day_from = datetime.combine(contract.date_start, time.min)
-    #             work_data = contract.employee_id._get_work_days_data(
-    #                 day_from, day_to, calendar=contract.resource_calendar_id
-    #             )
-    #         else:
-    #             work_data = contract.employee_id._get_work_days_data(
-    #                 day_from, day_to, calendar=contract.resource_calendar_id
-    #             )
-               
-    #         if not contract.resource_calendar_id.hours_per_day:
-    #             raise ValidationError(
-    #                 _("Debe ingresar la cantidad de horas por dia en la Planificación de trabajo del contrato del empleado")
-    #             )                
-    #         total_days = days_between(date_from, date_to)
-    #         total_hours = total_days*contract.resource_calendar_id.hours_per_day
-    #         attendances_total = {
-    #             "name": _("Total del periodo"),
-    #             "sequence": 1,
-    #             "code": "TOTALDAYS",
-    #             "number_of_days": total_days,
-    #             "number_of_hours": total_hours,
-    #             "contract_id": contract.id,
-    #         }            
-
-    #         attendances = {
-    #             "name": _("Normal Working Days paid at 100%"),
-    #             "sequence": 1,
-    #             "code": "WORK100",
-    #             "number_of_days": work_data["days"],
-    #             "number_of_hours": work_data["hours"],
-    #             "contract_id": contract.id,
-    #         }
-
-    #         res.append(attendances_total)
-    #         res.append(attendances)
-    #         res.extend(leaves.values())
-    #     return res        
