@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <?xml version="1.0" encoding="UTF-8"?>
 
 <odoo>
@@ -62,4 +63,26 @@
 			</xpath>
 		</field>
 	</record>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+	<!-- oe_stat_button -->
+	<record id="hr_payslip_view_form_type" model="ir.ui.view">
+		<field name="name">hr.payslip.view.form.type</field>
+		<field name="model">hr.payslip</field>
+		<field name="inherit_id" ref="hr_payroll.view_hr_payslip_form"/>
+		<field name="arch" type="xml">
+			<xpath expr="//field[@name='credit_note']" position="after">
+				<field name="type_payslip_id" required="1"/>
+			</xpath>
+			<xpath expr="//button[@name='compute_sheet']" position="after">
+				<button string="Actualizar Entradas" name="actualizar_entradas" type="object" states="draft,verify" class="oe_highlight"/>
+			</xpath>
+			<xpath expr="//field[@name='number_of_days']" position="replace">
+				<field name="number_of_days"/>
+			</xpath>
+		</field>
+	</record>
+>>>>>>> 14b5e054f2a378822e55bbb89100ad6968606a84
 </odoo>
