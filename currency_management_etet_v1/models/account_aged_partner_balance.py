@@ -82,7 +82,7 @@ class account_aged_partner_balance(models.AbstractModel):
                 'id': 'partner_%s' % (values['partner_id'],),
                 'name': values['name'],
                 'level': 2,
-                'columns': [{'name': ''}] * 4 + [{'name': self.format_value(sign * v), 'no_format': sign * v}
+                'columns': [{'name': ''}] * 4 + [{'name': self.format_value(v), 'no_format': v}
                                                  for v in [values['direction'], values['4'],
                                                            values['3'], values['2'],
                                                            values['1'], values['0'], values['total'],
@@ -120,12 +120,8 @@ class account_aged_partner_balance(models.AbstractModel):
                                      aml.account_id.display_name, format_date(self.env, aml.expected_pay_date)]] +
                                    [{'name': self.format_value(sign * v, blank_if_zero=True), 'no_format': sign * v} for
                                     v in [line['period'] == 6 - i and line['amount'] or 0 for i in range(7)]] +
-                                   [{'name': self.format_value(
-                                       self.env['account.move'].search([('name', '=', aml.name)]).amount_total,
-                                       blank_if_zero=True)}] +
-                                   [{'name': self.format_value(
-                                       self.env['account.move'].search([('name', '=', aml.name)]).trm,
-                                       blank_if_zero=True)}],
+                                   [{'name': self.format_value(line['line'].amount_currency)}] +
+                                   [{'name': self.format_value(line['line'].move_id.trm)}],
 
                         'action_context': {
                             'default_type': aml.move_id.type,
