@@ -35,7 +35,7 @@ class HrExtras(models.Model):
     @api.constrains('amount')
     def _check_values(self):
         if self.amount == 0.0:
-            raise Warning(_('La Cantidad de horas pueden ser cero. '))
+            raise Warning(_('La cantidad de horas pueden ser cero. '))
 
 
     def name_get(self):
