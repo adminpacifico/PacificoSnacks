@@ -1,11 +1,6 @@
-<<<<<<< HEAD
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_hr_type_payslip,hr.type.payslip,model_hr_type_payslip,hr_payroll.group_hr_payroll_manager,1,1,1,1
 access_hr_withholding_tax,access_hr_withholding_tax,model_hr_withholding_tax,base.group_user,1,1,1,1
 access_hr_deductions_rt,access_hr_deductions_rt,model_hr_deductions_rt,base.group_user,1,1,1,1
 access_hr_deduction_concepts,access_hr_deduction_concepts,model_hr_deduction_concepts,base.group_user,1,1,1,1
 access_hr_payroll_data,access_hr_payroll_data,model_hr_payroll_data,base.group_user,1,1,1,1
-=======
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_type_payslip,hr.type.payslip,model_hr_type_payslip,hr_payroll.group_hr_payroll_manager,1,1,1,1
->>>>>>> 14b5e054f2a378822e55bbb89100ad6968606a84
