@@ -19,8 +19,8 @@ class HrExtras(models.Model):
     contract_id = fields.Many2one('hr.contract', string='Contracto', track_visibility='onchange')
     date = fields.Date('Fecha', track_visibility='onchange', readonly=True, states={'draft': [('readonly', False)]})
     amount = fields.Float(string='Cantidad Horas', default=False ,readonly=True, states={'draft': [('readonly', False)]})
-    hour_value = fields.Float(string="Valor Hora", compute='get_hour_value')
-    total_money = fields.Float(string="Valor Total", compute='get_amount_money')
+    hour_value = fields.Float(string="Valor Hora", compute='get_hour_value', store=True)
+    total_money = fields.Float(string="Valor Total", compute='get_amount_money', store=True)
     load_manual = fields.Boolean(string="Cargue manual", default=False)
     total_money_manual = fields.Float(string="Valor Total (manual)", default=0.0,)
     payslip_id = fields.Many2one('hr.payslip', string='Payslip', readonly=True)
@@ -35,15 +35,16 @@ class HrExtras(models.Model):
     @api.constrains('amount')
     def _check_values(self):
         if self.amount == 0.0:
-            raise Warning(_('La cantidad de horas pueden ser cero. '))
+            raise Warning(_('La Cantidad de horas pueden ser cero. '))
 
 
     def name_get(self):
         return [(hour.id, '%s - %s' % (hour.employee_id.name, hour.date)) for hour in self]
 
+    @api.depends('input_id', 'total_money_manual', 'contract_id' )
     def get_hour_value(self):
         for record in self:
-            if record.total_money_manual == 0.0:
+            if record.total_money_manual == 0.0 and record.input_id != False:
                 record.hour_value = (record.contract_id.wage / 240) * (record.input_id.hour_percentage)
             else:
                 if not record.amount == 0.0:
@@ -51,6 +52,7 @@ class HrExtras(models.Model):
                 else:
                     record.hour_value = 0
 
+    @api.depends('hour_value', 'total_money_manual', 'amount')
     def get_amount_money(self):
         for record in self:
             if record.total_money_manual == False or record.total_money_manual == 0.0 :

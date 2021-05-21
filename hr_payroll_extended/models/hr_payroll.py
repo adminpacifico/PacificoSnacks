@@ -156,7 +156,7 @@ class HrPayslip(models.Model):
 
     def get_inputs_loans_12month_before(self, contract_id, date_from, date_to):
         lm12_date_ini = date_to - relativedelta(months=12)
-        hm12_date_ini = hm12_date_ini + relativedelta(days=1)
+        hm12_date_ini = lm12_date_ini + relativedelta(days=1)
         if contract_id.date_start <= lm12_date_ini:
             lm12_date_init = lm12_date_ini
         else:
@@ -764,7 +764,7 @@ class HrPayslip(models.Model):
             inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, date_from, date_to)
             if inputs_loans_12month_before:
                 lm12_date_ini = date_to - relativedelta(months=12)
-                hm12_date_ini = hm12_date_ini + relativedelta(days=1)
+                hm12_date_ini = lm12_date_ini + relativedelta(days=1)
                 if contract.date_start <= lm12_date_ini:
                     lm12_date_init = lm12_date_ini
                 else:

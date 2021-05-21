@@ -35,7 +35,7 @@
                         <field name="amount" required="True"/>
                         <field name="hour_value" widget="monetary"/>
                         <field name="total_money" widget="monetary"/>
-                        <!-- field name="payslip_id" /-->
+                        <field name="payslip_id" invisible="True"/>
                     </group>
                 </group>
                 </sheet>
