@@ -14,24 +14,28 @@
 				<button string="Actualizar Entradas" name="actualizar_entradas" type="object" states="draft,verify" class="oe_highlight"/>
 			</xpath>
 			<xpath expr="//field[@name='worked_days_line_ids']" position="replace">
-				<field name="worked_days_line_ids">
-					<tree string="Worked Days" editable="bottom">
-						<field name="amount" invisible="1"/> <!-- Do not remove this otherwise the amount won't be saved -->
-						<field name="work_entry_type_id"/>
+				<field name="worked_days_line_ids"  >
+					<tree string="Worked Days" editable="bottom" >
 						<field name="name"/>
 						<field name="number_of_days"/>
 						<field name="number_of_hours"/>
+						<!-- field name="number_of_days_total" attrs="{'invisible':[('amount', '=', 0)]}"/-->
+						<!-- field name="number_of_hours_total" attrs="{'invisible':[('amount', '=', 0)]}" /-->
+						<field name="amount" attrs="{'invisible':[('amount', '=', 0)]}"/> <!-- Do not remove this otherwise the amount won't be saved -->
 						<field name="contract_id" invisible="True"/>
 						<field name="sequence" invisible="True"/>
+						<field name="work_entry_type_id" invisible="True"/>
 					</tree>
 					<form string="Worked Day">
 						<group col="4">
 							<field name="work_entry_type_id"/>
 							<field name="name"/>
 							<field name="sequence"/>
+							<field name="contract_id"/>
 							<field name="number_of_days"/>
 							<field name="number_of_hours"/>
-							<field name="contract_id"/>
+							<field name="number_of_days_total"/>
+							<field name="number_of_hours_total"/>
 						</group>
 					</form>
 				</field>

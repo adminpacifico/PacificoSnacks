@@ -33,8 +33,20 @@
 
     <menuitem
         id="menu_prenomina_report"
-        parent="hr_payroll.menu_hr_payroll_work_entries_root"
+        parent="hr_payroll.menu_hr_payroll_report"
         name="Prenomina"
+        action="prenomina_report_action"
+        sequence="30"/>
+    <menuitem
+        id="menu_prenomina_report2"
+        parent="hr_payroll.menu_hr_payroll_report"
+        name="Plantilla Nomina"
+        action="prenomina_report_action"
+        sequence="30"/>
+    <menuitem
+        id="menu_prenomina_report3"
+        parent="hr_payroll.menu_hr_payroll_report"
+        name="Informe de UGPP"
         action="prenomina_report_action"
         sequence="30"/>
 

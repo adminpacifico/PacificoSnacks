@@ -70,7 +70,7 @@ class PrenominaReport(models.TransientModel):
         title_head.set_font_color('black')
         format_date = wb.add_format({'num_format': 'mm/dd/yyyy'})
         format_number = wb.add_format({'num_format': '#,##0.00'})
-        format_number1 = wb.add_format({'num_format': '#,##0.00', 'fg_color': '#33CCCC'})
+        format_number1 = wb.add_format({'num_format': '#,##0.00', 'fg_color': '#33CCCC', 'border': 1})
 
         ws.merge_range('B1:J1', 'PACIFICO SNACKS', title_head)
         ws.write(1, 10, date_creation, format_date)
@@ -121,57 +121,57 @@ class PrenominaReport(models.TransientModel):
 
             if nom.struct_id.name == 'Administrativa':
                 fila += 1
-                ws.write(fila, 0, '0') if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
-                ws.write(fila, 1, '0') if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
-                ws.write(fila, 2, '0') if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
+                ws.write(fila, 0, 0) if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
+                ws.write(fila, 1, 0) if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
+                ws.write(fila, 2, 0) if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
                 salm = (nom.line_ids).search([('code', '=', 'SALCONTRACTO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 3, '0') if not salm.total else ws.write(fila, 3, salm.total, format_number)
+                ws.write(fila, 3, 0) if not salm.total else ws.write(fila, 3, salm.total, format_number)
                 total_salario_adm += salm.total
                 work_day = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 4, '0') if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
+                ws.write(fila, 4, 0) if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
                 total_dias_adm += work_day.number_of_days
                 sal = (nom.line_ids).search([('code', '=', 'SALARIO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 5, '0') if not sal.total else ws.write(fila, 5, sal.total, format_number)
+                ws.write(fila, 5, 0) if not sal.total else ws.write(fila, 5, sal.total, format_number)
                 total_sueldo_adm += sal.total
                 work_days = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 6, '0') if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
+                ws.write(fila, 6, 0) if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
                 total_dias_no_lab_adm += work_days.number_of_days
 
                 day_inc = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'LEAVE110'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 7, '0') if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
+                ws.write(fila, 7, 0) if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
                 total_dias_inc_adm += day_inc.number_of_days
                 incapacidades = (nom.line_ids).search([('code', '=', 'INCAPACIDADE'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 8, '0') if not incapacidades.total else ws.write(fila, 8, incapacidades.total)
+                ws.write(fila, 8, 0) if not incapacidades.total else ws.write(fila, 8, incapacidades.total)
                 total_incapacidad_adm += incapacidades.total
                 prima = (nom.line_ids).search([('code', '=', 'PROVPRIMA'), ('slip_id', '=', nom.id) ])
-                ws.write(fila, 9, '0') if not prima.total else ws.write(fila, 9, prima.total, format_number)
+                ws.write(fila, 9, 0) if not prima.total else ws.write(fila, 9, prima.total, format_number)
                 total_prima_adm += prima.total
                 aux = (nom.line_ids).search([('code', '=', 'SUBSTRAN'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 10, '0') if not aux.total else ws.write(fila, 10, aux.total, format_number)
+                ws.write(fila, 10, 0) if not aux.total else ws.write(fila, 10, aux.total, format_number)
                 total_auxiliot_adm += aux.total
                 t_dev = (nom.line_ids).search([('code', '=', 'GROSS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 11, '0') if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
+                ws.write(fila, 11, 0) if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
                 total_devengado_adm += t_dev.total
                 salud = (nom.line_ids).search([('code', '=', 'SALUDEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 12, '0') if not salud.total else ws.write(fila, 12, salud.total, format_number)
+                ws.write(fila, 12, 0) if not salud.total else ws.write(fila, 12, salud.total, format_number)
                 total_salud_adm += salud.total
                 pension = (nom.line_ids).search([('code', '=', 'PENSIONEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 13, '0') if not pension.total else ws.write(fila, 13, pension.total, format_number)
+                ws.write(fila, 13, 0) if not pension.total else ws.write(fila, 13, pension.total, format_number)
                 total_pension_adm += pension.total
                 fsp = (nom.line_ids).search([('code', '=', 'FSP'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 14, '0') if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
+                ws.write(fila, 14, 0) if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
                 total_fsp_adm += fsp.total
                 rtf = (nom.line_ids).search([('code', '=', 'RTFM1'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 15, '0') if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
+                ws.write(fila, 15, 0) if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
                 total_retencion_adm += rtf.total
                 descuentos = (nom.line_ids).search([('code', '=', 'DESCUENTOS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 16, '0') if not descuentos.amount else ws.write(fila, 16, descuentos.amount, format_number)
+                ws.write(fila, 16, 0) if not descuentos.amount else ws.write(fila, 16, descuentos.amount, format_number)
                 total_descuentos_adm += descuentos.amount
                 t_ded = (nom.line_ids).search([('code', '=', 'TOTALDED'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 17, '0') if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
+                ws.write(fila, 17, 0) if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
                 total_deducciones_adm += t_ded.total
                 net = (nom.line_ids).search([('code', '=', 'NET'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 18, '0') if not net.total else ws.write(fila, 18, net.total, format_number)
+                ws.write(fila, 18, 0) if not net.total else ws.write(fila, 18, net.total, format_number)
                 total_a_pagar_adm += net.total
         fila += 1
         ws.write(fila, 0, '', title_head)
@@ -215,59 +215,59 @@ class PrenominaReport(models.TransientModel):
 
             if nom.struct_id.name == 'Operativa':
                 fila += 1
-                ws.write(fila, 0, '0') if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0,nom.contract_id.employee_id.department_id.name)
-                ws.write(fila, 1, '0') if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
-                ws.write(fila, 2, '0') if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
+                ws.write(fila, 0, 0) if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0,nom.contract_id.employee_id.department_id.name)
+                ws.write(fila, 1, 0) if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
+                ws.write(fila, 2, 0) if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
                 salm = (nom.line_ids).search([('code', '=', 'SALCONTRACTO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 3, '0') if not salm.total else ws.write(fila, 3, salm.total, format_number)
+                ws.write(fila, 3, 0) if not salm.total else ws.write(fila, 3, salm.total, format_number)
                 total_salario_ope += salm.total
                 work_day = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 4, '0') if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
+                ws.write(fila, 4, 0) if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
 
                 total_dias_ope += work_day.number_of_days
                 sal = (nom.line_ids).search([('code', '=', 'SALARIO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 5, '0') if not sal.total else ws.write(fila, 5, sal.total, format_number)
+                ws.write(fila, 5, 0) if not sal.total else ws.write(fila, 5, sal.total, format_number)
                 total_sueldo_ope += sal.total
                 work_days = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 6, '0') if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
+                ws.write(fila, 6, 0) if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
                 total_dias_no_lab_ope += work_days.number_of_days
 
                 day_inc = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'LEAVE110'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 7, '0') if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
+                ws.write(fila, 7, 0) if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
                 total_dias_inc_ope += day_inc.number_of_days
                 incapacidades = (nom.line_ids).search([('code', '=', 'INCAPACIDADE'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 8, '0') if not incapacidades.total else ws.write(fila, 8, incapacidades.total, format_number)
+                ws.write(fila, 8, 0) if not incapacidades.total else ws.write(fila, 8, incapacidades.total, format_number)
                 total_incapacidad_ope += incapacidades.total
                 prima = (nom.line_ids).search([('code', '=', 'PROVPRIMA'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 9, '0') if not prima.total else ws.write(fila, 9, prima.total, format_number)
+                ws.write(fila, 9, 0) if not prima.total else ws.write(fila, 9, prima.total, format_number)
                 total_prima_ope += prima.total
                 aux = (nom.line_ids).search([('code', '=', 'SUBSTRAN'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 10, '0') if not aux.total else ws.write(fila, 10, aux.total, format_number)
+                ws.write(fila, 10, 0) if not aux.total else ws.write(fila, 10, aux.total, format_number)
                 total_auxiliot_ope += aux.total
                 t_dev = (nom.line_ids).search([('code', '=', 'GROSS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 11, '0') if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
+                ws.write(fila, 11, 0) if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
                 total_devengado_ope += t_dev.total
                 salud = (nom.line_ids).search([('code', '=', 'SALUDEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 12, '0') if not salud.total else ws.write(fila, 12, salud.total, format_number)
+                ws.write(fila, 12, 0) if not salud.total else ws.write(fila, 12, salud.total, format_number)
                 total_salud_ope += salud.total
                 pension = (nom.line_ids).search([('code', '=', 'PENSIONEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 13, '0') if not pension.total else ws.write(fila, 13, pension.total, format_number)
+                ws.write(fila, 13, 0) if not pension.total else ws.write(fila, 13, pension.total, format_number)
                 total_pension_ope += pension.total
                 fsp = (nom.line_ids).search([('code', '=', 'FSP'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 14, '0') if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
+                ws.write(fila, 14, 0) if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
                 total_fsp_ope += fsp.total
                 rtf = (nom.line_ids).search([('code', '=', 'RTFM1'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 15, '0') if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
+                ws.write(fila, 15, 0) if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
                 total_retencion_ope += rtf.total
                 descuentos = (nom.line_ids).search([('code', '=', 'DESCUENTOS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 16, '0') if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
+                ws.write(fila, 16, 0) if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
                                                                               format_number)
                 total_descuentos_ope += descuentos.amount
                 t_ded = (nom.line_ids).search([('code', '=', 'TOTALDED'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 17, '0') if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
+                ws.write(fila, 17, 0) if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
                 total_deducciones_ope += t_ded.total
                 net = (nom.line_ids).search([('code', '=', 'NET'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 18, '0') if not net.total else ws.write(fila, 18, net.total, format_number)
+                ws.write(fila, 18, 0) if not net.total else ws.write(fila, 18, net.total, format_number)
                 total_a_pagar_ope += net.total
         fila += 1
         ws.write(fila, 0, '', title_head)
@@ -312,58 +312,58 @@ class PrenominaReport(models.TransientModel):
 
             if nom.struct_id.name == 'Ventas':
                 fila += 1
-                ws.write(fila, 0, '0') if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
-                ws.write(fila, 1, '0') if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
-                ws.write(fila, 2, '0') if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
+                ws.write(fila, 0, 0) if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
+                ws.write(fila, 1, 0) if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
+                ws.write(fila, 2, 0) if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
                 salm = (nom.line_ids).search([('code', '=', 'SALCONTRACTO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 3, '0') if not salm.total else ws.write(fila, 3, salm.total, format_number)
+                ws.write(fila, 3, 0) if not salm.total else ws.write(fila, 3, salm.total, format_number)
                 total_salario_ven += salm.total
                 work_day = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 4, '0') if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
+                ws.write(fila, 4, 0) if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
                 total_dias_ven += work_day.number_of_days
                 sal = (nom.line_ids).search([('code', '=', 'SALARIO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 5, '0') if not sal.total else ws.write(fila, 5, sal.total, format_number)
+                ws.write(fila, 5, 0) if not sal.total else ws.write(fila, 5, sal.total, format_number)
                 total_sueldo_ven += sal.total
                 work_days = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 6, '0') if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
+                ws.write(fila, 6, 0) if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
                 total_dias_no_lab_ven += work_days.number_of_days
 
                 day_inc = (nom.worked_days_line_ids).search([('work_entry_type_id.code', '=', 'LEAVE110'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 7, '0') if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
+                ws.write(fila, 7, 0) if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
                 total_dias_inc_ven += day_inc.number_of_days
                 incapacidades = (nom.line_ids).search([('code', '=', 'INCAPACIDADE'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 8, '0') if not incapacidades.total else ws.write(fila, 8, incapacidades.total)
+                ws.write(fila, 8, 0) if not incapacidades.total else ws.write(fila, 8, incapacidades.total)
                 total_incapacidad_ven += incapacidades.total
                 prima = (nom.line_ids).search([('code', '=', 'PROVPRIMA'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 9, '0') if not prima.total else ws.write(fila, 9, prima.total, format_number)
+                ws.write(fila, 9, 0) if not prima.total else ws.write(fila, 9, prima.total, format_number)
                 total_prima_ven += prima.total
                 aux = (nom.line_ids).search([('code', '=', 'SUBSTRAN'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 10, '0') if not aux.total else ws.write(fila, 10, aux.total, format_number)
+                ws.write(fila, 10, 0) if not aux.total else ws.write(fila, 10, aux.total, format_number)
                 total_auxiliot_ven += aux.total
                 t_dev = (nom.line_ids).search([('code', '=', 'GROSS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 11, '0') if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
+                ws.write(fila, 11, 0) if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
                 total_devengado_ven += t_dev.total
                 salud = (nom.line_ids).search([('code', '=', 'SALUDEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 12, '0') if not salud.total else ws.write(fila, 12, salud.total, format_number)
+                ws.write(fila, 12, 0) if not salud.total else ws.write(fila, 12, salud.total, format_number)
                 total_salud_ven += salud.total
                 pension = (nom.line_ids).search([('code', '=', 'PENSIONEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 13, '0') if not pension.total else ws.write(fila, 13, pension.total, format_number)
+                ws.write(fila, 13, 0) if not pension.total else ws.write(fila, 13, pension.total, format_number)
                 total_pension_ven += pension.total
                 fsp = (nom.line_ids).search([('code', '=', 'FSP'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 14, '0') if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
+                ws.write(fila, 14, 0) if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
                 total_fsp_ven += fsp.total
                 rtf = (nom.line_ids).search([('code', '=', 'RTFM1'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 15, '0') if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
+                ws.write(fila, 15, 0) if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
                 total_retencion_ven += rtf.total
                 descuentos = (nom.line_ids).search([('code', '=', 'DESCUENTOS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 16, '0') if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
+                ws.write(fila, 16, 0) if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
                                                                               format_number)
                 total_descuentos_ven += descuentos.amount
                 t_ded = (nom.line_ids).search([('code', '=', 'TOTALDED'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 17, '0') if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
+                ws.write(fila, 17, 0) if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
                 total_deducciones_ven += t_ded.total
                 net = (nom.line_ids).search([('code', '=', 'NET'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 18, '0') if not net.total else ws.write(fila, 18, net.total, format_number)
+                ws.write(fila, 18, 0) if not net.total else ws.write(fila, 18, net.total, format_number)
                 total_a_pagar_ven += net.total
         fila += 1
         ws.write(fila, 0, '', title_head)
@@ -408,63 +408,63 @@ class PrenominaReport(models.TransientModel):
 
             if nom.struct_id.name == 'Aprendiz SENA Administrativa':
                 fila += 1
-                ws.write(fila, 0, '0') if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
-                ws.write(fila, 1, '0') if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
-                ws.write(fila, 2, '0') if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
+                ws.write(fila, 0, 0) if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0, nom.contract_id.employee_id.department_id.name)
+                ws.write(fila, 1, 0) if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1, nom.contract_id.employee_id.identification_id)
+                ws.write(fila, 2, 0) if not nom.contract_id.employee_id.name else ws.write(fila, 2, nom.contract_id.employee_id.name)
                 salm = (nom.line_ids).search([('code', '=', 'SALCONTRACTO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 3, '0') if not salm.total else ws.write(fila, 3, salm.total, format_number)
+                ws.write(fila, 3, 0) if not salm.total else ws.write(fila, 3, salm.total, format_number)
                 total_salario_asa += salm.total
                 work_day = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 4, '0') if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
+                ws.write(fila, 4, 0) if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
 
                 total_dias_asa += work_day.number_of_days
                 sal = (nom.line_ids).search([('code', '=', 'SALARIO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 5, '0') if not sal.total else ws.write(fila, 5, sal.total, format_number)
+                ws.write(fila, 5, 0) if not sal.total else ws.write(fila, 5, sal.total, format_number)
                 total_sueldo_asa += sal.total
                 work_days = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 6, '0') if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
+                ws.write(fila, 6, 0) if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
                 total_dias_no_lab_asa += work_days.number_of_days
 
                 day_inc = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'LEAVE110'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 7, '0') if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
+                ws.write(fila, 7, 0) if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
                 total_dias_inc_asa += day_inc.number_of_days
                 incapacidades = (nom.line_ids).search([('code', '=', 'INCAPACIDADE'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 8, '0') if not incapacidades.total else ws.write(fila, 8, incapacidades.total,
+                ws.write(fila, 8, 0) if not incapacidades.total else ws.write(fila, 8, incapacidades.total,
                                                                                 format_number)
                 total_incapacidad_asa += incapacidades.total
                 prima = (nom.line_ids).search([('code', '=', 'PROVPRIMA'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 9, '0') if not prima.total else ws.write(fila, 9, prima.total, format_number)
+                ws.write(fila, 9, 0) if not prima.total else ws.write(fila, 9, prima.total, format_number)
                 total_prima_asa += prima.total
                 aux = (nom.line_ids).search([('code', '=', 'SUBSTRAN'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 10, '0') if not aux.total else ws.write(fila, 10, aux.total, format_number)
+                ws.write(fila, 10, 0) if not aux.total else ws.write(fila, 10, aux.total, format_number)
                 total_auxiliot_asa += aux.total
                 t_dev = (nom.line_ids).search([('code', '=', 'GROSS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 11, '0') if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
+                ws.write(fila, 11, 0) if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
                 total_devengado_asa += t_dev.total
                 salud = (nom.line_ids).search([('code', '=', 'SALUDEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 12, '0') if not salud.total else ws.write(fila, 12, salud.total, format_number)
+                ws.write(fila, 12, 0) if not salud.total else ws.write(fila, 12, salud.total, format_number)
                 total_salud_asa += salud.total
                 pension = (nom.line_ids).search([('code', '=', 'PENSIONEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 13, '0') if not pension.total else ws.write(fila, 13, pension.total, format_number)
+                ws.write(fila, 13, 0) if not pension.total else ws.write(fila, 13, pension.total, format_number)
                 total_pension_asa += pension.total
                 fsp = (nom.line_ids).search([('code', '=', 'FSP'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 14, '0') if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
+                ws.write(fila, 14, 0) if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
                 total_fsp_asa += fsp.total
                 rtf = (nom.line_ids).search([('code', '=', 'RTFM1'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 15, '0') if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
+                ws.write(fila, 15, 0) if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
                 total_retencion_asa += rtf.total
                 descuentos = (nom.line_ids).search([('code', '=', 'DESCUENTOS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 16, '0') if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
+                ws.write(fila, 16, 0) if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
                                                                                format_number)
                 total_descuentos_asa += descuentos.amount
                 t_ded = (nom.line_ids).search([('code', '=', 'TOTALDED'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 17, '0') if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
+                ws.write(fila, 17, 0) if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
                 total_deducciones_asa += t_ded.total
                 net = (nom.line_ids).search([('code', '=', 'NET'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 18, '0') if not net.total else ws.write(fila, 18, net.total, format_number)
+                ws.write(fila, 18, 0) if not net.total else ws.write(fila, 18, net.total, format_number)
                 total_a_pagar_asa += net.total
         fila += 1
         ws.write(fila, 0, '', title_head)
@@ -508,66 +508,66 @@ class PrenominaReport(models.TransientModel):
 
             if nom.struct_id.name == 'Aprendiz SENA Operativa':
                 fila += 1
-                ws.write(fila, 0, '0') if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0,
+                ws.write(fila, 0, 0) if not nom.contract_id.employee_id.department_id.name else ws.write(fila, 0,
                                                                                                            nom.contract_id.employee_id.department_id.name)
-                ws.write(fila, 1, '0') if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1,
+                ws.write(fila, 1, 0) if not nom.contract_id.employee_id.identification_id else ws.write(fila, 1,
                                                                                                           nom.contract_id.employee_id.identification_id)
-                ws.write(fila, 2, '0') if not nom.contract_id.employee_id.name else ws.write(fila, 2,
+                ws.write(fila, 2, 0) if not nom.contract_id.employee_id.name else ws.write(fila, 2,
                                                                                              nom.contract_id.employee_id.name)
                 salm = (nom.line_ids).search([('code', '=', 'SALCONTRACTO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 3, '0') if not salm.total else ws.write(fila, 3, salm.total, format_number)
+                ws.write(fila, 3, 0) if not salm.total else ws.write(fila, 3, salm.total, format_number)
                 total_salario_asop += salm.total
                 work_day = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 4, '0') if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
+                ws.write(fila, 4, 0) if not work_day.number_of_days else ws.write(fila, 4, work_day.number_of_days)
 
                 total_dias_asop += work_day.number_of_days
                 sal = (nom.line_ids).search([('code', '=', 'SALARIO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 5, '0') if not sal.total else ws.write(fila, 5, sal.total, format_number)
+                ws.write(fila, 5, 0) if not sal.total else ws.write(fila, 5, sal.total, format_number)
                 total_sueldo_asop += sal.total
                 work_days = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'WORK100'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 6, '0') if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
+                ws.write(fila, 6, 0) if not work_days.number_of_days else ws.write(fila, 6, work_days.number_of_days)
                 total_dias_no_lab_asop += work_days.number_of_days
 
                 day_inc = (nom.worked_days_line_ids).search(
                     [('work_entry_type_id.code', '=', 'LEAVE110'), ('payslip_id', '=', nom.id)])
-                ws.write(fila, 7, '0') if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
+                ws.write(fila, 7, 0) if not day_inc.number_of_days else ws.write(fila, 7, day_inc.number_of_days)
                 total_dias_inc_asop += day_inc.number_of_days
                 incapacidades = (nom.line_ids).search([('code', '=', 'INCAPACIDADE'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 8, '0') if not incapacidades.total else ws.write(fila, 8, incapacidades.total,
+                ws.write(fila, 8, 0) if not incapacidades.total else ws.write(fila, 8, incapacidades.total,
                                                                                 format_number)
                 total_incapacidad_asop += incapacidades.total
                 prima = (nom.line_ids).search([('code', '=', 'PROVPRIMA'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 9, '0') if not prima.total else ws.write(fila, 9, prima.total, format_number)
+                ws.write(fila, 9, 0) if not prima.total else ws.write(fila, 9, prima.total, format_number)
                 total_prima_asop += prima.total
                 aux = (nom.line_ids).search([('code', '=', 'SUBSTRAN'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 10, '0') if not aux.total else ws.write(fila, 10, aux.total, format_number)
+                ws.write(fila, 10, 0) if not aux.total else ws.write(fila, 10, aux.total, format_number)
                 total_auxiliot_asop += aux.total
                 t_dev = (nom.line_ids).search([('code', '=', 'GROSS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 11, '0') if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
+                ws.write(fila, 11, 0) if not t_dev.total else ws.write(fila, 11, t_dev.total, format_number)
                 total_devengado_asop += t_dev.total
                 salud = (nom.line_ids).search([('code', '=', 'SALUDEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 12, '0') if not salud.total else ws.write(fila, 12, salud.total, format_number)
+                ws.write(fila, 12, 0) if not salud.total else ws.write(fila, 12, salud.total, format_number)
                 total_salud_asop += salud.total
                 pension = (nom.line_ids).search([('code', '=', 'PENSIONEMPLEADO'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 13, '0') if not pension.total else ws.write(fila, 13, pension.total, format_number)
+                ws.write(fila, 13, 0) if not pension.total else ws.write(fila, 13, pension.total, format_number)
                 total_pension_asop += pension.total
                 fsp = (nom.line_ids).search([('code', '=', 'FSP'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 14, '0') if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
+                ws.write(fila, 14, 0) if not fsp.total else ws.write(fila, 14, fsp.total, format_number)
                 total_fsp_asop += fsp.total
                 rtf = (nom.line_ids).search([('code', '=', 'RTFM1'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 15, '0') if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
+                ws.write(fila, 15, 0) if not rtf.total else ws.write(fila, 15, rtf.total, format_number)
                 total_retencion_asop += rtf.total
                 descuentos = (nom.line_ids).search([('code', '=', 'DESCUENTOS'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 16, '0') if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
+                ws.write(fila, 16, 0) if not descuentos.amount else ws.write(fila, 16, descuentos.amount,
                                                                                format_number)
                 total_descuentos_asop += descuentos.amount
                 t_ded = (nom.line_ids).search([('code', '=', 'TOTALDED'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 17, '0') if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
+                ws.write(fila, 17, 0) if not t_ded.total else ws.write(fila, 17, t_ded.total, format_number)
                 total_deducciones_asop += t_ded.total
                 net = (nom.line_ids).search([('code', '=', 'NET'), ('slip_id', '=', nom.id)])
-                ws.write(fila, 18, '0') if not net.total else ws.write(fila, 18, net.total, format_number)
+                ws.write(fila, 18, 0) if not net.total else ws.write(fila, 18, net.total, format_number)
                 total_a_pagar_asop += net.total
         fila += 1
         ws.write(fila, 0, '', title_head)

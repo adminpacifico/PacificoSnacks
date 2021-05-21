@@ -1,15 +1,16 @@
-from odoo import _, fields, models
-from odoo.exceptions import UserError
-
 from collections import defaultdict
 from datetime import datetime, date, time
 import pytz
+
+from odoo import api, fields, models, _
+from odoo.exceptions import UserError
 
 
 
 class HrPayslipEmployees(models.TransientModel):
     _inherit = "hr.payslip.employees"
 
+    #department_id = fields.Many2one('hr.department', string="Departamento empleados")
 
     def compute_sheet(self):
         self.ensure_one()
@@ -39,12 +40,16 @@ class HrPayslipEmployees(models.TransientModel):
         ])
         self._check_undefined_slots(work_entries, payslip_run)
 
-        validated = work_entries.action_validate()
-        if not validated:
-            raise UserError(_("Some work entries could not be validated."))
+        #validated = work_entries.action_validate()
+        #if not validated:
+        #   raise UserError(_("Some work entries could not be validated."))
 
         default_values = Payslip.default_get(Payslip.fields_get())
         for contract in contracts:
+            structure_selected = self.env['hr.payroll.structure'].search([("type_id", "=", payslip_run.type_payslip_id.id),
+                                                                          ("department_id", "=", contract.department_id.id)], limit=1)
+            if not structure_selected:
+                structure_selected = contract.structure_type_id.default_struct_id
             values = dict(default_values, **{
                 'employee_id': contract.employee_id.id,
                 'credit_note': payslip_run.credit_note,
@@ -52,7 +57,7 @@ class HrPayslipEmployees(models.TransientModel):
                 'date_from': payslip_run.date_start,
                 'date_to': payslip_run.date_end,
                 'contract_id': contract.id,
-                'struct_id': self.structure_id.id or contract.structure_type_id.default_struct_id.id,
+                'struct_id': self.structure_id.id or structure_selected.id,
                 'type_payslip_id': payslip_run.type_payslip_id,
                 'date': payslip_run.date,
                 'journal_id': payslip_run.journal_id.id,
