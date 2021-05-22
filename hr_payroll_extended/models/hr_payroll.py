@@ -44,7 +44,7 @@ class HrPayslip(models.Model):
         return True
 
     def get_inputs_hora_extra(self, contract_id, date_from, date_to):
-        self._cr.execute(''' SELECT i.name, i.code, h.total_money, i.id FROM hr_extras h
+        self._cr.execute(''' SELECT i.name, i.code, h.total_money, i.id, h.hour_value, h.amount FROM hr_extras h
                                 INNER JOIN hr_payslip_input_type i ON i.id=h.input_id
                                 WHERE h.contract_id=%s AND h.state='approved'
                                 AND h.date BETWEEN %s AND %s
@@ -270,172 +270,211 @@ class HrPayslip(models.Model):
 
         self._cr.execute(''' DELETE FROM hr_payslip_input WHERE payslip_id=%s ''', (self.id,))
         for contract in contracts:
+
             horas_extras = self.get_inputs_hora_extra(contract, date_from, date_to)
             if horas_extras:
-                amounth25 = 0
-                inputh25_type_id = 0
-                amounth35 = 0
-                inputh35_type_id = 0
-                amounth75 = 0
-                inputh75_type_id = 0
-                amounthf75 = 0
-                inputhf75_type_id = 0
-                amounth110 = 0
-                inputh110_type_id = 0
+                extradiurna_amount = 0
+                extradiurnafestivo_amount = 0
+                extranocturna_amount = 0
+                extranocturnafestivo_amount = 0
+                recargonocturno_amount = 0
+                recargodiurnofestivo_amounth = 0
+                recargonocturnofestivo_amount = 0
                 for hora in horas_extras:
                     if hora[1] == 'EXTRADIURNA':
-                        amounth25 = amounth25 + hora[2]
-                        inputh25_type_id = hora[3]
-                        nameh25 = hora[0]
-                        codeh25 = hora[1]
-                    if hora[1] == 'RECARGONOCTURNO':
-                        amounth35 = amounth35 + hora[2]
-                        inputh35_type_id = hora[3]
-                        nameh35 = hora[0]
-                        codeh35 = hora[1]
+                        extradiurna_amount = extradiurna_amount + hora[2]
+                        extradiurna_type_id = hora[3]
+                        extradiurna_name = hora[0]
+                        extradiurna_code = hora[1]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                        extradiurnafestivo_type_id = hora[3]
+                        extradiurnafestivo_name = hora[0]
+                        extradiurnafestivo_code = hora[1]
                     if hora[1] == 'EXTRANOCTURNA':
-                        amounth75 = amounth75 + hora[2]
-                        inputh75_type_id = hora[3]
-                        nameh75 = hora[0]
-                        codeh75 = hora[1]
+                        extranocturna_amount = extranocturna_amount + hora[2]
+                        extranocturna_type_id = hora[3]
+                        extranocturna_name = hora[0]
+                        extranocturna_code = hora[1]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                        extranocturnafestivo_type_id = hora[3]
+                        extranocturnafestivo_name = hora[0]
+                        extranocturnafestivo_code = hora[1]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[2]
+                        recargonocturno_type_id = hora[3]
+                        recargonocturno_name = hora[0]
+                        recargonocturno_code = hora[1]
                     if hora[1] == 'RECARGODIURNOFESTIVO':
-                        amounthf75 = amounthf75 + hora[2]
-                        inputhf75_type_id = hora[3]
-                        namehf75 = hora[0]
-                        codehf75 = hora[1]
+                        recargodiurnofestivo_amounth = recargodiurnofestivo_amounth + hora[2]
+                        recargodiurnofestivo_type_id = hora[3]
+                        recargodiurnofestivo_name = hora[0]
+                        recargodiurnofestivo_code = hora[1]
                     if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                        amounth110 = amounth110 + hora[2]
-                        inputh110_type_id = hora[3]
-                        nameh110 = hora[0]
-                        codeh110 = hora[1]
-                if not amounth25 == 0:
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+                        recargonocturnofestivo_type_id = hora[3]
+                        recargonocturnofestivo_name = hora[0]
+                        recargonocturnofestivo_code = hora[1]
+                if not extradiurna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth25,
+                        "amount": extradiurna_amount,
                         "payslip_id": self.id,
-                        "input_type_id": inputh25_type_id,
-                        "name_input": nameh25,
-                        "code_input": codeh25,
+                        "input_type_id": extradiurna_type_id,
+                        "name_input": extradiurna_name,
+                        "code_input": extradiurna_code,
                     })
-                if not amounth35 == 0:
+                if not extradiurnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth35,
+                        "amount": extradiurnafestivo_amount,
                         "payslip_id": self.id,
-                        "input_type_id": inputh35_type_id,
-                        "name_input": nameh35,
-                        "code_input": codeh35,
+                        "input_type_id": extradiurnafestivo_type_id,
+                        "name_input": extradiurnafestivo_name,
+                        "code_input": extradiurnafestivo_code,
                     })
-                if not amounth75 == 0:
+                if not extranocturna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth75,
+                        "amount": extranocturna_amount,
                         "payslip_id": self.id,
-                        "input_type_id": inputh75_type_id,
-                        "name_input": nameh75,
-                        "code_input": codeh75,
+                        "input_type_id": extranocturna_type_id,
+                        "name_input": extranocturna_name,
+                        "code_input": extranocturna_code,
                     })
-                if not amounthf75 == 0:
+                if not extranocturnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounthf75,
+                        "amount": extranocturnafestivo_amount,
                         "payslip_id": self.id,
-                        "input_type_id": inputhf75_type_id,
-                        "name_input": namehf75,
-                        "code_input": codehf75,
+                        "input_type_id": extranocturnafestivo_type_id,
+                        "name_input": extranocturnafestivo_name,
+                        "code_input": extranocturnafestivo_code,
                     })
-                if not amounth110 == 0:
+                if not recargonocturno_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth110,
+                        "amount": recargonocturno_amount,
                         "payslip_id": self.id,
-                        "input_type_id": inputh110_type_id,
-                        "name_input": nameh110,
-                        "code_input": codeh110,
+                        "input_type_id": recargonocturno_type_id,
+                        "name_input": recargonocturno_name,
+                        "code_input": recargonocturno_code,
                     })
+                if not recargodiurnofestivo_amounth == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": recargodiurnofestivo_amounth,
+                        "payslip_id": self.id,
+                        "input_type_id": recargodiurnofestivo_type_id,
+                        "name_input": recargodiurnofestivo_name,
+                        "code_input": recargodiurnofestivo_code,
+                    })
+                if not recargonocturnofestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": recargonocturnofestivo_amount,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturnofestivo_type_id,
+                        "name_input": recargonocturnofestivo_name,
+                        "code_input": recargonocturnofestivo_code,
+                    })
+
             hora_extra_month_before = self.get_inputs_hora_extra_month_before(contract, date_from, date_to)
             if hora_extra_month_before:
-                amounth25 = 0
-                inputh25_type_id = 0
-                amounth35 = 0
-                inputh35_type_id = 0
-                amounth75 = 0
-                inputh75_type_id = 0
-                amounthf75 = 0
-                inputhf75_type_id = 0
-                amounth110 = 0
-                inputh110_type_id = 0
-                for hora in horas_extras:
+                extradiurna_amount_ant = 0
+                extradiurnafestivo_amount_ant = 0
+                extranocturna_amount_ant = 0
+                extranocturnafestivo_amount_ant = 0
+                recargonocturno_amount_ant = 0
+                recargodiurnofestivo_amount_ant = 0
+                recargonocturnofestivo_amount_ant = 0
+                for hora in hora_extra_month_before:
                     if hora[1] == 'EXTRADIURNA':
-                        amounth25 = amounth25 + hora[2]
-                        inputh25_type_id = hora[3]
-                        nameh25 = hora[0]
-                        codeh25 = hora[1]
-                    if hora[1] == 'RECARGONOCTURNO':
-                        amounth35 = amounth35 + hora[2]
-                        inputh35_type_id = hora[3]
-                        nameh35 = hora[0]
-                        codeh35 = hora[1]
+                        extradiurna_amount_ant = extradiurna_amount_ant + hora[2]
+                        extradiurna_type_id_ant = hora[3]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount_ant = extradiurnafestivo_amount_ant + hora[2]
+                        extradiurnafestivo_type_id_ant = hora[3]
                     if hora[1] == 'EXTRANOCTURNA':
-                        amounth75 = amounth75 + hora[2]
-                        inputh75_type_id = hora[3]
-                        nameh75 = hora[0]
-                        codeh75 = hora[1]
+                        extranocturna_amount_ant = extranocturna_amount_ant + hora[2]
+                        extranocturna_type_id_ant = hora[3]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount_ant = extranocturnafestivo_amount_ant + hora[2]
+                        extranocturnafestivo_type_id_ant = hora[3]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount_ant = recargonocturno_amount_ant + hora[2]
+                        recargonocturno_type_id_ant = hora[3]
                     if hora[1] == 'RECARGODIURNOFESTIVO':
-                        amounthf75 = amounthf75 + hora[2]
-                        inputhf75_type_id = hora[3]
-                        namehf75 = hora[0]
-                        codehf75 = hora[1]
+                        recargodiurnofestivo_amount_ant = recargodiurnofestivo_amount_ant + hora[2]
+                        recargodiurnofestivo_type_id_ant = hora[3]
                     if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                        amounth110 = amounth110 + hora[2]
-                        inputh110_type_id = hora[3]
-                        nameh110 = hora[0]
-                        codeh110 = hora[1]
-                if not amounth25 == 0:
+                        recargonocturnofestivo_amount_ant = recargonocturnofestivo_amount_ant + hora[2]
+                        recargonocturnofestivo_type_id_ant = hora[3]
+                if not extradiurna_amount_ant == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth25,
+                        "amount": extradiurna_amount_ant,
                         "payslip_id": self.id,
-                        "input_type_id": inputh25_type_id,
+                        "input_type_id": extradiurna_type_id_ant,
                         "code_input": 'EXTRADIURNA_ANT30',
                         "name_input": 'Horas Extra Diurna (25%) Mes Anterior',
                     })
-                if not amounth35 == 0:
+                if not extradiurnafestivo_amount_ant == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth35,
+                        "amount": extradiurnafestivo_amount_ant,
                         "payslip_id": self.id,
-                        "input_type_id": inputh35_type_id,
-                        "code_input": 'RECARGONOCTURNO_ANT30',
-                        "name_input": 'Horas Recargo Nocturno (35%) Mes Anterior',
+                        "input_type_id": extradiurnafestivo_type_id_ant,
+                        "code_input": 'EXTRADIURNAFESTIVO_ANT30',
+                        "name_input": '	Horas Extra Diurna Festivo (100%) Mes Anterior',
                     })
-                if not amounth75 == 0:
+                if not extranocturna_amount_ant == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth75,
+                        "amount": extranocturna_amount_ant,
                         "payslip_id": self.id,
-                        "input_type_id": inputh75_type_id,
+                        "input_type_id": extranocturna_type_id_ant,
                         "code_input": 'EXTRANOCTURNA_ANT30',
                         "name_input": 'Horas Extra Nocturna (75%) Mes Anterior',
                     })
-                if not amounthf75 == 0:
+                if not extranocturnafestivo_amount_ant == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounthf75,
+                        "amount": extranocturnafestivo_amount_ant,
                         "payslip_id": self.id,
-                        "input_type_id": inputhf75_type_id,
+                        "input_type_id": extranocturnafestivo_type_id_ant,
+                        "code_input": 'EXTRANOCTURNAFESTIVO_ANT30',
+                        "name_input": 'Horas Extra Nocturna Festivo (150%) Mes Anterior',
+                    })
+                if not recargonocturno_amount_ant == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": recargonocturno_amount_ant,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturno_type_id_ant,
+                        "code_input": 'RECARGONOCTURNO_ANT30',
+                        "name_input": 'Horas Recargo Nocturno (35%) Mes Anterior',
+                    })
+                if not recargodiurnofestivo_amount_ant == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": recargodiurnofestivo_amount_ant,
+                        "payslip_id": self.id,
+                        "input_type_id": recargodiurnofestivo_type_id_ant,
                         "code_input": 'RECARGODIURNOFESTIVO_ANT30',
                         "name_input": 'Horas Recargo Diurno Festivo (75%) Mes Anterior',
                     })
-                if not amounth110 == 0:
+                if not recargonocturnofestivo_amount_ant == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounth110,
+                        "amount": recargonocturnofestivo_amount_ant,
                         "payslip_id": self.id,
-                        "input_type_id": inputh110_type_id,
+                        "input_type_id": recargonocturnofestivo_type_id_ant,
                         "code_input": 'RECARGONOCTURNOFESTIVO_ANT30',
                         "name_input": 'Horas Recargo Nocturno Festivo (110%) Mes Anterior',
                     })
+
             horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, date_from, date_to)
             if horas_extras_12month_before:
                 hm12_date_ini = date_to - relativedelta(months=12)
@@ -446,99 +485,100 @@ class HrPayslip(models.Model):
                     hm12_date_init = contract.date_start
                 #total_days12y = days_between(hm12_date_init, date_to)
                 total_days12y = days360(hm12_date_init, date_to) + 1
-                counth25 = 0
-                amounth25 = 0
-                inputh25_type_id = 0
-                counth35 = 0
-                amounth35 = 0
-                inputh35_type_id = 0
-                counth75 = 0
-                amounth75 = 0
-                inputh75_type_id = 0
-                counthf75 = 0
-                amounthf75 = 0
-                inputhf75_type_id = 0
-                counth110 = 0
-                amounth110 = 0
-                inputh110_type_id = 0
+                extradiurna_amount = 0
+                extradiurnafestivo_amount = 0
+                extranocturna_amount = 0
+                extranocturnafestivo_amount = 0
+                recargonocturno_amount = 0
+                recargodiurnofestivo_amount = 0
+                recargonocturnofestivo_amount = 0
                 for hora in horas_extras_12month_before:
-                    if hora[1] == 'RECARGONOCTURNO':
-                        counth35 = counth35 + 1
-                        amounth35 = amounth35 + hora[2]
-                        inputh35_type_id = hora[3]
-                        nameh35 = hora[0]
-                        codeh35 = hora[1]
-                    if hora[1] == 'RECARGODIURNOFESTIVO':
-                        counthf75 = counthf75 + 1
-                        amounthf75 = amounthf75 + hora[2]
-                        inputhf75_type_id = hora[3]
-                        namehf75 = hora[0]
-                        codehf75 = hora[1]
-                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                        counth110 = counth110 + 1
-                        amounth110 = amounth110 + hora[2]
-                        inputh110_type_id = hora[3]
-                        nameh110 = hora[0]
-                        codeh110 = hora[1]
-
                     if hora[1] == 'EXTRADIURNA':
-                        counth25 = counth25 + 1
-                        amounth25 = amounth25 + hora[2]
-                        inputh25_type_id = hora[3]
-                        nameh25 = hora[0]
-                        codeh25 = hora[1]
+                        extradiurna_amount = extradiurna_amount + hora[2]
+                        extradiurna_type_id = hora[3]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                        extradiurnafestivo_type_id = hora[3]
                     if hora[1] == 'EXTRANOCTURNA':
-                        counth75 = counth75 + 1
-                        amounth75 = amounth75 + hora[2]
-                        inputh75_type_id = hora[3]
-                        nameh75 = hora[0]
-                        codeh75 = hora[1]
+                        extranocturna_amount = extranocturna_amount + hora[2]
+                        extranocturna_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                        extranocturnafestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[2]
+                        recargonocturno_type_id = hora[3]
+                    if hora[1] == 'RECARGODIURNOFESTIVO':
+                        recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                        recargodiurnofestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+                        recargonocturnofestivo_type_id = hora[3]
 
-                if not amounth25 == 0:
+                if not extradiurna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth25/total_days12y)*30,
+                        "amount": (extradiurna_amount/total_days12y)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh25_type_id,
+                        "input_type_id": extradiurna_type_id,
                         "code_input": 'EXTRADIURNA_PYEARS',
                         "name_input": 'Horas Extra Diurna (25%) Promedio 12M atras',
                     })
-                if not amounth35 == 0:
+                if not extradiurnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth35/total_days12y)*30,
+                        "amount": (extradiurnafestivo_amount/total_days12y)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh35_type_id,
-                        "code_input": 'RECARGONOCTURNO_PYEARS',
-                        "name_input": 'Horas Recargo Nocturno (35%) Promedio 12M atras',
+                        "input_type_id": extradiurnafestivo_type_id,
+                        "code_input": 'EXTRADIURNAFESTIVO_PYEARS',
+                        "name_input": '	Horas Extra Diurna Festivo (100%) Promedio 12M atras',
                     })
-                if not amounth75 == 0:
+                if not extranocturna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth75/total_days12y)*30,
+                        "amount": (extranocturna_amount/total_days12y)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh75_type_id,
+                        "input_type_id": extranocturna_type_id,
                         "code_input": 'EXTRANOCTURNA_PYEARS',
                         "name_input": 'Horas Extra Nocturna (75%) Promedio 12M atras',
                     })
-                if not amounthf75 == 0:
+                if not extranocturnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounthf75/total_days12y)*30,
+                        "amount": (extranocturnafestivo_amount/total_days12y)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputhf75_type_id,
+                        "input_type_id": extranocturnafestivo_type_id,
+                        "code_input": 'EXTRANOCTURNAFESTIVO_PYEARS',
+                        "name_input": 'Horas Extra Nocturna Festivo (150%) Promedio 12M atras',
+                    })
+                if not recargonocturno_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (recargonocturno_amount/total_days12y)*30,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturno_type_id,
+                        "code_input": 'RECARGONOCTURNO_PYEARS',
+                        "name_input": 'Horas Recargo Nocturno (35%) Promedio 12M atras',
+                    })
+                if not recargodiurnofestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (recargodiurnofestivo_amount/total_days12y)*30,
+                        "payslip_id": self.id,
+                        "input_type_id": recargodiurnofestivo_type_id,
                         "code_input": 'RECARGODIURNOFESTIVO_PYEARS',
                         "name_input": 'Horas Recargo Diurno Festivo (75%) Promedio 12M atras',
                     })
-                if not amounth110 == 0:
+                if not recargonocturnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth110/total_days12y)*30,
+                        "amount": (recargonocturnofestivo_amount/total_days12y)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh110_type_id,
+                        "input_type_id": recargonocturnofestivo_type_id,
                         "code_input": 'RECARGONOCTURNOFESTIVO_PYEARS',
                         "name_input": 'Horas Recargo Nocturno Festivo (110%) Promedio 12M atras',
                     })
+
             hora_extra_year_now = self.get_inputs_hora_extra_year_now(contract, date_from, date_to)
             if hora_extra_year_now:
                 hdate_init_year = date(date_from.year, 1, 1)
@@ -548,97 +588,100 @@ class HrPayslip(models.Model):
                     hdate_init = contract.date_start
                 #total_days = days_between(hdate_init, date_to)
                 total_days = days360(hdate_init, date_to)
-                counth25 = 0
-                amounth25 = 0
-                inputh25_type_id = 0
-                counth35 = 0
-                amounth35 = 0
-                inputh35_type_id = 0
-                counth75 = 0
-                amounth75 = 0
-                inputh75_type_id = 0
-                counthf75 = 0
-                amounthf75 = 0
-                inputhf75_type_id = 0
-                counth110 = 0
-                amounth110 = 0
-                inputh110_type_id = 0
+                extradiurna_amount = 0
+                extradiurnafestivo_amount = 0
+                extranocturna_amount = 0
+                extranocturnafestivo_amount = 0
+                recargonocturno_amount = 0
+                recargodiurnofestivo_amount = 0
+                recargonocturnofestivo_amount = 0
                 for hora in hora_extra_year_now:
-                    if hora[1] == 'RECARGONOCTURNO':
-                        counth35 = counth35 + 1
-                        amounth35 = amounth35 + hora[2]
-                        inputh35_type_id = hora[3]
-                        nameh35 = hora[0]
-                        codeh35 = hora[1]
-                    if hora[1] == 'RECARGODIURNOFESTIVO':
-                        counthf75 = counthf75 + 1
-                        amounthf75 = amounthf75 + hora[2]
-                        inputhf75_type_id = hora[3]
-                        namehf75 = hora[0]
-                        codehf75 = hora[1]
-                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                        counth110 = counth110 + 1
-                        amounth110 = amounth110 + hora[2]
-                        inputh110_type_id = hora[3]
-                        nameh110 = hora[0]
-                        codeh110 = hora[1]
                     if hora[1] == 'EXTRADIURNA':
-                        counth25 = counth25 + 1
-                        amounth25 = amounth25 + hora[2]
-                        inputh25_type_id = hora[3]
-                        nameh25 = hora[0]
-                        codeh25 = hora[1]
+                        extradiurna_amount = extradiurna_amount + hora[2]
+                        extradiurna_type_id = hora[3]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                        extradiurnafestivo_type_id = hora[3]
                     if hora[1] == 'EXTRANOCTURNA':
-                        counth75 = counth75 + 1
-                        amounth75 = amounth75 + hora[2]
-                        inputh75_type_id = hora[3]
-                        nameh75 = hora[0]
-                        codeh75 = hora[1]
-                if not amounth25 == 0:
+                        extranocturna_amount = extranocturna_amount + hora[2]
+                        extranocturna_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                        extranocturnafestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[2]
+                        recargonocturno_type_id = hora[3]
+                    if hora[1] == 'RECARGODIURNOFESTIVO':
+                        recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                        recargodiurnofestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+                        recargonocturnofestivo_type_id = hora[3]
+
+                if not extradiurna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth25/total_days)*30,
+                        "amount": (extradiurna_amount / total_days) * 30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh25_type_id,
+                        "input_type_id": extradiurna_type_id,
                         "code_input": 'EXTRADIURNA_YEARS_NOW',
                         "name_input": 'Horas Extra Diurna (25%) Promedio Anual',
                     })
-                if not amounth35 == 0:
+                if not extradiurnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth35/total_days)*30,
+                        "amount": (extradiurnafestivo_amount / total_days) * 30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh35_type_id,
-                        "code_input": 'RECARGONOCTURNO_YEARS_NOW',
-                        "name_input": 'Horas Recargo Nocturno (35%) Promedio Anual',
+                        "input_type_id": extradiurnafestivo_type_id,
+                        "code_input": 'EXTRADIURNAFESTIVO_YEARS_NOW',
+                        "name_input": '	Horas Extra Diurna Festivo (100%) Promedio Anual',
                     })
-                if not amounth75 == 0:
+                if not extranocturna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth75/total_days)*30,
+                        "amount": (extranocturna_amount / total_days) * 30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh75_type_id,
+                        "input_type_id": extranocturna_type_id,
                         "code_input": 'EXTRANOCTURNA_YEARS_NOW',
                         "name_input": 'Horas Extra Nocturna (75%) Promedio Anual',
                     })
-                if not amounthf75 == 0:
+                if not extranocturnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounthf75/total_days)*30,
+                        "amount": (extranocturnafestivo_amount / total_days) * 30,
                         "payslip_id": self.id,
-                        "input_type_id": inputhf75_type_id,
+                        "input_type_id": extranocturnafestivo_type_id,
+                        "code_input": 'EXTRANOCTURNAFESTIVO_YEARS_NOW',
+                        "name_input": 'Horas Extra Nocturna Festivo (150%) Promedio Anual',
+                    })
+                if not recargonocturno_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (recargonocturno_amount / total_days) * 30,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturno_type_id,
+                        "code_input": 'RECARGONOCTURNO_YEARS_NOW',
+                        "name_input": 'Horas Recargo Nocturno (35%) Promedio Anual',
+                    })
+                if not recargodiurnofestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (recargodiurnofestivo_amount / total_days) * 30,
+                        "payslip_id": self.id,
+                        "input_type_id": recargodiurnofestivo_type_id,
                         "code_input": 'RECARGODIURNOFESTIVO_YEARS_NOW',
                         "name_input": 'Horas Recargo Diurno Festivo (75%) Promedio Anual',
                     })
-                if not amounth110 == 0:
+                if not recargonocturnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amounth110/total_days)*30,
+                        "amount": (recargonocturnofestivo_amount / total_days) * 30,
                         "payslip_id": self.id,
-                        "input_type_id": inputh110_type_id,
+                        "input_type_id": recargonocturnofestivo_type_id,
                         "code_input": 'RECARGONOCTURNOFESTIVO_YEARS_NOW',
                         "name_input": 'Horas Recargo Nocturno Festivo (110%) Promedio Anual',
                     })
+
             loans_fijos_ids = self.get_inputs_loans_fijos(contract)
             if loans_fijos_ids:
                 for hora in loans_fijos_ids:
@@ -650,6 +693,7 @@ class HrPayslip(models.Model):
                         "code_input": hora[1],
                         "name_input": hora[0],
                     })
+
             loans_ids = self.get_inputs_loans(contract, date_from, date_to)
             if loans_ids:
                 amountb = 0
@@ -685,6 +729,7 @@ class HrPayslip(models.Model):
                         "name_input": named,
                         "code_input": coded,
                     })
+
             loans_month_now_ids = self.get_inputs_loans_month_now(contract, date_from, date_to)
             if loans_month_now_ids and date_from.day == 16:
                 amountbn = 0
@@ -707,17 +752,7 @@ class HrPayslip(models.Model):
                         "code_input": 'BONIFICACION_NOW30',
                         "name_input": 'Bonificación Mes Actual',
                     })
-                """
-                if not amountdn == 0:
-                    self.env['hr.payslip.input'].create({
-                        "sequence": 1,
-                        "amount": amountdn,
-                        "payslip_id": self.id,
-                        "input_type_id": inputdn_type_id,
-                        "code_input": 'DESCUENTO_NOW30',
-                        "name_input": 'Descuento Mes Actual',
-                    })
-                """
+
             get_inputs_total_ingreso = self.get_inputs_total_ingreso(contract, date_from, date_to)
             if get_inputs_total_ingreso and date_from.day == 16:
                 total_ingreso_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1).id
@@ -1076,6 +1111,139 @@ class HrPayslip(models.Model):
             }
             if not  leave_sickness_days_total == 0:
                 res.append(totalae)
+
+            # Horas Extras (# horas y valor x hora)
+            horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
+            if horas_extras:
+                extradiurna_amount = 0
+                extradiurna_hours = 0
+                extradiurnafestivo_amount = 0
+                extradiurnafestivo_hours = 0
+                extranocturna_amount = 0
+                extranocturna_hours = 0
+                extranocturnafestivo_amount = 0
+                extranocturnafestivo_hours = 0
+                recargonocturno_amount = 0
+                recargonocturno_hours = 0
+                recargodiurnofestivo_amounth = 0
+                recargodiurnofestivo_hours = 0
+                recargonocturnofestivo_amount = 0
+                recargonocturnofestivo_hours = 0
+                for hora in horas_extras:
+                    if hora[1] == 'EXTRADIURNA':
+                        extradiurna_amount = extradiurna_amount + hora[4]
+                        extradiurna_hours = extradiurna_hours + hora[5]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[4]
+                        extradiurnafestivo_hours = extradiurnafestivo_hours + hora[5]
+                    if hora[1] == 'EXTRANOCTURNA':
+                        extranocturna_amount = extranocturna_amount + hora[4]
+                        extranocturna_hours = extranocturna_hours + hora[5]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[4]
+                        extranocturnafestivo_hours = extranocturnafestivo_hours + hora[5]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[4]
+                        recargonocturno_hours = recargonocturno_hours + hora[5]
+                    if hora[1] == 'RECARGODIURNOFESTIVO':
+                        recargodiurnofestivo_amounth = recargodiurnofestivo_amounth + hora[4]
+                        recargodiurnofestivo_hours = recargodiurnofestivo_hours + hora[5]
+                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[4]
+                        recargonocturnofestivo_hours = recargonocturnofestivo_hours + hora[5]
+
+                if not extradiurna_amount == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRADIURNA')], limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': extradiurna_hours,
+                        'number_of_days_total': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': extradiurna_hours,
+                        'amount': extradiurna_amount,
+                    }
+                    res.append(hours_e)
+                if not extradiurnafestivo_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRADIURNAFESTIVO')], limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': extradiurnafestivo_hours,
+                        'number_of_days_total': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': extradiurnafestivo_hours,
+                        'amount': extradiurnafestivo_amount,
+                    }
+                    res.append(hours_e)
+                if not extranocturna_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRANOCTURNA')], limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': extranocturna_hours,
+                        'number_of_days_total': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': extranocturna_hours,
+                        'amount': extranocturna_amount,
+                    }
+                    res.append(hours_e)
+                if not extranocturnafestivo_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRANOCTURNAFESTIVO')], limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': extranocturnafestivo_hours,
+                        'number_of_days_total': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': extranocturnafestivo_hours,
+                        'amount': extranocturnafestivo_amount,
+                    }
+                    res.append(hours_e)
+                if not recargonocturno_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGONOCTURNO')],limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': recargonocturno_hours,
+                        'number_of_days_total': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': recargonocturno_hours,
+                        'amount': recargonocturno_amount,
+                    }
+                    res.append(hours_e)
+                if not recargodiurnofestivo_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGODIURNOFESTIVO')],limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': recargodiurnofestivo_hours,
+                        'number_of_days_total': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': recargodiurnofestivo_hours,
+                        'amount': recargodiurnofestivo_amounth,
+                    }
+                    res.append(hours_e)
+                if not recargonocturnofestivo_hours == 0:
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGONOCTURNOFESTIVO')],limit=1)
+                    hours_e = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours': recargonocturnofestivo_hours,
+                        'number_of_days_total': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                        'number_of_hours_total': recargonocturnofestivo_hours,
+                        'amount': recargonocturnofestivo_amount,
+                    }
+                    res.append(hours_e)
+
         return res
 
     def _get_payslip_lines(self):
