@@ -185,5 +185,5 @@ class HrPayslip(models.Model):
             'debit': debit,
             'credit': credit,
             'analytic_account_id': line.salary_rule_id.analytic_account_id.id or line.slip_id.contract_id.analytic_account_id.id,
-            'analytic_tag_ids': analytic_tag_ids
+            #'analytic_tag_ids': analytic_tag_ids
         }
