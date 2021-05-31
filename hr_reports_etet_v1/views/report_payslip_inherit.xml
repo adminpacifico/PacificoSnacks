@@ -103,7 +103,7 @@
                                     <span t-esc="salario_nombre"/>
                                 </td>
 
-                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Total Días')" t-as="worked_days">
+                                <td class="text-right" t-foreach="o.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Asistencia')" t-as="worked_days">
                                 <span t-field="worked_days.number_of_days"/>
                                 </td>
 
