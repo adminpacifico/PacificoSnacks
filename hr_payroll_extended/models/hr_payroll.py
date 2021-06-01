@@ -484,6 +484,8 @@ class HrPayslip(models.Model):
                 else:
                     hm12_date_init = contract.date_start
                 #total_days12y = days_between(hm12_date_init, date_to)
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
                 total_days12y = days360(hm12_date_init, date_to) + 1
                 extradiurna_amount = 0
                 extradiurnafestivo_amount = 0
@@ -805,6 +807,8 @@ class HrPayslip(models.Model):
                 else:
                     lm12_date_init = contract.date_start
                 #total_dayl12 = days_between(lm12_date_init, date_to)
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
                 total_dayl12 = days360(lm12_date_init, date_to)+1
                 countb = 0
                 amountb = 0
