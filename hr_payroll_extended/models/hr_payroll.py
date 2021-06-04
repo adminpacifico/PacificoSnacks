@@ -1038,6 +1038,7 @@ class HrPayslip(models.Model):
                     leave_sickness_hours_total = 0
                     leave_days_t = 0
                     leave_hours_t = 0
+                    wage_min_day = wage_min/30
                     horas_extras_promedio12m_dia = 0
                     recargo_promedio12m_dia = 0
                     bonificacion_promedio12m_dia = 0
@@ -1153,6 +1154,9 @@ class HrPayslip(models.Model):
                             leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_M91D)/100,-2)
                         else:
                             leave_sickness_amount = 0
+
+                        if leave_sickness_amount < wage_min_day:
+                            leave_sickness_amount = wage_min_day
 
                         work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
                         leave_s = {
