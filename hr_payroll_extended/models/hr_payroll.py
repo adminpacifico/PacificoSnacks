@@ -702,6 +702,8 @@ class HrPayslip(models.Model):
                 inputb_type_id = 0
                 amountd = 0
                 inputd_type_id = 0
+                amounti = 0
+                inputi_type_id = 0
                 for loans in loans_ids:
                     if loans[1] == 'BONIFICACION':
                        amountb = amountb + loans[2]
@@ -713,6 +715,11 @@ class HrPayslip(models.Model):
                        inputd_type_id = loans[3]
                        named = loans[0]
                        coded = loans[1]
+                    if loans[1] == 'INGRESO':
+                       amounti = amounti + loans[2]
+                       inputi_type_id = loans[3]
+                       namei = loans[0]
+                       codei = loans[1]
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                      "sequence": 1,
@@ -730,6 +737,15 @@ class HrPayslip(models.Model):
                         "input_type_id": inputd_type_id,
                         "name_input": named,
                         "code_input": coded,
+                    })
+                if not amounti == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amounti,
+                        "payslip_id": self.id,
+                        "input_type_id": inputi_type_id,
+                        "name_input": namei,
+                        "code_input": codei,
                     })
 
             loans_month_now_ids = self.get_inputs_loans_month_now(contract, date_from, date_to)
@@ -972,363 +988,363 @@ class HrPayslip(models.Model):
                         novelties_days = 15
 
                         # Dias por rango de fecha (manejo de 30 dias)
-                    all_days = days_between(self.date_from, self.date_to)
+                all_days = days_between(self.date_from, self.date_to)
 
-                    # Dias de asistencia
-                    assistance_days = all_days - novelties_days
-                    assistance_hours = assistance_days * contract.resource_calendar_id.hours_per_day
-                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
-                    attendance_assistance = {
-                        'sequence': work_entry_type.sequence,
-                        'work_entry_type_id': work_entry_type.id,
-                        'name': work_entry_type.code,
-                        'number_of_days': assistance_days,
-                        'number_of_hours': assistance_hours,
-                        'number_of_days_total': assistance_days,
-                        'number_of_hours_total': assistance_hours,
-                        'amount': 0,
-                    }
-                    if not assistance_days == 0:
-                        res.append(attendance_assistance)
+                # Dias de asistencia
+                assistance_days = all_days - novelties_days
+                assistance_hours = assistance_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
+                attendance_assistance = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': assistance_days,
+                    'number_of_hours': assistance_hours,
+                    'number_of_days_total': assistance_days,
+                    'number_of_hours_total': assistance_hours,
+                    'amount': 0,
+                }
+                if not assistance_days == 0:
+                    res.append(attendance_assistance)
 
-                    # Dias totales
-                    total_days = assistance_days + novelties_days
-                    total_hours = total_days * contract.resource_calendar_id.hours_per_day
-                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYS')], limit=1)
-                    attendances_total = {
-                        'sequence': work_entry_type.sequence,
-                        'work_entry_type_id': work_entry_type.id,
-                        'name': work_entry_type.code,
-                        'number_of_days': total_days,
-                        'number_of_hours': total_hours,
-                        'number_of_days_total': total_days,
-                        'number_of_hours_total': total_hours,
-                        'amount': 0,
-                    }
-                    res.append(attendances_total)
+                # Dias totales
+                total_days = assistance_days + novelties_days
+                total_hours = total_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYS')], limit=1)
+                attendances_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_days,
+                    'number_of_hours': total_hours,
+                    'number_of_days_total': total_days,
+                    'number_of_hours_total': total_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_total)
 
-                    # Dias anuales trabajados
-                    date_init_year = date(self.date_from.year, 1, 1)
-                    if contract.date_start <= date_init_year:
-                        date_init = date_init_year
+                # Dias anuales trabajados
+                date_init_year = date(self.date_from.year, 1, 1)
+                if contract.date_start <= date_init_year:
+                    date_init = date_init_year
+                else:
+                    date_init = contract.date_start
+                total_year_days = days360(date_init, self.date_to)
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
+                attendances_year_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_year_total)
+
+                # Total ausencias por enfermedad
+                absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],limit=1).disability_percentage
+                absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],limit=1).disability_percentage
+                absence_rate_M91D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_M91D')],limit=1).disability_percentage
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110')], limit=1)
+                leave_sickness_amount_total = 0
+                leave_sickness_days_total = 0
+                leave_sickness_hours_total = 0
+                leave_days_t = 0
+                leave_hours_t = 0
+                wage_min_day = wage_min/30
+                horas_extras_promedio12m_dia = 0
+                recargo_promedio12m_dia = 0
+                bonificacion_promedio12m_dia = 0
+
+                inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, self.date_from, self.date_to)
+                if inputs_loans_12month_before:
+                    date_to = self.date_to
+                    lm12_date_ini = self.date_to - relativedelta(months=12)
+                    lm12_date_ini = lm12_date_ini + relativedelta(days=1)
+                    if contract.date_start <= lm12_date_ini:
+                        lm12_date_init = lm12_date_ini
                     else:
-                        date_init = contract.date_start
-                    total_year_days = days360(date_init, self.date_to)
-                    total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
-                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
-                    attendances_year_total = {
+                        lm12_date_init = contract.date_start
+                    # total_dayl12 = days_between(lm12_date_init, date_to)
+                    if date_to.day == 31:
+                        date_to = date_to - relativedelta(days=1)
+                    total_dayl12 = days360(lm12_date_init, date_to) + 1
+                    bonificacion_promedio12m = 0
+                    for loans in inputs_loans_12month_before:
+                        if loans[1] == 'BONIFICACION':
+                            bonificacion_promedio12m = bonificacion_promedio12m + loans[2]
+                    if not bonificacion_promedio12m == 0:
+                        bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * 30
+
+                    bonificacion_promedio12m_dia = bonificacion_promedio12m / 30
+
+                horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, self.date_from, self.date_to)
+                if horas_extras_12month_before:
+                    date_to = self.date_to
+                    hm12_date_ini = self.date_to - relativedelta(months=12)
+                    hm12_date_ini = hm12_date_ini + relativedelta(days=1)
+                    if contract.date_start <= hm12_date_ini:
+                        hm12_date_init = hm12_date_ini
+                    else:
+                        hm12_date_init = contract.date_start
+                    # total_days12y = days_between(hm12_date_init, date_to)
+                    if date_to.day == 31:
+                        date_to = date_to - relativedelta(days=1)
+                    total_days12y = days360(hm12_date_init, date_to) + 1
+                    extradiurna_promedio12m = 0
+                    extradiurnafestivo_promedio12m = 0
+                    extranocturna_promedio12m = 0
+                    extranocturnafestivo_promedio12m = 0
+                    recargonocturno_promedio12m = 0
+                    recargodiurnofestivo_promedio12m = 0
+                    recargonocturnofestivo_promedio12m = 0
+                    for hora in horas_extras_12month_before:
+                        if hora[1] == 'EXTRADIURNA':
+                            extradiurna_promedio12m = extradiurna_promedio12m + hora[2]
+                        if hora[1] == 'EXTRADIURNAFESTIVO':
+                            extradiurnafestivo_promedio12m = extradiurnafestivo_promedio12m + hora[2]
+                        if hora[1] == 'EXTRANOCTURNA':
+                            extranocturna_promedio12m = extranocturna_promedio12m + hora[2]
+                        if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                            extranocturnafestivo_promedio12m = extranocturnafestivo_promedio12m + hora[2]
+                        if hora[1] == 'RECARGONOCTURNO':
+                            recargonocturno_promedio12m = recargonocturno_promedio12m + hora[2]
+                        if hora[1] == 'RECARGODIURNOFESTIVO':
+                            recargodiurnofestivo_promedio12m = recargodiurnofestivo_promedio12m + hora[2]
+                        if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                            recargonocturnofestivo_promedio12m = recargonocturnofestivo_promedio12m + hora[2]
+
+                    if not extradiurna_promedio12m == 0:
+                        extradiurna_promedio12m = (extradiurna_promedio12m / total_days12y) * 30
+                    if not extradiurnafestivo_promedio12m == 0:
+                        extradiurnafestivo_promedio12m = (extradiurnafestivo_promedio12m / total_days12y) * 30
+                    if not extranocturna_promedio12m == 0:
+                        extranocturna_promedio12m = (extranocturna_promedio12m / total_days12y) * 30
+                    if not extranocturnafestivo_promedio12m == 0:
+                        extranocturnafestivo_promedio12m = (extranocturnafestivo_promedio12m / total_days12y) * 30
+                    if not recargonocturno_promedio12m == 0:
+                        recargonocturno_promedio12m = (recargonocturno_promedio12m / total_days12y) * 30
+                    if not recargodiurnofestivo_promedio12m == 0:
+                        recargodiurnofestivo_promedio12m = (recargodiurnofestivo_promedio12m / total_days12y) * 30
+                    if not recargonocturnofestivo_promedio12m == 0:
+                        recargonocturnofestivo_promedio12m = (recargonocturnofestivo_promedio12m / total_days12y) * 30
+
+                    horas_extras_promedio12m = extradiurna_promedio12m+extradiurnafestivo_promedio12m+extranocturna_promedio12m+extranocturnafestivo_promedio12m
+                    recargo_promedio12m = recargonocturno_promedio12m+recargodiurnofestivo_promedio12m+recargonocturnofestivo_promedio12m
+
+                    horas_extras_promedio12m_dia = horas_extras_promedio12m / 30
+                    recargo_promedio12m_dia = recargo_promedio12m / 30
+
+                salario_contrato_dia = paid_amount / 30
+                total_valor_promedio_dia = salario_contrato_dia+bonificacion_promedio12m_dia+horas_extras_promedio12m_dia+recargo_promedio12m_dia
+
+                leave_sickness_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("work_entry_type_id", "=",
+                                                                        work_entry_type.id),
+                                                                       ("employee_id", "=",
+                                                                        contract.employee_id.id)])
+                for l in leave_sickness_all.leave_id:
+                    leave_days_total = l.number_of_days
+                    leave_hours_total = l.number_of_days * contract.resource_calendar_id.hours_per_day
+                    leave_sickness = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("leave_id", "=", l.id),
+                                                                       ])
+                    leave_sickness_hours = 0
+                    for s in leave_sickness:
+                        leave_sickness_hours += s.duration
+
+                    leave_sickness_days = leave_sickness_hours / contract.resource_calendar_id.hours_per_day
+
+                    leave_sickness_base_amount = total_valor_promedio_dia * leave_sickness_days
+
+                    if leave_sickness_days >= 1 and leave_sickness_days <= 2:
+                        leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_2D)/100,-2)
+                    elif leave_sickness_days >= 3 and leave_sickness_days <= 90:
+                        leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_90D)/100,-2)
+                    elif leave_sickness_days >= 91:
+                        leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_M91D)/100,-2)
+                    else:
+                        leave_sickness_amount = 0
+
+                    if leave_sickness_amount < wage_min_day:
+                        leave_sickness_amount = wage_min_day
+
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
+                    leave_s = {
                         'sequence': work_entry_type.sequence,
                         'work_entry_type_id': work_entry_type.id,
                         'name': work_entry_type.code,
-                        'number_of_days': total_year_days,
-                        'number_of_hours': total_year_hours,
-                        'number_of_days_total': total_year_days,
-                        'number_of_hours_total': total_year_hours,
-                        'amount': 0,
+                        'number_of_days': leave_sickness_days,
+                        'number_of_hours': leave_sickness_hours,
+                        'number_of_days_total': leave_days_total,
+                        'number_of_hours_total': leave_hours_total,
+                        'amount': leave_sickness_amount,
                     }
-                    res.append(attendances_year_total)
+                    leave_sickness_days_total += leave_sickness_days
+                    leave_sickness_hours_total += leave_sickness_hours
+                    leave_days_t += leave_days_total
+                    leave_hours_t += leave_hours_total
+                    leave_sickness_amount_total += leave_sickness_amount
+                    res.append(leave_s)
 
-                    # Total ausencias por enfermedad
-                    absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],limit=1).disability_percentage
-                    absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],limit=1).disability_percentage
-                    absence_rate_M91D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_M91D')],limit=1).disability_percentage
-                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110')], limit=1)
-                    leave_sickness_amount_total = 0
-                    leave_sickness_days_total = 0
-                    leave_sickness_hours_total = 0
-                    leave_days_t = 0
-                    leave_hours_t = 0
-                    wage_min_day = wage_min/30
-                    horas_extras_promedio12m_dia = 0
-                    recargo_promedio12m_dia = 0
-                    bonificacion_promedio12m_dia = 0
+                # Total de ausencia por enfermedad
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
+                totalae = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': leave_sickness_days_total,
+                    'number_of_hours': leave_sickness_hours_total,
+                    'number_of_days_total': leave_days_t,
+                    'number_of_hours_total': leave_hours_t,
+                    'amount': leave_sickness_amount_total,
+                }
+                if not leave_sickness_days_total == 0:
+                    res.append(totalae)
 
-                    inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, self.date_from, self.date_to)
-                    if inputs_loans_12month_before:
-                        date_to = self.date_to
-                        lm12_date_ini = self.date_to - relativedelta(months=12)
-                        lm12_date_ini = lm12_date_ini + relativedelta(days=1)
-                        if contract.date_start <= lm12_date_ini:
-                            lm12_date_init = lm12_date_ini
-                        else:
-                            lm12_date_init = contract.date_start
-                        # total_dayl12 = days_between(lm12_date_init, date_to)
-                        if date_to.day == 31:
-                            date_to = date_to - relativedelta(days=1)
-                        total_dayl12 = days360(lm12_date_init, date_to) + 1
-                        bonificacion_promedio12m = 0
-                        for loans in inputs_loans_12month_before:
-                            if loans[1] == 'BONIFICACION':
-                                bonificacion_promedio12m = bonificacion_promedio12m + loans[2]
-                        if not bonificacion_promedio12m == 0:
-                            bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * 30
+                # Horas Extras (# horas y valor x hora)
+                horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
+                if horas_extras:
+                    extradiurna_amount = 0
+                    extradiurna_hours = 0
+                    extradiurnafestivo_amount = 0
+                    extradiurnafestivo_hours = 0
+                    extranocturna_amount = 0
+                    extranocturna_hours = 0
+                    extranocturnafestivo_amount = 0
+                    extranocturnafestivo_hours = 0
+                    recargonocturno_amount = 0
+                    recargonocturno_hours = 0
+                    recargodiurnofestivo_amounth = 0
+                    recargodiurnofestivo_hours = 0
+                    recargonocturnofestivo_amount = 0
+                    recargonocturnofestivo_hours = 0
+                    for hora in horas_extras:
+                        if hora[1] == 'EXTRADIURNA':
+                            extradiurna_amount = extradiurna_amount + hora[4]
+                            extradiurna_hours = extradiurna_hours + hora[5]
+                        if hora[1] == 'EXTRADIURNAFESTIVO':
+                            extradiurnafestivo_amount = extradiurnafestivo_amount + hora[4]
+                            extradiurnafestivo_hours = extradiurnafestivo_hours + hora[5]
+                        if hora[1] == 'EXTRANOCTURNA':
+                            extranocturna_amount = extranocturna_amount + hora[4]
+                            extranocturna_hours = extranocturna_hours + hora[5]
+                        if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                            extranocturnafestivo_amount = extranocturnafestivo_amount + hora[4]
+                            extranocturnafestivo_hours = extranocturnafestivo_hours + hora[5]
+                        if hora[1] == 'RECARGONOCTURNO':
+                            recargonocturno_amount = recargonocturno_amount + hora[4]
+                            recargonocturno_hours = recargonocturno_hours + hora[5]
+                        if hora[1] == 'RECARGODIURNOFESTIVO':
+                            recargodiurnofestivo_amounth = recargodiurnofestivo_amounth + hora[4]
+                            recargodiurnofestivo_hours = recargodiurnofestivo_hours + hora[5]
+                        if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                            recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[4]
+                            recargonocturnofestivo_hours = recargonocturnofestivo_hours + hora[5]
 
-                        bonificacion_promedio12m_dia = bonificacion_promedio12m / 30
-
-                    horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, self.date_from, self.date_to)
-                    if horas_extras_12month_before:
-                        date_to = self.date_to
-                        hm12_date_ini = self.date_to - relativedelta(months=12)
-                        hm12_date_ini = hm12_date_ini + relativedelta(days=1)
-                        if contract.date_start <= hm12_date_ini:
-                            hm12_date_init = hm12_date_ini
-                        else:
-                            hm12_date_init = contract.date_start
-                        # total_days12y = days_between(hm12_date_init, date_to)
-                        if date_to.day == 31:
-                            date_to = date_to - relativedelta(days=1)
-                        total_days12y = days360(hm12_date_init, date_to) + 1
-                        extradiurna_promedio12m = 0
-                        extradiurnafestivo_promedio12m = 0
-                        extranocturna_promedio12m = 0
-                        extranocturnafestivo_promedio12m = 0
-                        recargonocturno_promedio12m = 0
-                        recargodiurnofestivo_promedio12m = 0
-                        recargonocturnofestivo_promedio12m = 0
-                        for hora in horas_extras_12month_before:
-                            if hora[1] == 'EXTRADIURNA':
-                                extradiurna_promedio12m = extradiurna_promedio12m + hora[2]
-                            if hora[1] == 'EXTRADIURNAFESTIVO':
-                                extradiurnafestivo_promedio12m = extradiurnafestivo_promedio12m + hora[2]
-                            if hora[1] == 'EXTRANOCTURNA':
-                                extranocturna_promedio12m = extranocturna_promedio12m + hora[2]
-                            if hora[1] == 'EXTRANOCTURNAFESTIVO':
-                                extranocturnafestivo_promedio12m = extranocturnafestivo_promedio12m + hora[2]
-                            if hora[1] == 'RECARGONOCTURNO':
-                                recargonocturno_promedio12m = recargonocturno_promedio12m + hora[2]
-                            if hora[1] == 'RECARGODIURNOFESTIVO':
-                                recargodiurnofestivo_promedio12m = recargodiurnofestivo_promedio12m + hora[2]
-                            if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                                recargonocturnofestivo_promedio12m = recargonocturnofestivo_promedio12m + hora[2]
-
-                        if not extradiurna_promedio12m == 0:
-                            extradiurna_promedio12m = (extradiurna_promedio12m / total_days12y) * 30
-                        if not extradiurnafestivo_promedio12m == 0:
-                            extradiurnafestivo_promedio12m = (extradiurnafestivo_promedio12m / total_days12y) * 30
-                        if not extranocturna_promedio12m == 0:
-                            extranocturna_promedio12m = (extranocturna_promedio12m / total_days12y) * 30
-                        if not extranocturnafestivo_promedio12m == 0:
-                            extranocturnafestivo_promedio12m = (extranocturnafestivo_promedio12m / total_days12y) * 30
-                        if not recargonocturno_promedio12m == 0:
-                            recargonocturno_promedio12m = (recargonocturno_promedio12m / total_days12y) * 30
-                        if not recargodiurnofestivo_promedio12m == 0:
-                            recargodiurnofestivo_promedio12m = (recargodiurnofestivo_promedio12m / total_days12y) * 30
-                        if not recargonocturnofestivo_promedio12m == 0:
-                            recargonocturnofestivo_promedio12m = (recargonocturnofestivo_promedio12m / total_days12y) * 30
-
-                        horas_extras_promedio12m = extradiurna_promedio12m+extradiurnafestivo_promedio12m+extranocturna_promedio12m+extranocturnafestivo_promedio12m
-                        recargo_promedio12m = recargonocturno_promedio12m+recargodiurnofestivo_promedio12m+recargonocturnofestivo_promedio12m
-
-                        horas_extras_promedio12m_dia = horas_extras_promedio12m / 30
-                        recargo_promedio12m_dia = recargo_promedio12m / 30
-
-                    salario_contrato_dia = paid_amount / 30
-                    total_valor_promedio_dia = salario_contrato_dia+bonificacion_promedio12m_dia+horas_extras_promedio12m_dia+recargo_promedio12m_dia
-
-                    leave_sickness_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
-                                                                           ("date_stop", "<=", self.date_to),
-                                                                           ("work_entry_type_id", "=",
-                                                                            work_entry_type.id),
-                                                                           ("employee_id", "=",
-                                                                            contract.employee_id.id)])
-                    for l in leave_sickness_all.leave_id:
-                        leave_days_total = l.number_of_days
-                        leave_hours_total = l.number_of_days * contract.resource_calendar_id.hours_per_day
-                        leave_sickness = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
-                                                                           ("date_stop", "<=", self.date_to),
-                                                                           ("leave_id", "=", l.id),
-                                                                           ])
-                        leave_sickness_hours = 0
-                        for s in leave_sickness:
-                            leave_sickness_hours += s.duration
-
-                        leave_sickness_days = leave_sickness_hours / contract.resource_calendar_id.hours_per_day
-
-                        leave_sickness_base_amount = total_valor_promedio_dia * leave_sickness_days
-
-                        if leave_sickness_days >= 1 and leave_sickness_days <= 2:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_2D)/100,-2)
-                        elif leave_sickness_days >= 3 and leave_sickness_days <= 90:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_90D)/100,-2)
-                        elif leave_sickness_days >= 91:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_M91D)/100,-2)
-                        else:
-                            leave_sickness_amount = 0
-
-                        if leave_sickness_amount < wage_min_day:
-                            leave_sickness_amount = wage_min_day
-
-                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
-                        leave_s = {
+                    if not extradiurna_amount == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRADIURNA')],
+                                                                                limit=1)
+                        hours_e = {
                             'sequence': work_entry_type.sequence,
                             'work_entry_type_id': work_entry_type.id,
                             'name': work_entry_type.code,
-                            'number_of_days': leave_sickness_days,
-                            'number_of_hours': leave_sickness_hours,
-                            'number_of_days_total': leave_days_total,
-                            'number_of_hours_total': leave_hours_total,
-                            'amount': leave_sickness_amount,
+                            'number_of_days': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extradiurna_hours,
+                            'number_of_days_total': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extradiurna_hours,
+                            'amount': extradiurna_amount,
                         }
-                        leave_sickness_days_total += leave_sickness_days
-                        leave_sickness_hours_total += leave_sickness_hours
-                        leave_days_t += leave_days_total
-                        leave_hours_t += leave_hours_total
-                        leave_sickness_amount_total += leave_sickness_amount
-                        res.append(leave_s)
-
-                    # Total de ausencia por enfermedad
-                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
-                    totalae = {
-                        'sequence': work_entry_type.sequence,
-                        'work_entry_type_id': work_entry_type.id,
-                        'name': work_entry_type.code,
-                        'number_of_days': leave_sickness_days_total,
-                        'number_of_hours': leave_sickness_hours_total,
-                        'number_of_days_total': leave_days_t,
-                        'number_of_hours_total': leave_hours_t,
-                        'amount': leave_sickness_amount_total,
-                    }
-                    if not leave_sickness_days_total == 0:
-                        res.append(totalae)
-
-                    # Horas Extras (# horas y valor x hora)
-                    horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
-                    if horas_extras:
-                        extradiurna_amount = 0
-                        extradiurna_hours = 0
-                        extradiurnafestivo_amount = 0
-                        extradiurnafestivo_hours = 0
-                        extranocturna_amount = 0
-                        extranocturna_hours = 0
-                        extranocturnafestivo_amount = 0
-                        extranocturnafestivo_hours = 0
-                        recargonocturno_amount = 0
-                        recargonocturno_hours = 0
-                        recargodiurnofestivo_amounth = 0
-                        recargodiurnofestivo_hours = 0
-                        recargonocturnofestivo_amount = 0
-                        recargonocturnofestivo_hours = 0
-                        for hora in horas_extras:
-                            if hora[1] == 'EXTRADIURNA':
-                                extradiurna_amount = extradiurna_amount + hora[4]
-                                extradiurna_hours = extradiurna_hours + hora[5]
-                            if hora[1] == 'EXTRADIURNAFESTIVO':
-                                extradiurnafestivo_amount = extradiurnafestivo_amount + hora[4]
-                                extradiurnafestivo_hours = extradiurnafestivo_hours + hora[5]
-                            if hora[1] == 'EXTRANOCTURNA':
-                                extranocturna_amount = extranocturna_amount + hora[4]
-                                extranocturna_hours = extranocturna_hours + hora[5]
-                            if hora[1] == 'EXTRANOCTURNAFESTIVO':
-                                extranocturnafestivo_amount = extranocturnafestivo_amount + hora[4]
-                                extranocturnafestivo_hours = extranocturnafestivo_hours + hora[5]
-                            if hora[1] == 'RECARGONOCTURNO':
-                                recargonocturno_amount = recargonocturno_amount + hora[4]
-                                recargonocturno_hours = recargonocturno_hours + hora[5]
-                            if hora[1] == 'RECARGODIURNOFESTIVO':
-                                recargodiurnofestivo_amounth = recargodiurnofestivo_amounth + hora[4]
-                                recargodiurnofestivo_hours = recargodiurnofestivo_hours + hora[5]
-                            if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                                recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[4]
-                                recargonocturnofestivo_hours = recargonocturnofestivo_hours + hora[5]
-
-                        if not extradiurna_amount == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRADIURNA')],
-                                                                                    limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': extradiurna_hours,
-                                'number_of_days_total': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': extradiurna_hours,
-                                'amount': extradiurna_amount,
-                            }
-                            res.append(hours_e)
-                        if not extradiurnafestivo_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search(
-                                [("code", "=", 'EXTRADIURNAFESTIVO')], limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': extradiurnafestivo_hours,
-                                'number_of_days_total': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': extradiurnafestivo_hours,
-                                'amount': extradiurnafestivo_amount,
-                            }
-                            res.append(hours_e)
-                        if not extranocturna_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRANOCTURNA')],
-                                                                                    limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': extranocturna_hours,
-                                'number_of_days_total': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': extranocturna_hours,
-                                'amount': extranocturna_amount,
-                            }
-                            res.append(hours_e)
-                        if not extranocturnafestivo_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search(
-                                [("code", "=", 'EXTRANOCTURNAFESTIVO')], limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': extranocturnafestivo_hours,
-                                'number_of_days_total': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': extranocturnafestivo_hours,
-                                'amount': extranocturnafestivo_amount,
-                            }
-                            res.append(hours_e)
-                        if not recargonocturno_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGONOCTURNO')],
-                                                                                    limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': recargonocturno_hours,
-                                'number_of_days_total': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': recargonocturno_hours,
-                                'amount': recargonocturno_amount,
-                            }
-                            res.append(hours_e)
-                        if not recargodiurnofestivo_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search(
-                                [("code", "=", 'RECARGODIURNOFESTIVO')], limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': recargodiurnofestivo_hours,
-                                'number_of_days_total': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': recargodiurnofestivo_hours,
-                                'amount': recargodiurnofestivo_amounth,
-                            }
-                            res.append(hours_e)
-                        if not recargonocturnofestivo_hours == 0:
-                            work_entry_type = self.env['hr.work.entry.type'].search(
-                                [("code", "=", 'RECARGONOCTURNOFESTIVO')], limit=1)
-                            hours_e = {
-                                'sequence': work_entry_type.sequence,
-                                'work_entry_type_id': work_entry_type.id,
-                                'name': work_entry_type.code,
-                                'number_of_days': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours': recargonocturnofestivo_hours,
-                                'number_of_days_total': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
-                                'number_of_hours_total': recargonocturnofestivo_hours,
-                                'amount': recargonocturnofestivo_amount,
-                            }
-                            res.append(hours_e)
+                        res.append(hours_e)
+                    if not extradiurnafestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'EXTRADIURNAFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extradiurnafestivo_hours,
+                            'number_of_days_total': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extradiurnafestivo_hours,
+                            'amount': extradiurnafestivo_amount,
+                        }
+                        res.append(hours_e)
+                    if not extranocturna_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRANOCTURNA')],
+                                                                                limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extranocturna_hours,
+                            'number_of_days_total': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extranocturna_hours,
+                            'amount': extranocturna_amount,
+                        }
+                        res.append(hours_e)
+                    if not extranocturnafestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'EXTRANOCTURNAFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extranocturnafestivo_hours,
+                            'number_of_days_total': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extranocturnafestivo_hours,
+                            'amount': extranocturnafestivo_amount,
+                        }
+                        res.append(hours_e)
+                    if not recargonocturno_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGONOCTURNO')],
+                                                                                limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargonocturno_hours,
+                            'number_of_days_total': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargonocturno_hours,
+                            'amount': recargonocturno_amount,
+                        }
+                        res.append(hours_e)
+                    if not recargodiurnofestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'RECARGODIURNOFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargodiurnofestivo_hours,
+                            'number_of_days_total': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargodiurnofestivo_hours,
+                            'amount': recargodiurnofestivo_amounth,
+                        }
+                        res.append(hours_e)
+                    if not recargonocturnofestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'RECARGONOCTURNOFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargonocturnofestivo_hours,
+                            'number_of_days_total': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargonocturnofestivo_hours,
+                            'amount': recargonocturnofestivo_amount,
+                        }
+                        res.append(hours_e)
             else:
                 # Asistencia
                 attendance_line = {
