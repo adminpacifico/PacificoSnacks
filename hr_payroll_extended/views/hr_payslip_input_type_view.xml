@@ -10,6 +10,7 @@
 			</xpath>
 			<xpath expr="//field[@name='type_input']" position="after">
 				<field name="hour_percentage" attrs="{'invisible': [['type_input','!=','hours']]}" />
+				<field name="disability_percentage" attrs="{'invisible': [['type_input','!=','tasa_incapacidad']]}" />
 			</xpath>
 		</field>
 	</record>
