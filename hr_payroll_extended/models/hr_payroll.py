@@ -1146,11 +1146,11 @@ class HrPayslip(models.Model):
                         leave_sickness_base_amount = total_valor_promedio_dia * leave_sickness_days
 
                         if leave_sickness_days >= 1 and leave_sickness_days <= 2:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_2D),-2)
+                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_2D)/100,-2)
                         elif leave_sickness_days >= 3 and leave_sickness_days <= 90:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_90D),-2)
+                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_90D)/100,-2)
                         elif leave_sickness_days >= 91:
-                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_M91D),-2)
+                            leave_sickness_amount = round((leave_sickness_base_amount*absence_rate_M91D)/100,-2)
                         else:
                             leave_sickness_amount = 0
 
