@@ -1025,11 +1025,14 @@ class HrPayslip(models.Model):
 
                 # Dias anuales trabajados
                 date_init_year = date(self.date_from.year, 1, 1)
+                date_to = self.date_to
                 if contract.date_start <= date_init_year:
                     date_init = date_init_year
                 else:
                     date_init = contract.date_start
-                total_year_days = days360(date_init, self.date_to)
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+                total_year_days = days360(date_init, date_to)+1
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
                 attendances_year_total = {
@@ -1375,11 +1378,14 @@ class HrPayslip(models.Model):
 
                 # Dias anuales trabajados
                 date_init_year = date(self.date_from.year, 1, 1)
+                date_to = self.date_to
                 if contract.date_start <= date_init_year:
                     date_init = date_init_year
                 else:
                     date_init = contract.date_start
-                total_year_days = days360(date_init, self.date_to)
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+                total_year_days = days360(date_init, date_to)+1
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
                 attendances_year_total = {
