@@ -702,8 +702,8 @@ class HrPayslip(models.Model):
                 inputb_type_id = 0
                 amountd = 0
                 inputd_type_id = 0
-                amounti = 0
-                inputi_type_id = 0
+                amountri = 0
+                inputri_type_id = 0
                 for loans in loans_ids:
                     if loans[1] == 'BONIFICACION':
                        amountb = amountb + loans[2]
@@ -715,11 +715,11 @@ class HrPayslip(models.Model):
                        inputd_type_id = loans[3]
                        named = loans[0]
                        coded = loans[1]
-                    if loans[1] == 'INGRESO':
-                       amounti = amounti + loans[2]
-                       inputi_type_id = loans[3]
-                       namei = loans[0]
-                       codei = loans[1]
+                    if loans[1] == 'REINTEGRO':
+                       amountri = amountri + loans[2]
+                       inputri_type_id = loans[3]
+                       nameri = loans[0]
+                       coderi = loans[1]
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                      "sequence": 1,
@@ -738,14 +738,14 @@ class HrPayslip(models.Model):
                         "name_input": named,
                         "code_input": coded,
                     })
-                if not amounti == 0:
+                if not amountri == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amounti,
+                        "amount": amountri,
                         "payslip_id": self.id,
-                        "input_type_id": inputi_type_id,
-                        "name_input": namei,
-                        "code_input": codei,
+                        "input_type_id": inputri_type_id,
+                        "name_input": nameri,
+                        "code_input": coderi,
                     })
 
             loans_month_now_ids = self.get_inputs_loans_month_now(contract, date_from, date_to)

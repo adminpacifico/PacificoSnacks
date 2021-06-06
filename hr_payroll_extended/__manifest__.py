@@ -2,11 +2,11 @@
 
 {
     'name': 'Payroll Extended',
-    'summary': 'Description',
-    'version': '1.1',
+    'summary': 'Se extiende funcionalidad para adaptarse a las normativas de nómina de Colombia.',
+    'version': '1.2',
     'category': 'Human Resources',
-    'website': '',
-    'author': '',
+    'website': 'https://www.endtoendt.com/',
+    'author': 'End to End Technology by Cesar Quiroga',
     'license': '',
     'application': False,
     'installable': True,
