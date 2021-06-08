@@ -18,11 +18,7 @@
         'hr_work_entry',
         'hr_payroll_account',
         ],
-    'description': '''
-
-========================
-
-''',    
+    'description': 'Se extiende funcionalidad para adaptarse a las normativas de nómina de Colombia.',
     'data': [
         'views/hr_payslip_input_type_view.xml',
         'views/hr_payroll_view.xml',

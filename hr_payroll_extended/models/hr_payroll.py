@@ -1400,6 +1400,145 @@ class HrPayslip(models.Model):
                 }
                 res.append(attendances_year_total)
 
+                # Horas Extras (# horas y valor x hora)
+                horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
+                if horas_extras:
+                    extradiurna_amount = 0
+                    extradiurna_hours = 0
+                    extradiurnafestivo_amount = 0
+                    extradiurnafestivo_hours = 0
+                    extranocturna_amount = 0
+                    extranocturna_hours = 0
+                    extranocturnafestivo_amount = 0
+                    extranocturnafestivo_hours = 0
+                    recargonocturno_amount = 0
+                    recargonocturno_hours = 0
+                    recargodiurnofestivo_amounth = 0
+                    recargodiurnofestivo_hours = 0
+                    recargonocturnofestivo_amount = 0
+                    recargonocturnofestivo_hours = 0
+                    for hora in horas_extras:
+                        if hora[1] == 'EXTRADIURNA':
+                            extradiurna_amount = extradiurna_amount + hora[4]
+                            extradiurna_hours = extradiurna_hours + hora[5]
+                        if hora[1] == 'EXTRADIURNAFESTIVO':
+                            extradiurnafestivo_amount = extradiurnafestivo_amount + hora[4]
+                            extradiurnafestivo_hours = extradiurnafestivo_hours + hora[5]
+                        if hora[1] == 'EXTRANOCTURNA':
+                            extranocturna_amount = extranocturna_amount + hora[4]
+                            extranocturna_hours = extranocturna_hours + hora[5]
+                        if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                            extranocturnafestivo_amount = extranocturnafestivo_amount + hora[4]
+                            extranocturnafestivo_hours = extranocturnafestivo_hours + hora[5]
+                        if hora[1] == 'RECARGONOCTURNO':
+                            recargonocturno_amount = recargonocturno_amount + hora[4]
+                            recargonocturno_hours = recargonocturno_hours + hora[5]
+                        if hora[1] == 'RECARGODIURNOFESTIVO':
+                            recargodiurnofestivo_amounth = recargodiurnofestivo_amounth + hora[4]
+                            recargodiurnofestivo_hours = recargodiurnofestivo_hours + hora[5]
+                        if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                            recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[4]
+                            recargonocturnofestivo_hours = recargonocturnofestivo_hours + hora[5]
+
+                    if not extradiurna_amount == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRADIURNA')],
+                                                                                limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extradiurna_hours,
+                            'number_of_days_total': extradiurna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extradiurna_hours,
+                            'amount': extradiurna_amount,
+                        }
+                        res.append(hours_e)
+                    if not extradiurnafestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'EXTRADIURNAFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extradiurnafestivo_hours,
+                            'number_of_days_total': extradiurnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extradiurnafestivo_hours,
+                            'amount': extradiurnafestivo_amount,
+                        }
+                        res.append(hours_e)
+                    if not extranocturna_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'EXTRANOCTURNA')],
+                                                                                limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extranocturna_hours,
+                            'number_of_days_total': extranocturna_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extranocturna_hours,
+                            'amount': extranocturna_amount,
+                        }
+                        res.append(hours_e)
+                    if not extranocturnafestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'EXTRANOCTURNAFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': extranocturnafestivo_hours,
+                            'number_of_days_total': extranocturnafestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': extranocturnafestivo_hours,
+                            'amount': extranocturnafestivo_amount,
+                        }
+                        res.append(hours_e)
+                    if not recargonocturno_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'RECARGONOCTURNO')],
+                                                                                limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargonocturno_hours,
+                            'number_of_days_total': recargonocturno_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargonocturno_hours,
+                            'amount': recargonocturno_amount,
+                        }
+                        res.append(hours_e)
+                    if not recargodiurnofestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'RECARGODIURNOFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargodiurnofestivo_hours,
+                            'number_of_days_total': recargodiurnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargodiurnofestivo_hours,
+                            'amount': recargodiurnofestivo_amounth,
+                        }
+                        res.append(hours_e)
+                    if not recargonocturnofestivo_hours == 0:
+                        work_entry_type = self.env['hr.work.entry.type'].search(
+                            [("code", "=", 'RECARGONOCTURNOFESTIVO')], limit=1)
+                        hours_e = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours': recargonocturnofestivo_hours,
+                            'number_of_days_total': recargonocturnofestivo_hours / contract.resource_calendar_id.hours_per_day,
+                            'number_of_hours_total': recargonocturnofestivo_hours,
+                            'amount': recargonocturnofestivo_amount,
+                        }
+                        res.append(hours_e)
+
 
 
         return res
