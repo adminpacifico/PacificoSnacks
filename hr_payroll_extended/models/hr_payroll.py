@@ -271,6 +271,7 @@ class HrPayslip(models.Model):
         self._cr.execute(''' DELETE FROM hr_payslip_input WHERE payslip_id=%s ''', (self.id,))
         for contract in contracts:
 
+            # Horas Extras
             horas_extras = self.get_inputs_hora_extra(contract, date_from, date_to)
             if horas_extras:
                 extradiurna_amount = 0
@@ -380,6 +381,7 @@ class HrPayslip(models.Model):
                         "code_input": recargonocturnofestivo_code,
                     })
 
+            # Horas extras mes anterior
             hora_extra_month_before = self.get_inputs_hora_extra_month_before(contract, date_from, date_to)
             if hora_extra_month_before:
                 extradiurna_amount_ant = 0
@@ -475,6 +477,7 @@ class HrPayslip(models.Model):
                         "name_input": 'Horas Recargo Nocturno Festivo (110%) Mes Anterior',
                     })
 
+            # Horas extras promedio 12 meses atras
             horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, date_from, date_to)
             if horas_extras_12month_before:
                 hm12_date_ini = date_to - relativedelta(months=12)
@@ -581,6 +584,7 @@ class HrPayslip(models.Model):
                         "name_input": 'Horas Recargo Nocturno Festivo (110%) Promedio 12M atras',
                     })
 
+            # Horas extras promedio anual
             hora_extra_year_now = self.get_inputs_hora_extra_year_now(contract, date_from, date_to)
             if hora_extra_year_now:
                 hdate_init_year = date(date_from.year, 1, 1)
@@ -696,6 +700,7 @@ class HrPayslip(models.Model):
                         "name_input": hora[0],
                     })
 
+            # Bonificaciones descuentos reintegro y comisiones
             loans_ids = self.get_inputs_loans(contract, date_from, date_to)
             if loans_ids:
                 amountb = 0
@@ -704,6 +709,8 @@ class HrPayslip(models.Model):
                 inputd_type_id = 0
                 amountri = 0
                 inputri_type_id = 0
+                amountc = 0
+                inputc_type_id = 0
                 for loans in loans_ids:
                     if loans[1] == 'BONIFICACION':
                        amountb = amountb + loans[2]
@@ -720,6 +727,12 @@ class HrPayslip(models.Model):
                        inputri_type_id = loans[3]
                        nameri = loans[0]
                        coderi = loans[1]
+                    if loans[1] == 'COMISION':
+                       amountc = amountc + loans[2]
+                       inputc_type_id = loans[3]
+                       namec = loans[0]
+                       codec = loans[1]
+
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                      "sequence": 1,
@@ -747,20 +760,30 @@ class HrPayslip(models.Model):
                         "name_input": nameri,
                         "code_input": coderi,
                     })
+                if not amountc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountc,
+                        "payslip_id": self.id,
+                        "input_type_id": inputc_type_id,
+                        "name_input": namec,
+                        "code_input": codec,
+                    })
 
+            # Bonificaciones y comisiones Mes actual
             loans_month_now_ids = self.get_inputs_loans_month_now(contract, date_from, date_to)
             if loans_month_now_ids and date_from.day == 16:
                 amountbn = 0
                 inputbn_type_id = 0
-                amountdn = 0
-                inputdn_type_id = 0
+                amountc = 0
+                inputc_type_id = 0
                 for loans in loans_month_now_ids:
                     if loans[1] == 'BONIFICACION':
                         amountbn = amountbn + loans[2]
                         inputbn_type_id = loans[3]
-                    if loans[1] == 'DESCUENTOS':
-                        amountdn = amountdn + loans[2]
-                        inputdn_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                        amountc = amountc + loans[2]
+                        inputc_type_id = loans[3]
                 if not amountbn == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
@@ -770,25 +793,25 @@ class HrPayslip(models.Model):
                         "code_input": 'BONIFICACION_NOW30',
                         "name_input": 'Bonificación Mes Actual',
                     })
-
-            get_inputs_total_ingreso = self.get_inputs_total_ingreso(contract, date_from, date_to)
-            if get_inputs_total_ingreso and date_from.day == 16:
-                total_ingreso_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1).id
-                if total_ingreso_type:
+                if not amountc == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": get_inputs_total_ingreso.total,
+                        "amount": amountc,
                         "payslip_id": self.id,
-                        "input_type_id": total_ingreso_type,
-                        "code_input": 'NET115',
-                        "name_input": 'Total Ingresos (1 Quincena)',
+                        "input_type_id": inputc_type_id,
+                        "code_input": 'COMISION_NOW30',
+                        "name_input": 'Comision Mes Actual',
                     })
+
+            # Bonificaciones comisiones y descuentos Mes anterior
             loans_month_before_ids = self.get_inputs_loans_month_before(contract, date_from, date_to)
             if loans_month_before_ids:
                 amountb = 0
                 inputb_type_id = 0
                 amountd = 0
                 inputd_type_id = 0
+                amountc = 0
+                inputc_type_id = 0
                 for loans in loans_month_before_ids:
                     if loans[1] == 'BONIFICACION':
                        amountb = amountb + loans[2]
@@ -796,6 +819,9 @@ class HrPayslip(models.Model):
                     if loans[1] == 'DESCUENTOS':
                        amountd = amountd + loans[2]
                        inputd_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                       amountc = amountc + loans[2]
+                       inputc_type_id = loans[3]
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
@@ -804,6 +830,15 @@ class HrPayslip(models.Model):
                         "input_type_id": inputb_type_id,
                         "code_input": 'BONIFICACION_ANT30',
                         "name_input": 'Bonificación Mes Anterior',
+                    })
+                if not amountc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountc,
+                        "payslip_id": self.id,
+                        "input_type_id": inputc_type_id,
+                        "code_input": 'COMISION_ANT30',
+                        "name_input": 'Comision Mes Anterior',
                     })
                 if not amountd == 0:
                     self.env['hr.payslip.input'].create({
@@ -814,6 +849,8 @@ class HrPayslip(models.Model):
                         "code_input": 'DESCUENTO_ANT30',
                         "name_input": 'Descuento Mes Anterior',
                     })
+
+            # Bonificaciones y comisiones 12 meses antras
             inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, date_from, date_to)
             if inputs_loans_12month_before:
                 lm12_date_ini = date_to - relativedelta(months=12)
@@ -829,13 +866,19 @@ class HrPayslip(models.Model):
                 countb = 0
                 amountb = 0
                 inputb_type_id = 0
+                countc = 0
+                amountc = 0
+                inputc_type_id = 0
                 for loans in inputs_loans_12month_before:
                     if loans[1] == 'BONIFICACION':
                         countb = countb + 1
                         amountb = amountb + loans[2]
                         inputb_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                        countc = countc + 1
+                        amountc = amountc + loans[2]
+                        inputc_type_id = loans[3]
                 if not amountb == 0:
-                    X = (amountb/total_dayl12)*30,
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
                         "amount": (amountb/total_dayl12)*30,
@@ -844,6 +887,17 @@ class HrPayslip(models.Model):
                         "code_input": 'BONIFICACION_PYEARS',
                         "name_input": 'Bonificación Promedio (12M atras)',
                     })
+                if not amountc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (amountc/total_dayl12)*30,
+                        "payslip_id": self.id,
+                        "input_type_id": inputc_type_id,
+                        "code_input": 'COMISION_PYEARS',
+                        "name_input": 'Comision Promedio (12M atras)',
+                    })
+
+            # Bonificaciones y comisiones anual
             loans_year_now = self.get_inputs_loans_year_now(contract, date_from, date_to)
             if loans_year_now:
                 ldate_init_year = date(date_from.year, 1, 1)
@@ -856,11 +910,18 @@ class HrPayslip(models.Model):
                 countb = 0
                 amountb = 0
                 inputb_type_id = 0
+                countc = 0
+                amountc = 0
+                inputc_type_id = 0
                 for loans in loans_year_now:
                     if loans[1] == 'BONIFICACION':
                         countb = countb + 1
                         amountb = amountb + loans[2]
                         inputb_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                        countc = countb + 1
+                        amountc = amountb + loans[2]
+                        inputc_type_id = loans[3]
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
@@ -870,9 +931,21 @@ class HrPayslip(models.Model):
                         "code_input": 'BONIFICACION_YEARS_NOW',
                         "name_input": 'Bonificación Promedio Anual',
                     })
+                if not amountc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": (amountc/ltotal_days)*30,
+                        "payslip_id": self.id,
+                        "input_type_id": inputb_type_id,
+                        "code_input": 'COMISION_YEARS_NOW',
+                        "name_input": 'Comision Promedio Anual',
+                    })
+
+            # Auxilio de transporte anual
             amount_transport_subsidy_pyear = self.get_amount_transport_subsidy_year(contract, date_from, date_to)
-            if amount_transport_subsidy_pyear and amount_transport_subsidy_pyear > 0 :
-                code_aux_transp = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_TRANSPORTE_PYEARS')], limit=1).id
+            if amount_transport_subsidy_pyear and amount_transport_subsidy_pyear > 0:
+                code_aux_transp = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_TRANSPORTE_PYEARS')],
+                                                                           limit=1).id
                 self.env['hr.payslip.input'].create({
                     "sequence": 1,
                     "amount": amount_transport_subsidy_pyear,
@@ -881,7 +954,23 @@ class HrPayslip(models.Model):
                     "code_input": 'AUX_TRANSPORTE_PYEARS',
                     "name_input": 'Auxilio de Transporte Promedio Anual',
                 })
-            if contract.retention_method == 'M1':
+
+            # Total Ingresos Primera Quincena
+            get_inputs_total_ingreso = self.get_inputs_total_ingreso(contract, date_from, date_to)
+            if get_inputs_total_ingreso and date_from.day == 16:
+                total_ingreso_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1).id
+                if total_ingreso_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": get_inputs_total_ingreso.total,
+                        "payslip_id": self.id,
+                        "input_type_id": total_ingreso_type,
+                        "code_input": 'NET115',
+                        "name_input": 'Total Ingresos (1 Quincena)',
+                    })
+
+            # Total Deduciones para retencion en la fuente
+            if contract.retention_method == 'M2':
                 inputs_withholding_tax = self.get_inputs_withholding_tax(contract, date_from, date_to)
                 date_month_now_from = date(date_from.year, date_from.month, 1)
                 date_month_next = date_month_now_from + relativedelta(months=1)
@@ -1047,6 +1136,26 @@ class HrPayslip(models.Model):
                 }
                 res.append(attendances_year_total)
 
+                # Días trabajados desde inicio de contrato
+                date_to = self.date_to
+                date_init = contract.date_start
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+                total_year_days = days360(date_init, date_to) + 1
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSCONTRACT')], limit=1)
+                attendances_yearc_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_yearc_total)
+
                 # Total ausencias por enfermedad
                 absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],limit=1).disability_percentage
                 absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],limit=1).disability_percentage
@@ -1061,6 +1170,7 @@ class HrPayslip(models.Model):
                 horas_extras_promedio12m_dia = 0
                 recargo_promedio12m_dia = 0
                 bonificacion_promedio12m_dia = 0
+                comision_promedio12m_dia = 0
 
                 inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, self.date_from, self.date_to)
                 if inputs_loans_12month_before:
@@ -1076,13 +1186,19 @@ class HrPayslip(models.Model):
                         date_to = date_to - relativedelta(days=1)
                     total_dayl12 = days360(lm12_date_init, date_to) + 1
                     bonificacion_promedio12m = 0
+                    comision_promedio12m = 0
                     for loans in inputs_loans_12month_before:
                         if loans[1] == 'BONIFICACION':
                             bonificacion_promedio12m = bonificacion_promedio12m + loans[2]
+                        if loans[1] == 'COMISION':
+                            comision_promedio12m = comision_promedio12m + loans[2]
                     if not bonificacion_promedio12m == 0:
                         bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * 30
+                    if not comision_promedio12m == 0:
+                        comision_promedio12m = (comision_promedio12m / total_dayl12) * 30
 
                     bonificacion_promedio12m_dia = bonificacion_promedio12m / 30
+                    comision_promedio12m_dia = comision_promedio12m / 30
 
                 horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, self.date_from, self.date_to)
                 if horas_extras_12month_before:
@@ -1142,7 +1258,7 @@ class HrPayslip(models.Model):
                     recargo_promedio12m_dia = recargo_promedio12m / 30
 
                 salario_contrato_dia = paid_amount / 30
-                total_valor_promedio_dia = salario_contrato_dia+bonificacion_promedio12m_dia+horas_extras_promedio12m_dia+recargo_promedio12m_dia
+                total_valor_promedio_dia = salario_contrato_dia+bonificacion_promedio12m_dia+comision_promedio12m_dia+horas_extras_promedio12m_dia+recargo_promedio12m_dia
 
                 leave_sickness_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
                                                                        ("date_stop", "<=", self.date_to),
@@ -1399,6 +1515,26 @@ class HrPayslip(models.Model):
                     'amount': 0,
                 }
                 res.append(attendances_year_total)
+
+                # Días trabajados desde inicio de contrato
+                date_to = self.date_to
+                date_init = contract.date_start
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+                total_year_days = days360(date_init, date_to) + 1
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSCONTRACT')], limit=1)
+                attendances_yearc_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_yearc_total)
 
                 # Horas Extras (# horas y valor x hora)
                 horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
