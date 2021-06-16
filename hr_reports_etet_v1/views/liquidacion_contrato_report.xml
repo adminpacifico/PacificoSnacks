@@ -263,14 +263,14 @@
                                                         <td class="text-right"><span t-esc="vacations_valor" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
                                                         </td>
                                                         <t t-if="fecha_1 == fecha_2">
-                                                            <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
-                                                                <span t-field="worked_days.number_of_days"/>
+                                                            <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.code == 'TOTALDAYSYEARS')" t-as="worked_days">
+                                                                <span t-esc="'%.2f'%(worked_days.number_of_days)"/>
                                                             </td>
                                                         </t>
                                                         <t t-else="">
-                                                            <td class="text-center">
-                                                                <span t-esc="(doc.contract_id.date_end - doc.contract_id.date_start).days"></span>
-                                                            </td>
+                                                            <td class="text-center" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.code == 'TOTALDAYSCONTRACT')" t-as="worked_days">
+                                                                <span t-esc="'%.2f'%(worked_days.number_of_days)"/>
+                                                        </td>
                                                         </t>
                                                         <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPAGADOSVAC')" t-as="dias_p">
                                                 <t t-set="dias_pagados" t-value="dias_p.total"/>
