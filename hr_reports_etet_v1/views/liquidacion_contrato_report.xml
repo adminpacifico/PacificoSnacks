@@ -93,14 +93,14 @@
                                             <tr>
                                                 <td><strong>Dias trabajados </strong></td>
                                                 <t t-if="fecha_1 == fecha_2">
-                                                    <td class="text-left" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.name == 'Días anuales trabajados')" t-as="worked_days">
+                                                    <td class="text-left" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.code == 'TOTALDAYSYEARS')" t-as="worked_days">
                                                                 <span t-esc="int(worked_days.number_of_days)"/>
                                                         </td>
                                                 </t>
                                                 <t t-else="">
-                                                    <td class="text-left">
-                                                     <span t-esc="diferencia.days"/>
-                                                     </td>
+                                                         <td class="text-left" t-foreach="doc.worked_days_line_ids.filtered(lambda x: x.work_entry_type_id.code == 'TOTALDAYSCONTRACT')" t-as="worked_days">
+                                                                <span t-esc="int(worked_days.number_of_days)"/>
+                                                        </td>
                                                 </t>
                                             </tr>
                                             <tr>
