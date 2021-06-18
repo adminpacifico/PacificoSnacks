@@ -919,8 +919,8 @@ class HrPayslip(models.Model):
                         amountb = amountb + loans[2]
                         inputb_type_id = loans[3]
                     if loans[1] == 'COMISION':
-                        countc = countb + 1
-                        amountc = amountb + loans[2]
+                        countc = countc + 1
+                        amountc = amountc + loans[2]
                         inputc_type_id = loans[3]
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
@@ -936,7 +936,7 @@ class HrPayslip(models.Model):
                         "sequence": 1,
                         "amount": (amountc/ltotal_days)*30,
                         "payslip_id": self.id,
-                        "input_type_id": inputb_type_id,
+                        "input_type_id": inputc_type_id,
                         "code_input": 'COMISION_YEARS_NOW',
                         "name_input": 'Comision Promedio Anual',
                     })
@@ -1185,6 +1185,10 @@ class HrPayslip(models.Model):
                     if date_to.day == 31:
                         date_to = date_to - relativedelta(days=1)
                     total_dayl12 = days360(lm12_date_init, date_to) + 1
+                    if total_dayl12 == 15:
+                        day_base = 15
+                    else:
+                        day_base = 30
                     bonificacion_promedio12m = 0
                     comision_promedio12m = 0
                     for loans in inputs_loans_12month_before:
@@ -1193,12 +1197,12 @@ class HrPayslip(models.Model):
                         if loans[1] == 'COMISION':
                             comision_promedio12m = comision_promedio12m + loans[2]
                     if not bonificacion_promedio12m == 0:
-                        bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * 30
+                        bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * day_base
                     if not comision_promedio12m == 0:
-                        comision_promedio12m = (comision_promedio12m / total_dayl12) * 30
+                        comision_promedio12m = (comision_promedio12m / total_dayl12) * day_base
 
-                    bonificacion_promedio12m_dia = bonificacion_promedio12m / 30
-                    comision_promedio12m_dia = comision_promedio12m / 30
+                    bonificacion_promedio12m_dia = ((bonificacion_promedio12m/total_dayl12)*30)/30
+                    comision_promedio12m_dia = ((comision_promedio12m/total_dayl12)*30)/30
 
                 horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, self.date_from, self.date_to)
                 if horas_extras_12month_before:
@@ -1213,6 +1217,10 @@ class HrPayslip(models.Model):
                     if date_to.day == 31:
                         date_to = date_to - relativedelta(days=1)
                     total_days12y = days360(hm12_date_init, date_to) + 1
+                    if total_days12y == 15:
+                        day_base = 15
+                    else:
+                        day_base = 30
                     extradiurna_promedio12m = 0
                     extradiurnafestivo_promedio12m = 0
                     extranocturna_promedio12m = 0
@@ -1237,25 +1245,25 @@ class HrPayslip(models.Model):
                             recargonocturnofestivo_promedio12m = recargonocturnofestivo_promedio12m + hora[2]
 
                     if not extradiurna_promedio12m == 0:
-                        extradiurna_promedio12m = (extradiurna_promedio12m / total_days12y) * 30
+                        extradiurna_promedio12m = (extradiurna_promedio12m / total_days12y) * day_base
                     if not extradiurnafestivo_promedio12m == 0:
-                        extradiurnafestivo_promedio12m = (extradiurnafestivo_promedio12m / total_days12y) * 30
+                        extradiurnafestivo_promedio12m = (extradiurnafestivo_promedio12m / total_days12y) * day_base
                     if not extranocturna_promedio12m == 0:
-                        extranocturna_promedio12m = (extranocturna_promedio12m / total_days12y) * 30
+                        extranocturna_promedio12m = (extranocturna_promedio12m / total_days12y) * day_base
                     if not extranocturnafestivo_promedio12m == 0:
-                        extranocturnafestivo_promedio12m = (extranocturnafestivo_promedio12m / total_days12y) * 30
+                        extranocturnafestivo_promedio12m = (extranocturnafestivo_promedio12m / total_days12y) * day_base
                     if not recargonocturno_promedio12m == 0:
-                        recargonocturno_promedio12m = (recargonocturno_promedio12m / total_days12y) * 30
+                        recargonocturno_promedio12m = (recargonocturno_promedio12m / total_days12y) * day_base
                     if not recargodiurnofestivo_promedio12m == 0:
-                        recargodiurnofestivo_promedio12m = (recargodiurnofestivo_promedio12m / total_days12y) * 30
+                        recargodiurnofestivo_promedio12m = (recargodiurnofestivo_promedio12m / total_days12y) * day_base
                     if not recargonocturnofestivo_promedio12m == 0:
-                        recargonocturnofestivo_promedio12m = (recargonocturnofestivo_promedio12m / total_days12y) * 30
+                        recargonocturnofestivo_promedio12m = (recargonocturnofestivo_promedio12m / total_days12y) * day_base
 
                     horas_extras_promedio12m = extradiurna_promedio12m+extradiurnafestivo_promedio12m+extranocturna_promedio12m+extranocturnafestivo_promedio12m
                     recargo_promedio12m = recargonocturno_promedio12m+recargodiurnofestivo_promedio12m+recargonocturnofestivo_promedio12m
 
-                    horas_extras_promedio12m_dia = horas_extras_promedio12m / 30
-                    recargo_promedio12m_dia = recargo_promedio12m / 30
+                    horas_extras_promedio12m_dia = ((horas_extras_promedio12m/total_days12y)*30)/30
+                    recargo_promedio12m_dia = ((recargo_promedio12m/total_days12y)*30)/30
 
                 salario_contrato_dia = paid_amount / 30
                 total_valor_promedio_dia = salario_contrato_dia+bonificacion_promedio12m_dia+comision_promedio12m_dia+horas_extras_promedio12m_dia+recargo_promedio12m_dia
