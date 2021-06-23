@@ -11,9 +11,9 @@ class HrRisk(models.Model):
     _description = "Risk"
     _order = "name desc, id desc"   
     
-    name = fields.Char('Name', required=True)
-    code = fields.Char('Code', required=True)
-    amount = fields.Float(string='Amount', required=True)
+    name = fields.Char('Nombre', required=True)
+    code = fields.Char('Codigo', required=True)
+    amount = fields.Float(string='Monto', required=True)
      
 
     def name_get(self):

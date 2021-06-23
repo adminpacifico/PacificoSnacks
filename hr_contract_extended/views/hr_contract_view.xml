@@ -8,6 +8,7 @@
 		<field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='department_id']" position="after">
+				<field name="causal_termination_id" attrs="{'invisible': [['state','!=','cancel']],'required': [['state','=','cancel']] }"/>
 				<field name="risk_id"/>
 			</xpath>
 			<xpath expr="//form/sheet/notebook[1]" position="inside">

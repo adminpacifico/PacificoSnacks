@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_causal_termination_view_form" model="ir.ui.view">
+        <field name="name">hr.causal.termination</field>
+        <field name="model">hr.causal.termination</field>
+        <field name="arch" type="xml">
+            <form string="hr_causal_termination">
+                <sheet>			
+                <group>
+                    <field name="code" />
+                    <field name="name" />
+                </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="hr_causal_termination_view_tree" model="ir.ui.view">
+        <field name="name">hr.causal.termination.tree</field>
+        <field name="model">hr.causal.termination</field>
+        <field name="arch" type="xml">
+            <tree string="hr_causal_termination" >
+                <field name="code"/>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>		
+
+    <record id="action_hr_causal_termination" model="ir.actions.act_window">
+        <field name="name">Causal de terminacion de contrato</field>
+        <field name="res_model">hr.causal.termination</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" eval="hr_causal_termination_view_tree"/>
+    </record>	
+
+    <menuitem
+        id="hr_menu_contract_root"
+        name="Contratos"
+        parent="hr.menu_human_resources_configuration"
+        sequence="5"
+        groups="hr_contract.group_hr_contract_manager"/>
+
+    <menuitem
+        id="hr_menu_hr_causal_termination"
+        name="Causal de terminacion de contrato"
+        action="action_hr_causal_termination"
+        parent="hr_contract_extended.hr_menu_contract_root"
+        sequence="0"
+        groups="hr_contract.group_hr_contract_manager"/>
+</odoo>

@@ -37,7 +37,17 @@ class HrContract(models.Model):
     vacations_history = fields.Many2many('hr.leave' ,string="Historial", compute='get_history')
 
     retention_method = fields.Selection(string='Metodo de rétencion', selection=[('NA', 'No aplica'),('M1', 'Metodo 1'),('M2', 'Metodo 2')], default='NA', required=True )
-    
+    integral_salary = fields.Boolean(string="Salario Integral", default=False)
+
+    @api.onchange('wage')
+    def _integral_salary(self):
+        wage_min = self.env['hr.salary.rule'].search([("code", "=", 'SMLMV')], limit=1).amount_fix
+        if wage_min:
+            for record in self:
+                if record.wage >= (wage_min*10):
+                    record.integral_salary = True
+                else:
+                    record.integral_salary = False
 
     def get_accumulated_vacation(self):
         for record in self:

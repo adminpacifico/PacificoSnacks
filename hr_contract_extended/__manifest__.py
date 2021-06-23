@@ -22,6 +22,7 @@
     'data': [
         'views/hr_risk_view.xml',
         'views/hr_contract_view.xml',
+        'views/hr_causal_termination_view.xml',
         'security/ir.model.access.csv',
     ],
     'qweb': [

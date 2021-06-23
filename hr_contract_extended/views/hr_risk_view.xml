@@ -37,7 +37,7 @@
     </record>		
 
     <record id="action_hr_risk" model="ir.actions.act_window">
-        <field name="name">Risk</field>
+        <field name="name">Riesgos Laborales</field>
         <field name="res_model">hr.risk</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" eval="hr_risk_view_tree"/>
@@ -45,14 +45,14 @@
 
     <menuitem
         id="hr_menu_contract_root"
-        name="Contract"
+        name="Contratos"
         parent="hr.menu_human_resources_configuration"
         sequence="4"
         groups="hr_contract.group_hr_contract_manager"/>
 
     <menuitem
         id="hr_menu_hr_risk"
-        name="Risk"
+        name="Riesgos Laborales"
         action="action_hr_risk"
         parent="hr_contract_extended.hr_menu_contract_root"
         sequence="0"
