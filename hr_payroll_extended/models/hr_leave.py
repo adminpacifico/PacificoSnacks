@@ -35,6 +35,9 @@ def days_between(start_date, end_date):
     res = divmod(e360 - s360, 30)
     return ((res[0] * 30) + res[1]) or 0
 
+def days360(s, e):
+    return ( ((e.year * 12 + e.month) * 30 + e.day) - ((s.year * 12 + s.month) * 30 + s.day))
+
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
@@ -46,9 +49,15 @@ class HrLeave(models.Model):
     )
 
     days_vacations = fields.Integer(string="Vacaciones Disponibles", compute='get_days_vacations')
+    holiday_status_name = fields.Char(string="Nombre de ausencia", compute='get_holiday_status_name')
     amount_vacations = fields.Float(string="Valor Pagado", compute='get_amount_vacations')
     total_number_of_days = fields.Float(string="Duración Total", compute='get_total_number_of_days')
     amount_vacations_old = fields.Float(string="Valor Pagado (Carga Manual)", default=0,)
+
+    @api.onchange('holiday_status_id')
+    def get_holiday_status_name(self):
+        for record in self:
+            record.holiday_status_name = record.holiday_status_id.name
 
     @api.depends('employee_id')
     def get_days_vacations(self):
@@ -71,106 +80,100 @@ class HrLeave(models.Model):
         for record in self:
             if record.amount_vacations_old == 0:
                 contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id)])
-                if contracts and record.holiday_status_id.id == 6 :
+                if contracts and record.holiday_status_id.name == 'Vacaciones' or contracts and record.holiday_status_id.name == 'Vacaciones en dinero' :
                     for contract in contracts:
                         salary = contract.wage
                         total_extra_hour = 0
-                        total_bonus = 0
+                        amountb = 0
+                        amountc = 0
                         date_from = str(record.date_from)
                         date_from = dateutil.parser.parse(date_from).date()
                         date_to = str(record.date_to)
                         date_to = dateutil.parser.parse(date_to).date()
+
+                        if date_to.day <= 15:
+                            date_to = date(date_to.year, date_to.month, 15)
+
+                        if date_to.day > 15 and date_to.day <= 31:
+                            date_to = date(date_to.year, date_to.month, 30)
+
                         horas_extras_12month_before = record.env['hr.payslip'].get_inputs_hora_extra_12month_before(contract, date_from, date_to)
                         if horas_extras_12month_before:
                             hm12_date_ini = date_to - relativedelta(months=12)
+                            hm12_date_ini = hm12_date_ini + relativedelta(days=1)
                             if contract.date_start <= hm12_date_ini:
                                 hm12_date_init = hm12_date_ini
                             else:
                                 hm12_date_init = contract.date_start
-                            total_days12y = days_between(hm12_date_init, date_to)
-                            amounth25 = 0
-                            amounth35 = 0
-                            amounth75 = 0
-                            amounthf75 = 0
-                            amounth110 = 0
+                            # total_days12y = days_between(hm12_date_init, date_to)
+                            if date_to.day == 31:
+                                date_to = date_to - relativedelta(days=1)
+                            total_days12y = days360(hm12_date_init, date_to) + 1
+                            extradiurna_amount = 0
+                            extradiurnafestivo_amount = 0
+                            extranocturna_amount = 0
+                            extranocturnafestivo_amount = 0
+                            recargonocturno_amount = 0
+                            recargodiurnofestivo_amount = 0
+                            recargonocturnofestivo_amount = 0
                             for hora in horas_extras_12month_before:
-                                if hora[1] == 'RECARGONOCTURNO':
-                                    amounth35 = amounth35 + hora[2]
-                                if hora[1] == 'RECARGODIURNOFESTIVO':
-                                    amounthf75 = amounthf75 + hora[2]
-                                if hora[1] == 'RECARGONOCTURNOFESTIVO':
-                                    amounth110 = amounth110 + hora[2]
                                 if hora[1] == 'EXTRADIURNA':
-                                    amounth25 = amounth25 + hora[2]
+                                    extradiurna_amount = extradiurna_amount + hora[2]
+                                if hora[1] == 'EXTRADIURNAFESTIVO':
+                                    extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
                                 if hora[1] == 'EXTRANOCTURNA':
-                                    amounth75 = amounth75 + hora[2]
+                                    extranocturna_amount = extranocturna_amount + hora[2]
+                                if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                                    extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                                if hora[1] == 'RECARGONOCTURNO':
+                                    recargonocturno_amount = recargonocturno_amount + hora[2]
+                                if hora[1] == 'RECARGODIURNOFESTIVO':
+                                    recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                                if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                                    recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
 
-                            if not amounth25 == 0:
-                                amounth25 = round(((amounth25 / total_days12y) * 30), 2)
-                                percentage = record.env['hr.salary.rule'].search([("code", "=", 'P_EXTRADIURNA')],
-                                                                               limit=1).amount_fix
-                                if percentage:
-                                    amounth_hour = round(((salary / 240) * percentage), 2)
-                                    amounth25 = round((amounth25 * amounth_hour), 2)
-                                else:
-                                    amounth_hour = round((salary / 240), 2)
-                                    amounth25 = round((amounth25 * amounth_hour), 2)
-                            if not amounth35 == 0:
-                                amounth35 = round(((amounth35 / total_days12y) * 30), 2)
-                                percentage = record.env['hr.salary.rule'].search([("code", "=", 'P_RECARGONOCTURNO')],limit=1).amount_fix
-                                if percentage:
-                                    amounth_hour = round(((salary / 240) * percentage), 2)
-                                    amounth35 = round((amounth35 * amounth_hour), 2)
-                                else:
-                                    amounth_hour = round((salary / 240), 2)
-                                    amounth35 = round((amounth35 * amounth_hour), 2)
-                            if not amounth75 == 0:
-                                amounth75 = round(((amounth75 / total_days12y) * 30), 2)
-                                percentage = record.env['hr.salary.rule'].search([("code", "=", 'P_EXTRANOCTURNA')],
-                                                                               limit=1).amount_fix
-                                if percentage:
-                                    amounth_hour = round(((salary / 240) * percentage), 2)
-                                    amounth75 = round((amounth75 * amounth_hour), 2)
-                                else:
-                                    amounth_hour = round((salary / 240), 2)
-                                    amounth75 = round((amounth75 * amounth_hour), 2)
-                            if not amounthf75 == 0:
-                                amounthf75 = round(((amounthf75 / total_days12y) * 30), 2)
-                                percentage = record.env['hr.salary.rule'].search([("code", "=", 'P_RECARGODIURNOFESTIVO')],
-                                                                               limit=1).amount_fix
-                                if percentage:
-                                    amounth_hour = round(((salary / 240) * percentage), 2)
-                                    amounthf75 = round((amounthf75 * amounth_hour), 2)
-                                else:
-                                    amounth_hour = round((salary / 240), 2)
-                                    amounthf75 = round((amounthf75 * amounth_hour), 2)
-                            if not amounth110 == 0:
-                                amounth110 = round(((amounth110 / total_days12y) * 30), 2)
-                                percentage = record.env['hr.salary.rule'].search([("code", "=", 'P_RECARGONOCTURNOFESTIVO')],
-                                                                               limit=1).amount_fix
-                                if percentage:
-                                    amounth_hour = round(((salary / 240) * percentage), 2)
-                                    amounth110 = round((amounth110 * amounth_hour), 2)
-                                else:
-                                    amounth_hour = round((salary / 240), 2)
-                                    amounth110 = round((amounth110 * amounth_hour), 2)
+                            if not extradiurna_amount == 0:
+                                extradiurna_amount = (extradiurna_amount / total_days12y) * 30
+                            if not extradiurnafestivo_amount == 0:
+                                extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * 30
+                            if not extranocturna_amount == 0:
+                                extranocturna_amount = (extranocturna_amount / total_days12y) * 30
+                            if not extranocturnafestivo_amount == 0:
+                                extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * 30
+                            if not recargonocturno_amount == 0:
+                                recargonocturno_amount = (recargonocturno_amount / total_days12y) * 30
+                            if not recargodiurnofestivo_amount == 0:
+                                recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * 30
+                            if not recargonocturnofestivo_amount == 0:
+                                recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * 30
 
-                            total_extra_hour = amounth25 + amounth35 + amounth75 + amounthf75 + amounth110
+                            total_extra_hour = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
+
                         inputs_loans_12month_before = record.env['hr.payslip'].get_inputs_loans_12month_before(contract, date_from, date_to)
                         if inputs_loans_12month_before:
                             lm12_date_ini = date_to - relativedelta(months=12)
+                            lm12_date_ini = lm12_date_ini + relativedelta(days=1)
                             if contract.date_start <= lm12_date_ini:
                                 lm12_date_init = lm12_date_ini
                             else:
                                 lm12_date_init = contract.date_start
-                            total_dayl12 = days_between(lm12_date_init, date_to)
-                            total_bonus = 0
+                            # total_dayl12 = days_between(lm12_date_init, date_to)
+                            if date_to.day == 31:
+                                date_to = date_to - relativedelta(days=1)
+                            total_dayl12 = days360(lm12_date_init, date_to) + 1
+                            amountb = 0
+                            amountc = 0
                             for loans in inputs_loans_12month_before:
                                 if loans[1] == 'BONIFICACION':
-                                    total_bonus = total_bonus + loans[2]
-                            if not total_bonus == 0:
-                                total_bonus = round((total_bonus/total_dayl12)*30, 2)
-                        record.amount_vacations = round((((salary + total_bonus + total_extra_hour)/30) * record.number_of_days),2)
+                                    amountb = amountb + loans[2]
+                                if loans[1] == 'COMISION':
+                                    amountc = amountc + loans[2]
+                            if not amountb == 0:
+                                amountb = (amountb / total_dayl12) * 30
+                            if not amountc == 0:
+                                amountc = (amountc / total_dayl12) * 30
+
+                        record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc)/30) * record.number_of_days))
                 else:
                     record.amount_vacations = 0
             else:

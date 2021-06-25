@@ -850,7 +850,7 @@ class HrPayslip(models.Model):
                         "name_input": 'Descuento Mes Anterior',
                     })
 
-            # Bonificaciones y comisiones 12 meses antras
+            # Bonificaciones y comisiones 12 meses atras
             inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, date_from, date_to)
             if inputs_loans_12month_before:
                 lm12_date_ini = date_to - relativedelta(months=12)
