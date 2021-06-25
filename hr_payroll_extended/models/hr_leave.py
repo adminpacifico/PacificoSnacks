@@ -179,14 +179,12 @@ class HrLeave(models.Model):
             else:
                 record.amount_vacations = record.amount_vacations_old
 
-    '''
+
     def write(self, values):
-        # El 6 corresponde al tipo de ausencia de vacaciones, en caso de modificar el registro se debe cambiar el numero a evaluar
-        if self.holiday_status_id.id == 6 and self.days_vacations < self.number_of_days:
-            raise Warning('¡No es posible registrar la ausencia! '
-                          'El empleado no tiene suficientes días de vacaciones ('+str(self.days_vacations)+')')
+        if self.holiday_status_id.name == 'Vacaciones en dinero' and 7 < self.number_of_days:
+            raise Warning('¡No es posible registrar la ausencia! Solo se puede solicitar un máximo de 7 días')
         return super(HrLeave, self).write(values)
-    '''
+
 
     def _create_resource_leave(self):
         """ This method will create entry in resource calendar time off object at the time of holidays validated

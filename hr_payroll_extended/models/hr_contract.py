@@ -68,7 +68,7 @@ class HrContract(models.Model):
 
     def get_vacation_used(self):
         for record in self:
-            vacations = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_id', '=', 6), ('state', '=', 'validate')])
+            vacations = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero')), ('state', '=', 'validate')])
             vacation_used = 0
             for vacation in vacations:
                 vacation_used = vacation_used + vacation.number_of_days
@@ -81,7 +81,7 @@ class HrContract(models.Model):
 
     def get_history(self):
         for record in self:
-            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_id', '=', 6), ('state', '=', 'validate')])
+            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero')), ('state', '=', 'validate')])
 
 
     def get_all_structures(self):
