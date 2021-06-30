@@ -490,6 +490,9 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_days12y = days360(hm12_date_init, date_to) + 1
+                days_div = 30
+                if total_days12y < 30:
+                    days_div = total_days12y
                 extradiurna_amount = 0
                 extradiurnafestivo_amount = 0
                 extranocturna_amount = 0
@@ -523,7 +526,7 @@ class HrPayslip(models.Model):
                 if not extradiurna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extradiurna_amount/total_days12y)*30,
+                        "amount": (extradiurna_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": extradiurna_type_id,
                         "code_input": 'EXTRADIURNA_PYEARS',
@@ -532,7 +535,7 @@ class HrPayslip(models.Model):
                 if not extradiurnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extradiurnafestivo_amount/total_days12y)*30,
+                        "amount": (extradiurnafestivo_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": extradiurnafestivo_type_id,
                         "code_input": 'EXTRADIURNAFESTIVO_PYEARS',
@@ -541,7 +544,7 @@ class HrPayslip(models.Model):
                 if not extranocturna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extranocturna_amount/total_days12y)*30,
+                        "amount": (extranocturna_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": extranocturna_type_id,
                         "code_input": 'EXTRANOCTURNA_PYEARS',
@@ -550,7 +553,7 @@ class HrPayslip(models.Model):
                 if not extranocturnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extranocturnafestivo_amount/total_days12y)*30,
+                        "amount": (extranocturnafestivo_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": extranocturnafestivo_type_id,
                         "code_input": 'EXTRANOCTURNAFESTIVO_PYEARS',
@@ -559,7 +562,7 @@ class HrPayslip(models.Model):
                 if not recargonocturno_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargonocturno_amount/total_days12y)*30,
+                        "amount": (recargonocturno_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargonocturno_type_id,
                         "code_input": 'RECARGONOCTURNO_PYEARS',
@@ -568,7 +571,7 @@ class HrPayslip(models.Model):
                 if not recargodiurnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargodiurnofestivo_amount/total_days12y)*30,
+                        "amount": (recargodiurnofestivo_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargodiurnofestivo_type_id,
                         "code_input": 'RECARGODIURNOFESTIVO_PYEARS',
@@ -577,7 +580,7 @@ class HrPayslip(models.Model):
                 if not recargonocturnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargonocturnofestivo_amount/total_days12y)*30,
+                        "amount": (recargonocturnofestivo_amount/total_days12y)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargonocturnofestivo_type_id,
                         "code_input": 'RECARGONOCTURNOFESTIVO_PYEARS',
@@ -596,6 +599,9 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_days = days360(hdate_init, date_to) + 1
+                days_div = 30
+                if total_days < 30:
+                    days_div = total_days
                 extradiurna_amount = 0
                 extradiurnafestivo_amount = 0
                 extranocturna_amount = 0
@@ -629,7 +635,7 @@ class HrPayslip(models.Model):
                 if not extradiurna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extradiurna_amount / total_days) * 30,
+                        "amount": (extradiurna_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": extradiurna_type_id,
                         "code_input": 'EXTRADIURNA_YEARS_NOW',
@@ -638,7 +644,7 @@ class HrPayslip(models.Model):
                 if not extradiurnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extradiurnafestivo_amount / total_days) * 30,
+                        "amount": (extradiurnafestivo_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": extradiurnafestivo_type_id,
                         "code_input": 'EXTRADIURNAFESTIVO_YEARS_NOW',
@@ -647,7 +653,7 @@ class HrPayslip(models.Model):
                 if not extranocturna_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extranocturna_amount / total_days) * 30,
+                        "amount": (extranocturna_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": extranocturna_type_id,
                         "code_input": 'EXTRANOCTURNA_YEARS_NOW',
@@ -656,7 +662,7 @@ class HrPayslip(models.Model):
                 if not extranocturnafestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (extranocturnafestivo_amount / total_days) * 30,
+                        "amount": (extranocturnafestivo_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": extranocturnafestivo_type_id,
                         "code_input": 'EXTRANOCTURNAFESTIVO_YEARS_NOW',
@@ -665,7 +671,7 @@ class HrPayslip(models.Model):
                 if not recargonocturno_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargonocturno_amount / total_days) * 30,
+                        "amount": (recargonocturno_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargonocturno_type_id,
                         "code_input": 'RECARGONOCTURNO_YEARS_NOW',
@@ -674,7 +680,7 @@ class HrPayslip(models.Model):
                 if not recargodiurnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargodiurnofestivo_amount / total_days) * 30,
+                        "amount": (recargodiurnofestivo_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargodiurnofestivo_type_id,
                         "code_input": 'RECARGODIURNOFESTIVO_YEARS_NOW',
@@ -683,7 +689,7 @@ class HrPayslip(models.Model):
                 if not recargonocturnofestivo_amount == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (recargonocturnofestivo_amount / total_days) * 30,
+                        "amount": (recargonocturnofestivo_amount / total_days) * days_div,
                         "payslip_id": self.id,
                         "input_type_id": recargonocturnofestivo_type_id,
                         "code_input": 'RECARGONOCTURNOFESTIVO_YEARS_NOW',
@@ -865,6 +871,9 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_dayl12 = days360(lm12_date_init, date_to)+1
+                days_div = 30
+                if total_dayl12 < 30:
+                    days_div = total_dayl12
                 countb = 0
                 amountb = 0
                 inputb_type_id = 0
@@ -883,7 +892,7 @@ class HrPayslip(models.Model):
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amountb/total_dayl12)*30,
+                        "amount": (amountb/total_dayl12)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": inputb_type_id,
                         "code_input": 'BONIFICACION_PYEARS',
@@ -892,7 +901,7 @@ class HrPayslip(models.Model):
                 if not amountc == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amountc/total_dayl12)*30,
+                        "amount": (amountc/total_dayl12)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": inputc_type_id,
                         "code_input": 'COMISION_PYEARS',
@@ -911,6 +920,9 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 ltotal_days = days360(ldate_init, date_to) + 1
+                days_div = 30
+                if ltotal_days < 30:
+                    days_div = ltotal_days
                 countb = 0
                 amountb = 0
                 inputb_type_id = 0
@@ -929,7 +941,7 @@ class HrPayslip(models.Model):
                 if not amountb == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amountb/ltotal_days)*30,
+                        "amount": (amountb/ltotal_days)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": inputb_type_id,
                         "code_input": 'BONIFICACION_YEARS_NOW',
@@ -938,7 +950,7 @@ class HrPayslip(models.Model):
                 if not amountc == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": (amountc/ltotal_days)*30,
+                        "amount": (amountc/ltotal_days)*days_div,
                         "payslip_id": self.id,
                         "input_type_id": inputc_type_id,
                         "code_input": 'COMISION_YEARS_NOW',
