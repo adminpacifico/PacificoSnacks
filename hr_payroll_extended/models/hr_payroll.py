@@ -986,7 +986,7 @@ class HrPayslip(models.Model):
                     })
 
             # Total Deduciones para retencion en la fuente
-            if contract.retention_method == 'M2':
+            if contract.retention_method == 'M1':
                 inputs_withholding_tax = self.get_inputs_withholding_tax(contract, date_from, date_to)
                 date_month_now_from = date(date_from.year, date_from.month, 1)
                 date_month_next = date_month_now_from + relativedelta(months=1)
