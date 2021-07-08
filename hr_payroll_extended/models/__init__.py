@@ -18,3 +18,6 @@ from . import hr_payroll_account
 from . import hr_payslip_worked_days
 from . import hr_payslip_employees
 from . import hr_payroll_structure
+from . import hr_exempt_income_concepts
+from . import hr_exempt_income_rt
+from . import hr_exempt_income_tax

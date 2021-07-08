@@ -17,10 +17,11 @@
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='name']" position="before">
 				<field name="holiday_status_name" invisible="True" />
-				<field name="total_number_of_days" />
-				<field name="amount_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero'))]}" />
-				<field name="amount_vacations_old" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero'))]}" />
-				<field name="days_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero'))]}" />
+				<field name="holiday" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones a liquidar'))]}"/>
+				<field name="workday" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones a liquidar'))]}"/>
+				<field name="amount_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero','Vacaciones a liquidar'))]}" />
+				<field name="manual_data" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
+				<field name="days_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
 			</xpath>
 		</field>
 	</record>
@@ -30,7 +31,7 @@
 		<field name="inherit_id" ref="hr_holidays.hr_leave_view_form_manager"/>
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='employee_id']" position="after">
-				<field name="days_paid" />
+				<!--field name="days_paid" /-->
 			</xpath>
 		</field>
 	</record>

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import math
+from collections import defaultdict
+from datetime import datetime, date
 
+from odoo import api, fields, models, _
 from collections import namedtuple
 
 from datetime import datetime, date, timedelta, time
@@ -41,46 +44,49 @@ def days360(s, e):
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
-
-    days_paid = fields.Float(
-        string='Dias Pagados', 
-        default='0.0'
-        
-    )
-
+    days_paid = fields.Float(string='Dias Pagados', default='0.0')
     days_vacations = fields.Integer(string="Vacaciones Disponibles", compute='get_days_vacations')
     holiday_status_name = fields.Char(string="Nombre de ausencia", compute='get_holiday_status_name')
-    amount_vacations = fields.Float(string="Valor Pagado", compute='get_amount_vacations')
-    total_number_of_days = fields.Float(string="Duración Total", compute='get_total_number_of_days')
-    amount_vacations_old = fields.Float(string="Valor Pagado (Carga Manual)", default=0,)
+    amount_vacations = fields.Float(string="Valor Pagado")
+    workday = fields.Float(string="Días Hábiles", default=0)
+    holiday = fields.Float(string="Días Festivos", default=0)
+    manual_data = fields.Boolean(string="Carga Manual", default=False)
+
+    @api.onchange('date_from', 'date_to', 'employee_id','number_of_days')
+    def get_holiday(self):
+        for record in self:
+            if record.employee_id:
+                calendar = record.employee_id.resource_calendar_holidays_id
+                holidays = record.employee_id._get_work_days_data_batch(record.date_from, record.date_to, calendar=calendar)[record.employee_id.id]
+                record.workday = holidays['days']
+                record.holiday = record.number_of_days - record.workday
+                if record.holiday_status_id.name == 'Vacaciones en dinero' or record.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
+                    record.workday = record.number_of_days
+                    record.holiday = 0
 
     @api.onchange('holiday_status_id')
     def get_holiday_status_name(self):
         for record in self:
             record.holiday_status_name = record.holiday_status_id.name
 
-    @api.depends('employee_id')
     def get_days_vacations(self):
         for record in self:
-            contracts = record.env['hr.contract'].search([('employee_id', '=', self.employee_id.id)])
+            contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id),('state','=','open')])
             if contracts:
                 for contract in contracts:
                     record.days_vacations = contract.vacations_available
             else:
                 record.days_vacations = 0
 
-    def get_total_number_of_days(self):
-        for record in self:
-            if record.request_date_to and record.request_date_from:
-                record.total_number_of_days = (record.request_date_to - record.request_date_from).days + 1
-            else:
-                record.total_number_of_days = 0
-
+    @api.onchange('date_from','date_to','employee_id','holiday_status_id','number_of_days')
     def get_amount_vacations(self):
         for record in self:
-            if record.amount_vacations_old == 0:
-                contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id)])
-                if contracts and record.holiday_status_id.name == 'Vacaciones' or contracts and record.holiday_status_id.name == 'Vacaciones en dinero' :
+            if record.holiday_status_id.name == 'Vacaciones en dinero':
+                record.request_date_to = record.date_from
+                record.date_to = record.date_from
+            contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id),('state','=','open')])
+            if record.manual_data == False:
+                if contracts and record.holiday_status_id.name == 'Vacaciones' or contracts and record.holiday_status_id.name == 'Vacaciones a liquidar'or contracts and record.holiday_status_id.name == 'Vacaciones en dinero' or contracts and record.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
                     for contract in contracts:
                         salary = contract.wage
                         total_extra_hour = 0
@@ -176,15 +182,16 @@ class HrLeave(models.Model):
                         record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc)/30) * record.number_of_days))
                 else:
                     record.amount_vacations = 0
-            else:
-                record.amount_vacations = record.amount_vacations_old
-
 
     def write(self, values):
-        if self.holiday_status_id.name == 'Vacaciones en dinero' and 7 < self.number_of_days:
+        if values.get('number_of_days'):
+            duration_vac= values.get('number_of_days')
+        else:
+            duration_vac = self.number_of_days
+
+        if self.holiday_status_id.name == 'Vacaciones en dinero' and  7 < duration_vac :
             raise Warning('¡No es posible registrar la ausencia! Solo se puede solicitar un máximo de 7 días')
         return super(HrLeave, self).write(values)
-
 
     def _create_resource_leave(self):
         """ This method will create entry in resource calendar time off object at the time of holidays validated
@@ -213,89 +220,67 @@ class HrLeave(models.Model):
             }]
         return self.env['resource.calendar.leaves'].sudo().create(vals_list)
 
+    def _cancel_work_entry_conflict(self):
+        """
+        Creates a leave work entry for each hr.leave in self.
+        Check overlapping work entries with self.
+        Work entries completely included in a leave are archived.
+        e.g.:
+            |----- work entry ----|---- work entry ----|
+                |------------------- hr.leave ---------------|
+                                    ||
+                                    vv
+            |----* work entry ****|
+                |************ work entry leave --------------|
+        """
 
+        if not self:
+            return
 
-    # @api.onchange('request_date_from_period', 'request_hour_from', 'request_hour_to',
-    #               'request_date_from', 'request_date_to',
-    #               'employee_id')
-    # def _onchange_request_parameters(self):
-    #     if not self.request_date_from:
-    #         self.date_from = False
-    #         return
+        if self.holiday_status_id.name == 'Vacaciones en dinero' or self.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
+            return
+        # 1. Create a work entry for each leave
+        work_entries_vals_list = []
+        for leave in self:
+            contracts = leave.employee_id.sudo()._get_contracts(leave.date_from, leave.date_to, states=['open', 'close'])
+            for contract in contracts:
+                # Generate only if it has aleady been generated
+                if leave.date_to >= contract.date_generated_from and leave.date_from <= contract.date_generated_to:
+                    work_entries_vals_list += contracts._get_work_entries_values(leave.date_from, leave.date_to)
 
-    #     if self.request_unit_half or self.request_unit_hours:
-    #         self.request_date_to = self.request_date_from
+        new_leave_work_entries = self.env['hr.work.entry'].create(work_entries_vals_list)
 
-    #     if not self.request_date_to:
-    #         self.date_to = False
-    #         return
+        if new_leave_work_entries:
+            # 2. Fetch overlapping work entries, grouped by employees
+            start = min(self.mapped('date_from'), default=False)
+            stop = max(self.mapped('date_to'), default=False)
+            work_entry_groups = self.env['hr.work.entry'].read_group([
+                ('date_start', '<', stop),
+                ('date_stop', '>', start),
+                ('employee_id', 'in', self.employee_id.ids),
+            ], ['work_entry_ids:array_agg(id)', 'employee_id'], ['employee_id', 'date_start', 'date_stop'], lazy=False)
+            work_entries_by_employee = defaultdict(lambda: self.env['hr.work.entry'])
+            for group in work_entry_groups:
+                employee_id = group.get('employee_id')[0]
+                work_entries_by_employee[employee_id] |= self.env['hr.work.entry'].browse(group.get('work_entry_ids'))
 
-    #     resource_calendar_id = self.employee_id.resource_calendar_id or self.env.company.resource_calendar_id
-    #     domain = [('calendar_id', '=', resource_calendar_id.id), ('display_type', '=', False)]
-    #     attendances = self.env['resource.calendar.attendance'].read_group(domain, ['ids:array_agg(id)', 'hour_from:min(hour_from)', 'hour_to:max(hour_to)', 'week_type', 'dayofweek', 'day_period'], ['week_type', 'dayofweek', 'day_period'], lazy=False)
+            # 3. Archive work entries included in leaves
+            included = self.env['hr.work.entry']
+            overlappping = self.env['hr.work.entry']
+            for work_entries in work_entries_by_employee.values():
+                # Work entries for this employee
+                new_employee_work_entries = work_entries & new_leave_work_entries
+                previous_employee_work_entries = work_entries - new_leave_work_entries
 
-    #     # Must be sorted by dayofweek ASC and day_period DESC
-    #     attendances = sorted([DummyAttendance(group['hour_from'], group['hour_to'], group['dayofweek'], group['day_period'], group['week_type']) for group in attendances], key=lambda att: (att.dayofweek, att.day_period != 'morning'))
+                # Build intervals from work entries
+                leave_intervals = new_employee_work_entries._to_intervals()
+                conflicts_intervals = previous_employee_work_entries._to_intervals()
 
-    #     default_value = DummyAttendance(0, 0, 0, 'morning', False)
+                # Compute intervals completely outside any leave
+                # Intervals are outside, but associated records are overlapping.
+                outside_intervals = conflicts_intervals - leave_intervals
 
-    #     if resource_calendar_id.two_weeks_calendar:
-    #         # find week type of start_date
-    #         start_week_type = int(math.floor((self.request_date_from.toordinal() - 1) / 7) % 2)
-    #         attendance_actual_week = [att for att in attendances if att.week_type is False or int(att.week_type) == start_week_type]
-    #         attendance_actual_next_week = [att for att in attendances if att.week_type is False or int(att.week_type) != start_week_type]
-    #         # First, add days of actual week coming after date_from
-    #         attendance_filtred = [att for att in attendance_actual_week if int(att.dayofweek) >= self.request_date_from.weekday()]
-    #         # Second, add days of the other type of week
-    #         attendance_filtred += list(attendance_actual_next_week)
-    #         # Third, add days of actual week (to consider days that we have remove first because they coming before date_from)
-    #         attendance_filtred += list(attendance_actual_week)
-
-    #         end_week_type = int(math.floor((self.request_date_to.toordinal() - 1) / 7) % 2)
-    #         attendance_actual_week = [att for att in attendances if att.week_type is False or int(att.week_type) == end_week_type]
-    #         attendance_actual_next_week = [att for att in attendances if att.week_type is False or int(att.week_type) != end_week_type]
-    #         attendance_filtred_reversed = list(reversed([att for att in attendance_actual_week if int(att.dayofweek) <= self.request_date_to.weekday()]))
-    #         attendance_filtred_reversed += list(reversed(attendance_actual_next_week))
-    #         attendance_filtred_reversed += list(reversed(attendance_actual_week))
-
-    #         # find first attendance coming after first_day
-    #         attendance_from = attendance_filtred[0]
-    #         # find last attendance coming before last_day
-    #         attendance_to = attendance_filtred_reversed[0]
-    #     else:
-    #         # find first attendance coming after first_day
-    #         attendance_from = next((att for att in attendances if int(att.dayofweek) >= self.request_date_from.weekday()), attendances[0] if attendances else default_value)
-    #         # find last attendance coming before last_day
-    #         attendance_to = next((att for att in reversed(attendances) if int(att.dayofweek) <= self.request_date_to.weekday()), attendances[-1] if attendances else default_value)
-
-    #     compensated_request_date_from = self.request_date_from
-    #     compensated_request_date_to = self.request_date_to
-
-    #     if self.request_unit_half:
-    #         if self.request_date_from_period == 'am':
-    #             hour_from = float_to_time(attendance_from.hour_from)
-    #             hour_to = float_to_time(attendance_from.hour_to)
-    #         else:
-    #             hour_from = float_to_time(attendance_to.hour_from)
-    #             hour_to = float_to_time(attendance_to.hour_to)
-    #     elif self.request_unit_hours:
-    #         hour_from = float_to_time(float(self.request_hour_from))
-    #         hour_to = float_to_time(float(self.request_hour_to))
-    #     elif self.request_unit_custom:
-    #         hour_from = self.date_from.time()
-    #         hour_to = self.date_to.time()
-    #         compensated_request_date_from = self._adjust_date_based_on_tz(self.request_date_from, hour_from)
-    #         compensated_request_date_to = self._adjust_date_based_on_tz(self.request_date_to, hour_to)
-    #     else:
-    #         hour_from = float_to_time(attendance_from.hour_from)
-    #         hour_to = float_to_time(attendance_to.hour_to)
-
-    #     tz = 'UTC'  # custom -> already in UTC
-    #     # tz = self.env.user.tz if self.env.user.tz and not self.request_unit_custom else 'UTC'  # custom -> already in UTC
-
-    #     date_from = timezone(tz).localize(datetime.combine(compensated_request_date_from, hour_from)).astimezone(UTC).replace(tzinfo=None)
-    #     date_to = timezone(tz).localize(datetime.combine(compensated_request_date_to, hour_to)).astimezone(UTC).replace(tzinfo=None)
-    #     date_from = date_from - timedelta(hours=8)
-    #     date_to = date_to + timedelta(hours=7)
-    #     self.update({'date_from': date_from, 'date_to': date_to})
-    #     self._onchange_leave_dates()
+                overlappping |= self.env['hr.work.entry']._from_intervals(outside_intervals)
+                included |= previous_employee_work_entries - overlappping
+            overlappping.write({'leave_id': False})
+            included.write({'active': False})

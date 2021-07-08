@@ -58,7 +58,7 @@
     </record>		
 
     <record id="action_hr_withholding_tax" model="ir.actions.act_window">
-        <field name="name">Retencion en la fuente</field>
+        <field name="name">Deducciones</field>
         <field name="res_model">hr.withholding.tax</field>
         <field name="view_mode">tree,form</field>
     </record>	

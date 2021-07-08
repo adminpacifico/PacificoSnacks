@@ -94,6 +94,7 @@ class HrEmployee(models.Model):
                     }
                     self.env['mail.mail'].sudo().create(main_content).send()
 
+    resource_calendar_holidays_id = fields.Many2one('resource.calendar', string='Calendario festivo', domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]" )
     personal_mobile = fields.Char(string='Mobile', related='address_home_id.mobile', store=True, help="Personal mobile number of the employee")
     joining_date = fields.Date(string='Joining Date', help="Employee joining date computed from the contract start date",compute='compute_joining', store=True)
     id_expiry_date = fields.Date(string='Expiry Date', help='Expiry date of Identification ID')

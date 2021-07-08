@@ -71,7 +71,7 @@ class HrContract(models.Model):
             vacations = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero')), ('state', '=', 'validate')])
             vacation_used = 0
             for vacation in vacations:
-                vacation_used = vacation_used + vacation.number_of_days
+                vacation_used = vacation_used + vacation.workday
 
             record.vacation_used = vacation_used + record.vacation_initial
 
@@ -81,8 +81,7 @@ class HrContract(models.Model):
 
     def get_history(self):
         for record in self:
-            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero')), ('state', '=', 'validate')])
-
+            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar')), ('state', '=', 'validate')])
 
     def get_all_structures(self):
         """
@@ -151,12 +150,12 @@ class HrContract(models.Model):
         for contract in self:
             contract_vals = []
             employee = contract.employee_id
-            #calendar = contract.resource_calendar_id
-            calendar = self.env['resource.calendar'].search([("name", "=", 'NOMINA')], limit=1)
+            calendar = contract.resource_calendar_id
+            #calendar = self.env['resource.calendar'].search([("name", "=", 'NOMINA')], limit=1)
             resource = employee.resource_id
             tz = pytz.timezone(calendar.tz)
-            if not calendar:
-                calendar = contract.resource_calendar_id
+            #if not calendar:
+            #    calendar = contract.resource_calendar_id
 
             attendances = calendar._work_intervals_batch(
                 pytz.utc.localize(date_start) if not date_start.tzinfo else date_start,
