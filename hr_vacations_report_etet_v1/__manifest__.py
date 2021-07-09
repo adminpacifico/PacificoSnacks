@@ -4,16 +4,17 @@
 {
     'name': 'Libro de vacaciones',
     'version': '1.0',
-    'summary': 'summarys',
+    'summary': 'reporte en excel relacion, de vacaciones por empleado, estructura o general',
     'description': "reportes Nomina",
     'website': 'https://www.endtoendt.com',
     'depends': ['account'],
-    'category': 'category',
-    'author': 'Enrrique Aguiar',
+    'category': 'Human Resources',
+    'author': 'End to End Technology',
     'sequence': 13,
     'demo': [
         
     ],
+    'description': 'reporte en excel relacion, de vacaciones por empleado, estructura o general',
     'data': [
 
         'views/vacations_report_view.xml',
