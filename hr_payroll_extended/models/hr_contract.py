@@ -39,6 +39,7 @@ class HrContract(models.Model):
     retention_method = fields.Selection(string='Metodo de rétencion', selection=[('NA', 'No aplica'),('M1', 'Metodo 1'),('M2', 'Metodo 2')], default='NA', required=True )
     integral_salary = fields.Boolean(string="Salario Integral", default=False)
 
+
     @api.onchange('wage')
     def _integral_salary(self):
         wage_min = self.env['hr.salary.rule'].search([("code", "=", 'SMLMV')], limit=1).amount_fix
@@ -81,7 +82,7 @@ class HrContract(models.Model):
 
     def get_history(self):
         for record in self:
-            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar')), ('state', '=', 'validate')])
+            record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('contract_id', '=', record.id), ('holiday_status_id.code', 'in', ('VACATIONS','VACATIONS_MONEY','VACATIONS_LIQ','VACATIONS_MONEY_LIQ')), ('state', '=', 'validate')])
 
     def get_all_structures(self):
         """

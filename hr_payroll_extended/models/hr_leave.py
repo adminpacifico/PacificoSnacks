@@ -44,6 +44,7 @@ def days360(s, e):
 class HrLeave(models.Model):
     _inherit = 'hr.leave'
 
+    contract_id = fields.Many2one('hr.contract', string='Contracto', track_visibility='onchange')
     days_paid = fields.Float(string='Dias Pagados', default='0.0')
     days_vacations = fields.Integer(string="Vacaciones Disponibles", compute='get_days_vacations')
     holiday_status_name = fields.Char(string="Nombre de ausencia", compute='get_holiday_status_name')
@@ -51,6 +52,17 @@ class HrLeave(models.Model):
     workday = fields.Float(string="Días Hábiles", default=0)
     holiday = fields.Float(string="Días Festivos", default=0)
     manual_data = fields.Boolean(string="Carga Manual", default=False)
+
+    @api.onchange('employee_id')
+    def onchange_employee(self):
+        for record in self:
+            if record.employee_id:
+                contract = self.env["hr.contract"].search(
+                    [('employee_id', '=', record.employee_id.id), ('state', '=', 'open')], limit=1)
+                if contract:
+                    record.contract_id = contract.id
+                else:
+                    raise UserError(_('El empleado no tiene un contracto.'))
 
     @api.onchange('date_from', 'date_to', 'employee_id','number_of_days')
     def get_holiday(self):

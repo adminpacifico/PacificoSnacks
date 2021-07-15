@@ -725,6 +725,12 @@ class HrPayslip(models.Model):
                 inputrip_type_id = 0
                 amountric = 0
                 inputric_type_id = 0
+                amount_aux_movi = 0
+                input_aux_movi_type_id = 0
+                amount_aux_fun = 0
+                input_aux_fun_type_id = 0
+                amount_fyc = 0
+                input_fyc_type_id = 0
                 amountc = 0
                 inputc_type_id = 0
                 for loans in loans_ids:
@@ -748,6 +754,21 @@ class HrPayslip(models.Model):
                        inputric_type_id = loans[3]
                        nameric = loans[0]
                        coderic = loans[1]
+                    if loans[1] == 'AUX_MOVILIZACION':
+                       amount_aux_movi = amount_aux_movi + loans[2]
+                       input_aux_movi_type_id = loans[3]
+                       name_aux_movi = loans[0]
+                       code_aux_movi = loans[1]
+                    if loans[1] == 'AUX_FUNERARIO':
+                        amount_aux_fun = amount_aux_fun + loans[2]
+                        input_aux_fun_type_id = loans[3]
+                        name_aux_fun = loans[0]
+                        code_aux_fun = loans[1]
+                    if loans[1] == 'FYC':
+                        amount_fyc = amount_fyc + loans[2]
+                        input_fyc_type_id = loans[3]
+                        name_fyc = loans[0]
+                        code_fyc = loans[1]
                     if loans[1] == 'COMISION':
                        amountc = amountc + loans[2]
                        inputc_type_id = loans[3]
@@ -786,9 +807,36 @@ class HrPayslip(models.Model):
                         "sequence": 1,
                         "amount": amountric,
                         "payslip_id": self.id,
-                        "input_type_id": inputrip_type_id,
+                        "input_type_id": inputric_type_id,
                         "name_input": nameric,
                         "code_input": coderic,
+                    })
+                if not amount_aux_movi == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amount_aux_movi,
+                        "payslip_id": self.id,
+                        "input_type_id": input_aux_movi_type_id,
+                        "name_input": name_aux_movi,
+                        "code_input": code_aux_movi,
+                    })
+                if not amount_aux_fun == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amount_aux_fun,
+                        "payslip_id": self.id,
+                        "input_type_id": input_aux_fun_type_id,
+                        "name_input": name_aux_fun,
+                        "code_input": code_aux_fun,
+                    })
+                if not amount_fyc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amount_fyc,
+                        "payslip_id": self.id,
+                        "input_type_id": input_fyc_type_id,
+                        "name_input": name_fyc,
+                        "code_input": code_fyc,
                     })
                 if not amountc == 0:
                     self.env['hr.payslip.input'].create({
