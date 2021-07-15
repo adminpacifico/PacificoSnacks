@@ -69,7 +69,7 @@ class HrContract(models.Model):
 
     def get_vacation_used(self):
         for record in self:
-            vacations = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('holiday_status_name', 'in', ('Vacaciones','Vacaciones en dinero')), ('state', '=', 'validate')])
+            vacations = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('contract_id', '=', record.id), ('holiday_status_id.code', 'in', ('VACATIONS','VACATIONS_MONEY','VACATIONS_LIQ','VACATIONS_MONEY_LIQ')), ('state', '=', 'validate')])
             vacation_used = 0
             for vacation in vacations:
                 vacation_used = vacation_used + vacation.workday
