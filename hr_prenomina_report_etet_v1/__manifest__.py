@@ -4,12 +4,12 @@
 {
     'name': 'Informe prenomina',
     'version': '1.0',
-    'summary': 'summarys',
-    'description': "reportes Nomina",
+    'summary': 'Reporte en excel relacion, de novedades de nomina general',
+    'description': "reporte en excel relacion, de novedades de nomina general",
     'website': 'https://www.endtoendt.com',
     'depends': ['account', 'hr_payroll_extended'],
-    'category': 'category',
-    'author': 'Enrrique Aguiar',
+    'category': 'Human Resources',
+    'author': 'End to End Technology',
     'sequence': 13,
     'demo': [
         

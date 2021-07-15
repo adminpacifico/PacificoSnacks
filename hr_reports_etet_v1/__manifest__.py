@@ -4,12 +4,12 @@
 {
     'name': 'volante de nomina',
     'version': '1.0',
-    'summary': 'summary',
-    'description': "reporte generado en excel libro vacaciones empleados",
+    'summary': 'Reporte de nomina liquidacion de contrato y volante de nomina',
+    'description': "Reporte de nomina liquidacion de contrato y volante de nomina",
     'website': 'https://www.endtoendt.com',
     'depends': ['hr_payroll_extended'],
-    'category': 'category',
-    'author': 'Enrrique Aguiar',
+    'category': 'Human Resources',
+    'author': 'End to End Technology',
     'sequence': 13,
     'demo': [
         

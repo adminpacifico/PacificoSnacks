@@ -721,8 +721,10 @@ class HrPayslip(models.Model):
                 inputb_type_id = 0
                 amountd = 0
                 inputd_type_id = 0
-                amountri = 0
-                inputri_type_id = 0
+                amountrip = 0
+                inputrip_type_id = 0
+                amountric = 0
+                inputric_type_id = 0
                 amountc = 0
                 inputc_type_id = 0
                 for loans in loans_ids:
@@ -736,11 +738,16 @@ class HrPayslip(models.Model):
                        inputd_type_id = loans[3]
                        named = loans[0]
                        coded = loans[1]
-                    if loans[1] == 'REINTEGRO':
-                       amountri = amountri + loans[2]
-                       inputri_type_id = loans[3]
-                       nameri = loans[0]
-                       coderi = loans[1]
+                    if loans[1] == 'REINTEGRO_PAGAR':
+                       amountrip = amountrip + loans[2]
+                       inputrip_type_id = loans[3]
+                       namerip = loans[0]
+                       coderip = loans[1]
+                    if loans[1] == 'REINTEGRO_COBRAR':
+                       amountric = amountric + loans[2]
+                       inputric_type_id = loans[3]
+                       nameric = loans[0]
+                       coderic = loans[1]
                     if loans[1] == 'COMISION':
                        amountc = amountc + loans[2]
                        inputc_type_id = loans[3]
@@ -765,14 +772,23 @@ class HrPayslip(models.Model):
                         "name_input": named,
                         "code_input": coded,
                     })
-                if not amountri == 0:
+                if not amountrip == 0:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": amountri,
+                        "amount": amountrip,
                         "payslip_id": self.id,
-                        "input_type_id": inputri_type_id,
-                        "name_input": nameri,
-                        "code_input": coderi,
+                        "input_type_id": inputrip_type_id,
+                        "name_input": namerip,
+                        "code_input": coderip,
+                    })
+                if not amountric == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountric,
+                        "payslip_id": self.id,
+                        "input_type_id": inputrip_type_id,
+                        "name_input": nameric,
+                        "code_input": coderic,
                     })
                 if not amountc == 0:
                     self.env['hr.payslip.input'].create({
