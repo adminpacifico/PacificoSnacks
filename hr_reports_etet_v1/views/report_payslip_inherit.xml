@@ -84,8 +84,8 @@
                     <table style="width:100%" class="table table-bordered" add="small">
                         <thead >
                             <tr>
-                                <th style="width:60%">Conceptos</th>
-                                <th style="width:14%">Cantidad</th>
+                                <th style="width:60%">Concepto</th>
+                                <th style="width:10%">Cant</th>
                                 <th style="width:15%">Devengados</th>
                                 <th style="width:15%">Deducciones</th>
                             </tr>
@@ -95,8 +95,8 @@
                                 <td class="text-left">
                                 <span t-field="line_ids.name"/>
                                 </td>
-                                <td class="text-left">
-                                <span t-esc="int(line_ids.quantity)"/> Días
+                                <td class="text-right">
+                                <span t-field="line_ids.quantity"/> Días
                                 </td>
                                 <td class="text-right">
                                 <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": o.company_id.currency_id}'/>
@@ -107,7 +107,7 @@
                                 <td class="text-left">
                                 <span t-field="line_ids.name"/>
                                 </td>
-                                <td class="text-left">
+                                <td class="text-right">
                                 <span t-field="line_ids.quantity"/> Horas
                                 </td>
                                 <td class="text-right">
@@ -119,7 +119,7 @@
                                 <td class="text-left">
                                 <span t-field="line_ids.name"/>
                                 </td>
-                                <td class="text-left">
+                                <td class="text-right">
                                 <span t-field="line_ids.quantity"/> Horas
                                 </td>
                                 <td class="text-right">
@@ -131,8 +131,8 @@
                                 <td class="text-left">
                                 <span t-field="line_ids.name"/>
                                 </td>
-                                <td class="text-left">
-                                <span t-esc="int(line_ids.quantity)"/> Días
+                                <td class="text-right">
+                                <span t-field="line_ids.quantity"/>
                                 </td>
                                 <td class="text-right"><span>$ 0</span></td>
                                 <td class="text-right">
