@@ -13,6 +13,7 @@
 							<field name="accumulated_vacation"/>
 							<field name="vacation_used"/>
 							<field name="vacations_available"/>
+							<field name="vacations_date"/>
 						</group>
 					</group>
 					<group name="vacation history" string="Historial de vacaciones disfrutadas">

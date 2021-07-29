@@ -35,6 +35,7 @@ class HrContract(models.Model):
     vacation_used = fields.Float(string="Vacaciones Disfrutadas", compute='get_vacation_used')
     vacations_available = fields.Float(string="Vacaciones Disponibles", compute='get_vacations_available')
     vacations_history = fields.Many2many('hr.leave' ,string="Historial", compute='get_history')
+    vacations_date = fields.Date(string="Periodo Trabajado promedio", compute='get_vacations_date')
 
     retention_method = fields.Selection(string='Metodo de rétencion', selection=[('NA', 'No aplica'),('M1', 'Metodo 1'),('M2', 'Metodo 2')], default='NA', required=True )
     integral_salary = fields.Boolean(string="Salario Integral", default=False)
@@ -49,6 +50,12 @@ class HrContract(models.Model):
                     record.integral_salary = True
                 else:
                     record.integral_salary = False
+
+    def get_vacations_date(self):
+        for record in self:
+            dias_promedio_trabajado = (record.vacation_used * 365) / 15
+            record.vacations_date = record.date_start + relativedelta(days=int(dias_promedio_trabajado))
+
 
     def get_accumulated_vacation(self):
         for record in self:
