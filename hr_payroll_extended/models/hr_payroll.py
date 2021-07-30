@@ -1312,7 +1312,7 @@ class HrPayslip(models.Model):
                 absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],limit=1).disability_percentage
                 absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],limit=1).disability_percentage
                 absence_rate_M91D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_M91D')],limit=1).disability_percentage
-                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110')], limit=1)
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'INCAPACIDADGENERAL')], limit=1)
                 leave_sickness_amount_total = 0
                 leave_sickness_days_total = 0
                 leave_sickness_hours_total = 0
