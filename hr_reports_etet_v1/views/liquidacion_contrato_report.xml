@@ -79,6 +79,10 @@
                                     </td>
                                     <t t-set="fecha_1" t-value="(doc.contract_id.date_start).year"/>
                                     <t t-set="fecha_2" t-value="(doc.contract_id.date_end).year"/>
+                                    <t t-set="fecha_ini_contrato" t-value="doc.contract_id.date_start"/>
+                                    <t t-set="fecha_liq" t-value="doc.date_from"/>
+                                    <t t-set="mes_liq" t-value="(doc.date_from).month"/>
+                                    <t t-set="dia_liq" t-value="(doc.date_from).day"/>
                                     <td style="width:40%">
                                             <table style="width:100%; margin-left:5px; font-size:12px">
 
@@ -184,8 +188,21 @@
                                             <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PRIMA')" t-as="line_ids">
                                                 <td>
                                                     <span t-field="line_ids.name" />
-                                                    <t t-if="fecha_1 == fecha_2">
-                                                        <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                    <t t-if="mes_liq &lt;= 6 and dia_liq &lt;= 31">
+                                                        <t t-if="fecha_ini_contrato &lt;= fecha_liq">
+                                                             01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                           <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                        </t>
+                                                    </t>
+                                                    <t t-if="mes_liq &lt;= 12 and dia_liq &lt;= 31">
+                                                        <t t-if="fecha_ini_contrato &lt;= fecha_liq">
+                                                             07-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                           <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
+                                                        </t>
                                                     </t>
                                                     <t t-else="">
                                                        01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
@@ -196,7 +213,7 @@
                                                 <td class="text-center" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'DIASPRIMA')" t-as="line_ids">
                                                   <span t-esc="line_ids.total"/>
                                                 </td>
-                                                <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="line_ids">
+                                                <td class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_6MONTH')" t-as="line_ids">
                                                   <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
                                                 </td>
                                             </tr>

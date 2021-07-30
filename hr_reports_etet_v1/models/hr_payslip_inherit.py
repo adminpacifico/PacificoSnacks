@@ -29,9 +29,6 @@ class HrPayslipInherit(models.Model):
         _logger.error("INICIA LA FUNCIÓN CONSTRUIR EL ARCHIVO ")
 
 
-        lineas = self.env['hr.payslip'].search([("category_id", "=", informativa)])
-        lineas = self.env['hr.payslip'].search([("category_id", "=", informativa)])
-
     def action_print_payslip(self):
 
         return {
