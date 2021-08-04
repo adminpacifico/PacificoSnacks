@@ -11,6 +11,9 @@
                 <center>
                     <h3>Reporte prestaciones</h3>
                 </center>
+                <center>
+                        <field name="date_creation" required="1"/>
+                </center>
                 <footer>
                     <center>
                          <button name="do_report" string="Generar" type="object" class="oe_highlight"/>

@@ -25,7 +25,7 @@ class PrestacionesReport(models.TransientModel):
 
     data = fields.Binary("Archivo")
     data_name = fields.Char("nombre del archivo")
-    date_creation = fields.Date('Created Date', default=fields.Date.today())
+    date_creation = fields.Date('Fecha')
 
     def do_report(self):
 
@@ -106,20 +106,24 @@ class PrestacionesReport(models.TransientModel):
 
         for c in contracts:
 
-            # ---------------------- FECHA INICIAL -----------------------
-            init_year = date(c.date_start.year, 1, 1)
-            if c.date_start <= init_year:
-                date_init = init_year
+            # ---------------------- FECHA INICIAL PRIMA -----------------------
+
+            if self.date_creation.month <= 6 and self.date_creation.day <= 31:
+                init_date_prima = date(self.date_creation.year, 1, 1)
+
+            elif self.date_creation.month <= 12 and self.date_creation.day <= 31:
+                init_date_prima = date(self.date_creation.year, 7, 1)
+
+            if c.date_start <= init_date_prima:
+                init_date_prima = init_date_prima
             else:
-                date_init = c.date_start
+                init_date_prima = c.date_start
 
-            dias_labor = days360(date_init, self.date_creation) + 1
+            dias_labor_prima = days360(init_date_prima, self.date_creation) + 1
 
-            dias_labor_vacaciones = days360(c.vacations_date, self.date_creation) + 1
+            dias_liq_prima = dias_labor_prima / 360
 
-            dias_liq = dias_labor / 360
-
-            # ---------------------- VALOR PROMEDIO ANUAL -----------------
+            # ---------------------- VALOR PROMEDIO SEMESTRAL -----------------
 
             salary = c.wage
             total_extra_hour = 0
@@ -128,11 +132,148 @@ class PrestacionesReport(models.TransientModel):
             date_from = self.date_creation
             date_to = self.date_creation
 
-            if date_to.day <= 15:
-                date_to = date(date_to.year, date_to.month, 15)
+            # Horas extras promedio semestral
+            hora_extra_6month = self.env['hr.payslip'].get_inputs_hora_extra_6month(c, date_from, date_to)
+            if hora_extra_6month:
+                if date_from.month <= 6 and date_from.day <= 31:
+                    hdate_init_6month = date(date_from.year, 1, 1)
 
-            if date_to.day > 15 and date_to.day <= 31:
-                date_to = date(date_to.year, date_to.month, 30)
+                elif date_from.month <= 12 and date_from.day <= 31:
+                    hdate_init_6month = date(date_from.year, 7, 1)
+
+                if c.date_start <= hdate_init_6month:
+                    hdate_init = hdate_init_6month
+                else:
+                    hdate_init = c.date_start
+
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+
+                total_days = days360(hdate_init, date_to) + 1
+
+                if total_days < 30:
+                    day_base = total_days
+                else:
+                    day_base = 30
+
+                extradiurna_amount = 0
+                extradiurnafestivo_amount = 0
+                extranocturna_amount = 0
+                extranocturnafestivo_amount = 0
+                recargonocturno_amount = 0
+                recargodiurnofestivo_amount = 0
+                recargonocturnofestivo_amount = 0
+                for hora in hora_extra_6month:
+                    if hora[1] == 'EXTRADIURNA':
+                        extradiurna_amount = extradiurna_amount + hora[2]
+                        extradiurna_type_id = hora[3]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                        extradiurnafestivo_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNA':
+                        extranocturna_amount = extranocturna_amount + hora[2]
+                        extranocturna_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                        extranocturnafestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[2]
+                        recargonocturno_type_id = hora[3]
+                    if hora[1] == 'RECARGODIURNOFESTIVO':
+                        recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                        recargodiurnofestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+                        recargonocturnofestivo_type_id = hora[3]
+
+                if not extradiurna_amount == 0:
+                    extradiurna_amount = (extradiurna_amount / total_days) * day_base
+                if not extradiurnafestivo_amount == 0:
+                    extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days) * day_base
+                if not extranocturna_amount == 0:
+                    extranocturna_amount = (extranocturna_amount / total_days) * day_base
+                if not extranocturnafestivo_amount == 0:
+                    extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days) * day_base
+                if not recargonocturno_amount == 0:
+                    recargonocturno_amount = (recargonocturno_amount / total_days) * day_base
+                if not recargodiurnofestivo_amount == 0:
+                    recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days) * day_base
+                if not recargonocturnofestivo_amount == 0:
+                    recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days) * day_base
+
+                total_extra_hour = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
+
+            # Bonificaciones y comisiones semestral
+            loans_6month = self.env['hr.payslip'].get_inputs_loans_6month(c, date_from, date_to)
+            if loans_6month:
+                if date_from.month <= 6 and date_from.day <= 31:
+                    ldate_init_6month = date(date_from.year, 1, 1)
+
+                elif date_from.month <= 12 and date_from.day <= 31:
+                    ldate_init_6month = date(date_from.year, 7, 1)
+
+                if c.date_start <= ldate_init_6month:
+                    ldate_init = ldate_init_6month
+                else:
+                    ldate_init = c.date_start
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+
+                ltotal_days = days360(ldate_init, date_to) + 1
+
+                if ltotal_days < 30:
+                    day_base = ltotal_days
+                else:
+                    day_base = 30
+
+                countb = 0
+                amountb = 0
+                inputb_type_id = 0
+                countc = 0
+                amountc = 0
+                inputc_type_id = 0
+                for loans in loans_6month:
+                    if loans[1] == 'BONIFICACION':
+                        countb = countb + 1
+                        amountb = amountb + loans[2]
+                        inputb_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                        countc = countc + 1
+                        amountc = amountc + loans[2]
+                        inputc_type_id = loans[3]
+                if not amountb == 0:
+                    amountb = (amountb / ltotal_days) * day_base
+                if not amountc == 0:
+                    amountc = (amountc / ltotal_days) * day_base
+
+            # ------------------------------ VALOR DERIVADO DEL PROMEDIO ANUAL  -----------------------------------------
+
+            valor_prima = salary + total_extra_hour + amountb + amountc
+
+            valor_unit_prima = valor_prima / 30
+
+            total_prima = valor_unit_prima * dias_liq_prima
+
+            # ---------------------- FECHA INICIAL CESANTIAS -----------------------
+            init_year = date(c.date_start.year, 1, 1)
+            if c.date_start <= init_year:
+                date_init = init_year
+            else:
+                date_init = c.date_start
+
+            dias_labor_ces = days360(date_init, self.date_creation) + 1
+
+            dias_liq_ces = dias_labor_ces / 360
+
+
+            # ---------------------- VALOR CESANTIAS PROMEDIO ANUAL -----------------
+
+            salary = c.wage
+            total_extra_hour = 0
+            amountb = 0
+            amountc = 0
+            date_from = self.date_creation
+            date_to = self.date_creation
 
             hora_extra_year_now = self.env['hr.payslip'].get_inputs_hora_extra_year_now(c,date_from,date_to)
             if hora_extra_year_now:
@@ -145,6 +286,12 @@ class PrestacionesReport(models.TransientModel):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_days12y = days360(hm12_date_init, date_to) + 1
+
+                if total_days12y < 30:
+                    day_base = total_days12y
+                else:
+                    day_base = 30
+
                 extradiurna_amount = 0
                 extradiurnafestivo_amount = 0
                 extranocturna_amount = 0
@@ -169,19 +316,19 @@ class PrestacionesReport(models.TransientModel):
                         recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
 
                 if not extradiurna_amount == 0:
-                    extradiurna_amount = (extradiurna_amount / total_days12y) * 30
+                    extradiurna_amount = (extradiurna_amount / total_days12y) * day_base
                 if not extradiurnafestivo_amount == 0:
-                    extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * 30
+                    extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * day_base
                 if not extranocturna_amount == 0:
-                    extranocturna_amount = (extranocturna_amount / total_days12y) * 30
+                    extranocturna_amount = (extranocturna_amount / total_days12y) * day_base
                 if not extranocturnafestivo_amount == 0:
-                    extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * 30
+                    extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * day_base
                 if not recargonocturno_amount == 0:
-                    recargonocturno_amount = (recargonocturno_amount / total_days12y) * 30
+                    recargonocturno_amount = (recargonocturno_amount / total_days12y) * day_base
                 if not recargodiurnofestivo_amount == 0:
-                    recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * 30
+                    recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * day_base
                 if not recargonocturnofestivo_amount == 0:
-                    recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * 30
+                    recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * day_base
 
                 total_extra_hour = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
 
@@ -193,10 +340,15 @@ class PrestacionesReport(models.TransientModel):
                     lm12_date_init = lm12_date_ini
                 else:
                     lm12_date_init = c.date_start
-                # total_dayl12 = days_between(lm12_date_init, date_to)
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_dayl12 = days360(lm12_date_init, date_to) + 1
+
+                if total_dayl12 < 30:
+                    day_base = total_dayl12
+                else:
+                    day_base = 30
+
                 amountb = 0
                 amountc = 0
                 for loans in inputs_loans_year_now:
@@ -205,32 +357,39 @@ class PrestacionesReport(models.TransientModel):
                     if loans[1] == 'COMISION':
                         amountc = amountc + loans[2]
                 if not amountb == 0:
-                    amountb = (amountb / total_dayl12) * 30
+                    amountb = (amountb / total_dayl12) * day_base
                 if not amountc == 0:
-                    amountc = (amountc / total_dayl12) * 30
+                    amountc = (amountc / total_dayl12) * day_base
 
 
-            # ------------------------------ VALOR DERIVADO DEL PROMEDIO ANUAL  -----------------------------------------
+            # ------------------------------ VALOR DERIVADO DEL PROMEDIO CESANTIAS  -----------------------------------------
 
-            valor_anual = salary + total_extra_hour + amountb + amountc
+            valor_ces = salary + total_extra_hour + amountb + amountc
 
-            valor_unit_anual = valor_anual / 30
+            valor_unit_ces = valor_ces / 30
 
-            total_anual = valor_unit_anual * dias_liq
+            total_ces = valor_unit_ces * dias_liq_ces
 
-            # ---------------------- VALOR PROMEDIO 12 MESES ATRAS -----------------
+            # ------------------------------ VALOR DERIVADO DEL PROMEDIO INT CESANTIAS  -----------------------------------------
+
+            valor_ces_int = (salary + total_extra_hour + amountb + amountc) * 0.12
+
+            valor_unit_ces_int = valor_ces_int / 30
+
+            total_ces_int = valor_unit_ces_int * dias_liq_ces
+
+
+            # ---------------------- VALOR VACACIONES PROMEDIO 12 MESES ATRAS -----------------
+
+            dias_labor_vaca = days360(c.vacations_date, self.date_creation) + 1
+
+            dias_liq_vaca = c.vacations_available
 
             total_extra_hour_12m = 0
             amountb_12m = 0
             amountc_12m = 0
             date_from = self.date_creation
             date_to = self.date_creation
-
-            if date_to.day <= 15:
-                date_to = date(date_to.year, date_to.month, 15)
-
-            if date_to.day > 15 and date_to.day <= 31:
-                date_to = date(date_to.year, date_to.month, 30)
 
             horas_extras_12month_before = self.env['hr.payslip'].get_inputs_hora_extra_12month_before(c, date_from, date_to)
             if horas_extras_12month_before:
@@ -244,6 +403,12 @@ class PrestacionesReport(models.TransientModel):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_days12y = days360(hm12_date_init, date_to) + 1
+
+                if total_days12y < 30:
+                    day_base = total_days12y
+                else:
+                    day_base = 30
+
                 extradiurna_amount = 0
                 extradiurnafestivo_amount = 0
                 extranocturna_amount = 0
@@ -268,19 +433,19 @@ class PrestacionesReport(models.TransientModel):
                         recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
 
                 if not extradiurna_amount == 0:
-                    extradiurna_amount = (extradiurna_amount / total_days12y) * 30
+                    extradiurna_amount = (extradiurna_amount / total_days12y) * day_base
                 if not extradiurnafestivo_amount == 0:
-                    extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * 30
+                    extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * day_base
                 if not extranocturna_amount == 0:
-                    extranocturna_amount = (extranocturna_amount / total_days12y) * 30
+                    extranocturna_amount = (extranocturna_amount / total_days12y) * day_base
                 if not extranocturnafestivo_amount == 0:
-                    extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * 30
+                    extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * day_base
                 if not recargonocturno_amount == 0:
-                    recargonocturno_amount = (recargonocturno_amount / total_days12y) * 30
+                    recargonocturno_amount = (recargonocturno_amount / total_days12y) * day_base
                 if not recargodiurnofestivo_amount == 0:
-                    recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * 30
+                    recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * day_base
                 if not recargonocturnofestivo_amount == 0:
-                    recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * 30
+                    recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * day_base
 
                 total_extra_hour_12m = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
 
@@ -292,10 +457,15 @@ class PrestacionesReport(models.TransientModel):
                     lm12_date_init = lm12_date_ini
                 else:
                     lm12_date_init = c.date_start
-                # total_dayl12 = days_between(lm12_date_init, date_to)
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_dayl12 = days360(lm12_date_init, date_to) + 1
+
+                if total_dayl12 < 30:
+                    day_base = total_dayl12
+                else:
+                    day_base = 30
+
                 amountb_12m = 0
                 amountc_12m = 0
                 for loans in inputs_loans_12month_before:
@@ -304,17 +474,17 @@ class PrestacionesReport(models.TransientModel):
                     if loans[1] == 'COMISION':
                         amountc_12m = amountc_12m + loans[2]
                 if not amountb_12m == 0:
-                    amountb_12m = (amountb_12m / total_dayl12) * 30
+                    amountb_12m = (amountb_12m / total_dayl12) * day_base
                 if not amountc_12m == 0:
-                    amountc_12m = (amountc_12m / total_dayl12) * 30
+                    amountc_12m = (amountc_12m / total_dayl12) * day_base
 
-            # ------------------------------ VALOR DERIVADO DEL PROMEDIO ANUAL  -----------------------------------------
+            # ------------------------------ VALOR DERIVADO DEL PROMEDIO 12 MESES ATRAS  -----------------------------------------
 
-            valor_12m = salary + total_extra_hour_12m + amountb_12m + amountc_12m
+            valor_vaca = salary + total_extra_hour_12m + amountb_12m + amountc_12m
 
-            valor_unit_12m = valor_12m / 30
+            valor_unit_vaca = valor_vaca / 30
 
-            total_12m = valor_unit_12m * dias_liq
+            total_vaca = valor_unit_vaca * dias_liq_vaca
 
             #---------------------------------------------- PRIMA --------------------------------------------------------------------
             ws.write(fila, col, '') if not c.name else ws.write(fila, col, c.name)
@@ -329,25 +499,25 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, 'Prima Legal')
             col += 1
 
-            ws.write(fila, col, '') if not date_init else ws.write(fila, col, date_init, format_date)
+            ws.write(fila, col, '') if not init_date_prima else ws.write(fila, col, init_date_prima, format_date)
             col += 1
 
             ws.write(fila, col, self.date_creation, format_date)
             col += 1
 
-            ws.write(fila, col, valor_anual, format_number)
+            ws.write(fila, col, valor_prima, format_number)
             col += 1
 
-            ws.write(fila, col, dias_labor)
+            ws.write(fila, col, dias_labor_prima)
             col += 1
 
-            ws.write(fila, col, round(dias_liq, 2))
+            ws.write(fila, col, round(dias_liq_prima, 2))
             col += 1
 
-            ws.write(fila, col, valor_unit_anual, format_number)
+            ws.write(fila, col, valor_unit_prima, format_number)
             col += 1
 
-            ws.write(fila, col, total_anual, format_number)
+            ws.write(fila, col, total_prima, format_number)
             col += 1
 
             fila += 1
@@ -372,19 +542,19 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, self.date_creation, format_date)
             col += 1
 
-            ws.write(fila, col, valor_anual, format_number)
+            ws.write(fila, col, valor_ces, format_number)
             col += 1
 
-            ws.write(fila, col, dias_labor)
+            ws.write(fila, col, dias_labor_ces)
             col += 1
 
-            ws.write(fila, col, round(dias_liq, 2))
+            ws.write(fila, col, round(dias_liq_ces, 2))
             col += 1
 
-            ws.write(fila, col, valor_unit_anual, format_number)
+            ws.write(fila, col, valor_unit_ces, format_number)
             col += 1
 
-            ws.write(fila, col, total_anual, format_number)
+            ws.write(fila, col, total_ces, format_number)
             col += 1
 
             fila += 1
@@ -409,25 +579,26 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, self.date_creation, format_date)
             col += 1
 
-            ws.write(fila, col, valor_anual, format_number)
+            ws.write(fila, col, valor_ces_int, format_number)
             col += 1
 
-            ws.write(fila, col, dias_labor)
+            ws.write(fila, col, dias_labor_ces)
             col += 1
 
-            ws.write(fila, col, round(dias_liq, 2))
+            ws.write(fila, col, round(dias_liq_ces, 2))
             col += 1
 
-            ws.write(fila, col, valor_unit_anual, format_number)
+            ws.write(fila, col, valor_unit_ces_int, format_number)
             col += 1
 
-            ws.write(fila, col, total_anual, format_number)
+            ws.write(fila, col, total_ces_int, format_number)
             col += 1
 
             fila += 1
             col = 0
 
             # ---------------------------------------------- VACACIONES --------------------------------------------------------------------
+
             ws.write(fila, col, '') if not c.name else ws.write(fila, col, c.name)
             col += 1
 
@@ -446,19 +617,19 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, self.date_creation, format_date)
             col += 1
 
-            ws.write(fila, col, valor_12m, format_number)
+            ws.write(fila, col, valor_vaca, format_number)
             col += 1
 
-            ws.write(fila, col, dias_labor_vacaciones)
+            ws.write(fila, col, dias_labor_vaca)
             col += 1
 
-            ws.write(fila, col, c.vacations_available)
+            ws.write(fila, col, dias_liq_vaca)
             col += 1
 
-            ws.write(fila, col, valor_unit_12m, format_number)
+            ws.write(fila, col, valor_unit_vaca, format_number)
             col += 1
 
-            ws.write(fila, col, total_12m , format_number)
+            ws.write(fila, col, total_vaca , format_number)
             col += 1
 
             fila += 1
