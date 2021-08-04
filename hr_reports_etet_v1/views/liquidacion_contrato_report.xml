@@ -123,73 +123,115 @@
                                         </td>
                                     </tr>
                                     </table>
+                                <br></br>
                                 <table>
+                                    <table style="width:100%; margin-left:5px; font-size:12px">
+                                    <tr>
+                                    <td>
+                                    <table>
+                                            <tr>
+                                                <th><b>BASE SALARIAL PRIMA</b></th>
+                                            </tr>
+                                            <tr  t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALCONTRACTO')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr  t-foreach="doc.line_ids.filtered(lambda x: x.category_id.code == 'P6M')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><b>TOTAL</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_6MONTH')" t-as="line_ids">
+                                                  <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                    </table>
+                                    </td>
+                                    <td>
+                                    <table>
+                                            <tr>
+                                                <th><b>BASE SALARIAL CESANTIAS</b></th>
+                                            </tr>
+                                            <tr  t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALCONTRACTO')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr  t-foreach="doc.line_ids.filtered(lambda x: x.category_id.code == 'PA')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><b>TOTAL</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="line_ids">
+                                                  <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                    </table>
+                                    </td>
+                                    <td>
+                                    <table>
+                                            <tr>
+                                                <th><b>BASE SALARIAL VACACIONES</b></th>
+                                            </tr>
+                                            <tr t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALCONTRACTO')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr t-foreach="doc.line_ids.filtered(lambda x: x.category_id.code == 'P12M')" t-as="line_ids">
+                                                <td>
+                                                    <span t-esc="line_ids.name" />
+                                                </td>
+                                                <td class="text-right" >
+                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong><b>TOTAL</b></strong></td>
+                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO12M')" t-as="line_ids">
+                                                  <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
+                                                </td>
+                                            </tr>
+                                    </table>
+                                    </td>
+                                    </tr>
+                                    </table>
+
+                                    <hr></hr>
                                     <tr><td style="width:55%;">
                                     <table style="width:100%; margin-left:5px; font-size:12px">
                                             <tr style="height:10%; font-size:12px">
-                                                <th><b>SALARIO BASE DE LIQUIDACION</b></th>
+                                                <th><b>LIQUIDACION DE PRESTACIONES SOCIALES</b></th>
                                                 <th class="text-right" ><b>VALOR</b></th>
                                                 <th class="text-center" ><b>DIAS LIQUIDADOS</b></th>
                                                 <th class="text-center" ><b>DIAS PAGOS</b></th>
                                                 <th class="text-right" ><b>VALOR BASE</b></th>
                                             </tr>
-                                            <tr style="height:10%; font-size:12px">
-                                                <th><b>SALARIO PROMEDIO ANUAL</b></th>
-                                            </tr>
-                                            <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALCONTRACTO')" t-as="line_ids">
-                                                <td>
-                                                    <span t-esc="line_ids.name" />
-                                                </td>
-                                                <td class="text-right" >
-                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.category_id.code == 'PA')" t-as="line_ids">
-                                                <td>
-                                                    <span t-esc="line_ids.name" />
-                                                </td>
-                                                <td class="text-right" >
-                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong><b>TOTAL PROMEDIO ANUAL</b></strong></td>
-                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO_P_YEARS')" t-as="line_ids">
-                                                  <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <br></br>
-                                            <tr style="height:10%; font-size:12px">
-                                                <th><b>SALARIO PROMEDIO 12 MESES ATRAS</b></th>
-                                            </tr>
-                                            <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALCONTRACTO')" t-as="line_ids">
-                                                <td>
-                                                    <span t-esc="line_ids.name" />
-                                                </td>
-                                                <td class="text-right" >
-                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.category_id.code == 'P12M')" t-as="line_ids">
-                                                <td>
-                                                    <span t-esc="line_ids.name" />
-                                                </td>
-                                                <td class="text-right" >
-                                                    <span t-esc="line_ids.total" t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong><b>TOTAL PROMEDIO 12 MESES ATRAS</b></strong></td>
-                                                <td style="border-top: 1px solid black" class="text-right" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'SALARIO12M')" t-as="line_ids">
-                                                  <span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/>
-                                                </td>
-                                            </tr>
-                                            <tr><td><strong><b>LIQUIDACION DE PRESTACIONES SOCIALES</b></strong></td></tr>
                                             <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PRIMA')" t-as="line_ids">
                                                 <td>
                                                     <span t-field="line_ids.name" />
                                                     <t t-if="mes_liq &lt;= 6 and dia_liq &lt;= 31">
-                                                        <t t-if="fecha_ini_contrato &lt;= fecha_liq">
+                                                        <t t-if="fecha_liq &lt;=fecha_ini_contrato">
                                                              01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
                                                         </t>
                                                         <t t-else="">
@@ -197,7 +239,7 @@
                                                         </t>
                                                     </t>
                                                     <t t-if="mes_liq &lt;= 12 and dia_liq &lt;= 31">
-                                                        <t t-if="fecha_ini_contrato &lt;= fecha_liq">
+                                                        <t t-if="fecha_liq &lt;=fecha_ini_contrato">
                                                              07-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
                                                         </t>
                                                         <t t-else="">

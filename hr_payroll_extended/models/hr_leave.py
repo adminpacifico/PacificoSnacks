@@ -127,6 +127,12 @@ class HrLeave(models.Model):
                             if date_to.day == 31:
                                 date_to = date_to - relativedelta(days=1)
                             total_days12y = days360(hm12_date_init, date_to) + 1
+
+                            if total_days12y < 30:
+                                day_base = total_days12y
+                            else:
+                                day_base = 30
+
                             extradiurna_amount = 0
                             extradiurnafestivo_amount = 0
                             extranocturna_amount = 0
@@ -151,19 +157,19 @@ class HrLeave(models.Model):
                                     recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
 
                             if not extradiurna_amount == 0:
-                                extradiurna_amount = (extradiurna_amount / total_days12y) * 30
+                                extradiurna_amount = (extradiurna_amount / total_days12y) * day_base
                             if not extradiurnafestivo_amount == 0:
-                                extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * 30
+                                extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * day_base
                             if not extranocturna_amount == 0:
-                                extranocturna_amount = (extranocturna_amount / total_days12y) * 30
+                                extranocturna_amount = (extranocturna_amount / total_days12y) * day_base
                             if not extranocturnafestivo_amount == 0:
-                                extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * 30
+                                extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * day_base
                             if not recargonocturno_amount == 0:
-                                recargonocturno_amount = (recargonocturno_amount / total_days12y) * 30
+                                recargonocturno_amount = (recargonocturno_amount / total_days12y) * day_base
                             if not recargodiurnofestivo_amount == 0:
-                                recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * 30
+                                recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * day_base
                             if not recargonocturnofestivo_amount == 0:
-                                recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * 30
+                                recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * day_base
 
                             total_extra_hour = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
 
@@ -179,6 +185,10 @@ class HrLeave(models.Model):
                             if date_to.day == 31:
                                 date_to = date_to - relativedelta(days=1)
                             total_dayl12 = days360(lm12_date_init, date_to) + 1
+                            if total_dayl12 < 30:
+                                day_base = total_dayl12
+                            else:
+                                day_base = 30
                             amountb = 0
                             amountc = 0
                             for loans in inputs_loans_12month_before:
@@ -187,9 +197,9 @@ class HrLeave(models.Model):
                                 if loans[1] == 'COMISION':
                                     amountc = amountc + loans[2]
                             if not amountb == 0:
-                                amountb = (amountb / total_dayl12) * 30
+                                amountb = (amountb / total_dayl12) * day_base
                             if not amountc == 0:
-                                amountc = (amountc / total_dayl12) * 30
+                                amountc = (amountc / total_dayl12) * day_base
 
                         record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc)/30) * record.number_of_days))
                 else:

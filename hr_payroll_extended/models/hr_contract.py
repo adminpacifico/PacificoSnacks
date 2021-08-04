@@ -68,7 +68,7 @@ class HrContract(models.Model):
            # time_worked = (date_to - date_from).days
             time_worked = days360( date_from ,date_to)
             time_worked = time_worked+1
-            if float(time_worked) >= 30:
+            if float(time_worked) > 0:
                 accumulated_vacation = (time_worked/30) * 1.25
             else:
                 accumulated_vacation = 0
@@ -85,7 +85,7 @@ class HrContract(models.Model):
 
     def get_vacations_available(self):
         for record in self:
-            record.vacations_available = int(record.accumulated_vacation) - record.vacation_used
+            record.vacations_available = record.accumulated_vacation - record.vacation_used
 
     def get_history(self):
         for record in self:
