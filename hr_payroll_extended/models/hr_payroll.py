@@ -98,11 +98,11 @@ class HrPayslip(models.Model):
 
     def get_inputs_hora_extra_6month(self, contract_id, date_from, date_to):
 
-        if self.date_from.month <= 6 and self.date_from.day <= 31:
-            date_init_year = date(self.date_from.year, 1, 1)
+        if date_from.month <= 6 and date_from.day <= 31:
+            date_init_year = date(date_from.year, 1, 1)
 
-        elif self.date_from.month <= 12 and self.date_from.day <= 31:
-            date_init_year = date(self.date_from.year, 7, 1)
+        elif date_from.month <= 12 and date_from.day <= 31:
+            date_init_year = date(date_from.year, 7, 1)
 
         if contract_id.date_start <= date_init_year:
             date_init = date_init_year
@@ -213,11 +213,11 @@ class HrPayslip(models.Model):
         return loans_ids
 
     def get_inputs_loans_6month(self, contract_id, date_from, date_to):
-        if self.date_from.month <= 6 and self.date_from.day <= 31:
-            date_init_year = date(self.date_from.year, 1, 1)
+        if date_from.month <= 6 and date_from.day <= 31:
+            date_init_year = date(date_from.year, 1, 1)
 
-        elif self.date_from.month <= 12 and self.date_from.day <= 31:
-            date_init_year = date(self.date_from.year, 7, 1)
+        elif date_from.month <= 12 and date_from.day <= 31:
+            date_init_year = date(date_from.year, 7, 1)
 
         if contract_id.date_start <= date_init_year:
             date_init = date_init_year
