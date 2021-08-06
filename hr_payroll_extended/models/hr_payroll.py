@@ -1755,7 +1755,7 @@ class HrPayslip(models.Model):
 
                     leave_lmaternidad_days = leave_lmaternidad_hours / contract.resource_calendar_id.hours_per_day
 
-                    if leave_lmaternidad_days > 15 and self.date_to == 31:
+                    if leave_lmaternidad_days > 15 and self.date_to.day == 31:
                         leave_lmaternidad_days = leave_lmaternidad_days - 1
                         leave_lmaternidad_hours = leave_lmaternidad_hours - contract.resource_calendar_id.hours_per_day
 
@@ -1794,7 +1794,7 @@ class HrPayslip(models.Model):
 
                         leave_lpaternidad_days = leave_lpaternidad_hours / contract.resource_calendar_id.hours_per_day
 
-                        if leave_lpaternidad_days > 15 and self.date_to == 31:
+                        if leave_lpaternidad_days > 15 and self.date_to.day == 31:
                             leave_lpaternidad_days = leave_lpaternidad_days - 1
                             leave_lpaternidad_hours = leave_lpaternidad_hours - contract.resource_calendar_id.hours_per_day
 
