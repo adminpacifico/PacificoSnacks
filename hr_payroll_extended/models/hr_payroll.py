@@ -1755,6 +1755,10 @@ class HrPayslip(models.Model):
 
                     leave_lmaternidad_days = leave_lmaternidad_hours / contract.resource_calendar_id.hours_per_day
 
+                    if leave_lmaternidad_days > 15 and self.date_to == 31:
+                        leave_lmaternidad_days = leave_lmaternidad_days - 1
+                        leave_lmaternidad_hours = leave_lmaternidad_hours - contract.resource_calendar_id.hours_per_day
+
                     work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LICENCIAMATERNIDADS')],limit=1)
                     leave_lm = {
                         'sequence': work_entry_type.sequence,
@@ -1789,6 +1793,10 @@ class HrPayslip(models.Model):
                             leave_lpaternidad_hours += s.duration
 
                         leave_lpaternidad_days = leave_lpaternidad_hours / contract.resource_calendar_id.hours_per_day
+
+                        if leave_lpaternidad_days > 15 and self.date_to == 31:
+                            leave_lpaternidad_days = leave_lpaternidad_days - 1
+                            leave_lpaternidad_hours = leave_lpaternidad_hours - contract.resource_calendar_id.hours_per_day
 
                         work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LICENCIAPATERNIDADS')],
                                                                                 limit=1)
