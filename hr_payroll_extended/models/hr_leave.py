@@ -53,6 +53,119 @@ class HrLeave(models.Model):
     holiday = fields.Float(string="Días Festivos", default=0)
     manual_data = fields.Boolean(string="Carga Manual", default=False)
 
+    amount_license = fields.Float(string="Base para pago")
+
+    @api.onchange('date_from', 'date_to', 'employee_id', 'holiday_status_id', 'number_of_days')
+    def get_amount_license(self):
+        for record in self:
+            contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id),('state','=','open')])
+            if contracts and record.holiday_status_id.name == 'Licencia de Maternidad' or contracts and record.holiday_status_id.name == 'Licencia de Paternidad':
+                for contract in contracts:
+                    salary = contract.wage
+                    total_extra_hour = 0
+                    amountb = 0
+                    amountc = 0
+                    date_from = str(record.date_from)
+                    date_to = str(record.date_from)
+                    date_to = dateutil.parser.parse(date_to).date()
+                    date_from = dateutil.parser.parse(date_from).date()
+
+                    if date_to.day <= 15:
+                        date_to = date(date_to.year, date_to.month, 15)
+
+                    if date_to.day > 15 and date_to.day <= 31:
+                        date_to = date(date_to.year, date_to.month, 30)
+
+                    horas_extras_12month_before = record.env['hr.payslip'].get_inputs_hora_extra_12month_before(contract, date_from, date_to)
+                    if horas_extras_12month_before:
+                        hm12_date_ini = date_to - relativedelta(months=12)
+                        hm12_date_ini = hm12_date_ini + relativedelta(days=1)
+                        if contract.date_start <= hm12_date_ini:
+                            hm12_date_init = hm12_date_ini
+                        else:
+                            hm12_date_init = contract.date_start
+                        # total_days12y = days_between(hm12_date_init, date_to)
+                        if date_to.day == 31:
+                            date_to = date_to - relativedelta(days=1)
+                        total_days12y = days360(hm12_date_init, date_to) + 1
+
+                        if total_days12y < 30:
+                            day_base = total_days12y
+                        else:
+                            day_base = 30
+
+                        extradiurna_amount = 0
+                        extradiurnafestivo_amount = 0
+                        extranocturna_amount = 0
+                        extranocturnafestivo_amount = 0
+                        recargonocturno_amount = 0
+                        recargodiurnofestivo_amount = 0
+                        recargonocturnofestivo_amount = 0
+                        for hora in horas_extras_12month_before:
+                            if hora[1] == 'EXTRADIURNA':
+                                extradiurna_amount = extradiurna_amount + hora[2]
+                            if hora[1] == 'EXTRADIURNAFESTIVO':
+                                extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                            if hora[1] == 'EXTRANOCTURNA':
+                                extranocturna_amount = extranocturna_amount + hora[2]
+                            if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                                extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                            if hora[1] == 'RECARGONOCTURNO':
+                                recargonocturno_amount = recargonocturno_amount + hora[2]
+                            if hora[1] == 'RECARGODIURNOFESTIVO':
+                                recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                            if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                                recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+
+                        if not extradiurna_amount == 0:
+                            extradiurna_amount = (extradiurna_amount / total_days12y) * day_base
+                        if not extradiurnafestivo_amount == 0:
+                            extradiurnafestivo_amount = (extradiurnafestivo_amount / total_days12y) * day_base
+                        if not extranocturna_amount == 0:
+                            extranocturna_amount = (extranocturna_amount / total_days12y) * day_base
+                        if not extranocturnafestivo_amount == 0:
+                            extranocturnafestivo_amount = (extranocturnafestivo_amount / total_days12y) * day_base
+                        if not recargonocturno_amount == 0:
+                            recargonocturno_amount = (recargonocturno_amount / total_days12y) * day_base
+                        if not recargodiurnofestivo_amount == 0:
+                            recargodiurnofestivo_amount = (recargodiurnofestivo_amount / total_days12y) * day_base
+                        if not recargonocturnofestivo_amount == 0:
+                            recargonocturnofestivo_amount = (recargonocturnofestivo_amount / total_days12y) * day_base
+
+                        total_extra_hour = extradiurna_amount + extradiurnafestivo_amount + extranocturna_amount + extranocturnafestivo_amount + recargonocturno_amount + recargodiurnofestivo_amount + recargonocturnofestivo_amount
+
+                    inputs_loans_12month_before = record.env['hr.payslip'].get_inputs_loans_12month_before(contract, date_from, date_to)
+                    if inputs_loans_12month_before:
+                        lm12_date_ini = date_to - relativedelta(months=12)
+                        lm12_date_ini = lm12_date_ini + relativedelta(days=1)
+                        if contract.date_start <= lm12_date_ini:
+                            lm12_date_init = lm12_date_ini
+                        else:
+                            lm12_date_init = contract.date_start
+                        # total_dayl12 = days_between(lm12_date_init, date_to)
+                        if date_to.day == 31:
+                            date_to = date_to - relativedelta(days=1)
+                        total_dayl12 = days360(lm12_date_init, date_to) + 1
+                        if total_dayl12 < 30:
+                            day_base = total_dayl12
+                        else:
+                            day_base = 30
+                        amountb = 0
+                        amountc = 0
+                        for loans in inputs_loans_12month_before:
+                            if loans[1] == 'BONIFICACION':
+                                amountb = amountb + loans[2]
+                            if loans[1] == 'COMISION':
+                                amountc = amountc + loans[2]
+                        if not amountb == 0:
+                            amountb = (amountb / total_dayl12) * day_base
+                        if not amountc == 0:
+                            amountc = (amountc / total_dayl12) * day_base
+
+                    record.amount_license = round((salary + total_extra_hour + amountb + amountc))
+            else:
+                record.amount_license = 0
+
     @api.onchange('employee_id')
     def onchange_employee(self):
         for record in self:

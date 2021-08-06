@@ -20,6 +20,7 @@
 				<field name="holiday" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones a liquidar'))]}"/>
 				<field name="workday" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones a liquidar'))]}"/>
 				<field name="amount_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero','Vacaciones a liquidar'))]}" />
+				<field name="amount_license" attrs="{'invisible': [('holiday_status_name','not in',('Licencia de Maternidad','Licencia de Paternidad'))]}" />
 				<field name="manual_data" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
 				<field name="days_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
 			</xpath>

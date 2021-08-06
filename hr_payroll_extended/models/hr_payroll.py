@@ -1459,10 +1459,10 @@ class HrPayslip(models.Model):
                 }
                 res.append(attendances_total)
 
+
                 # Dias de vacaciones en dinero
                 vacations_money = self.env['hr.leave'].search([('employee_id', '=', self.employee_id.id),
-                                                               #('holiday_status_name', '=', 'Vacaciones en dinero'),
-                                                               ('holiday_status_id', '=', 8),
+                                                               ('holiday_status_id.code', '=', 'VACATIONS_MONEY'),
                                                                ("date_from", ">=", self.date_from),
                                                                ("date_to", "<=", self.date_to),
                                                                ('state', '=', 'validate')])
@@ -1485,8 +1485,7 @@ class HrPayslip(models.Model):
 
                 # Dias de vacaciones en dinero a liquidar
                 vacations_money_liq = self.env['hr.leave'].search([('employee_id', '=', self.employee_id.id),
-                                                               #('holiday_status_name', '=', 'Vacaciones en dinero a liquidar'),
-                                                               ('holiday_status_id', '=', 10),
+                                                               ('holiday_status_id.code', '=', 'VACATIONS_MONEY_LIQ'),
                                                                ("date_from", ">=", self.date_from),
                                                                ("date_to", "<=", self.date_to),
                                                                ('state', '=', 'validate')])
@@ -1734,6 +1733,77 @@ class HrPayslip(models.Model):
                 if not leave_sickness_days_total == 0:
                     res.append(totalae)
 
+                # Dias Licencia Maternidad
+
+                lmaternidad_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("work_entry_type_id.code", "=",
+                                                                        'LICENCIAMATERNIDAD'),
+                                                                       ("employee_id", "=",
+                                                                        contract.employee_id.id)])
+                for lm in lmaternidad_all.leave_id:
+                    leave_days_total = lm.number_of_days
+                    leave_hours_total = lm.number_of_days * contract.resource_calendar_id.hours_per_day
+                    amount_license_total = lm.amount_license
+                    leave_lmaternidad = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("leave_id", "=", lm.id),
+                                                                       ])
+                    leave_lmaternidad_hours = 0
+                    for s in leave_lmaternidad:
+                        leave_lmaternidad_hours += s.duration
+
+                    leave_lmaternidad_days = leave_lmaternidad_hours / contract.resource_calendar_id.hours_per_day
+
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LICENCIAMATERNIDADS')],limit=1)
+                    leave_lm = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': leave_lmaternidad_days,
+                        'number_of_hours': leave_lmaternidad_hours,
+                        'number_of_days_total': leave_days_total,
+                        'number_of_hours_total': leave_hours_total,
+                        'amount': amount_license_total,
+                    }
+                    res.append(leave_lm)
+
+                    # Dias Licencia pareternidad
+
+                    lpaternidad_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                        ("date_stop", "<=", self.date_to),
+                                                                        ("work_entry_type_id.code", "=",
+                                                                         'LICENCIAPATERNIDAD'),
+                                                                        ("employee_id", "=",
+                                                                         contract.employee_id.id)])
+                    for lp in lpaternidad_all.leave_id:
+                        leave_days_total = lp.number_of_days
+                        leave_hours_total = lp.number_of_days * contract.resource_calendar_id.hours_per_day
+                        amount_license_total = lp.amount_license
+                        leave_lpaternidad = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                              ("date_stop", "<=", self.date_to),
+                                                                              ("leave_id", "=", lm.id),
+                                                                              ])
+                        leave_lpaternidad_hours = 0
+                        for s in leave_lpaternidad:
+                            leave_lpaternidad_hours += s.duration
+
+                        leave_lpaternidad_days = leave_lpaternidad_hours / contract.resource_calendar_id.hours_per_day
+
+                        work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LICENCIAPATERNIDADS')],
+                                                                                limit=1)
+                        leave_lp = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type.id,
+                            'name': work_entry_type.code,
+                            'number_of_days': leave_lpaternidad_days,
+                            'number_of_hours': leave_lpaternidad_hours,
+                            'number_of_days_total': leave_days_total,
+                            'number_of_hours_total': leave_hours_total,
+                            'amount': amount_license_total,
+                        }
+                        res.append(leave_lp)
+
                 # Horas Extras (# horas y valor x hora)
                 horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
                 if horas_extras:
@@ -1872,6 +1942,7 @@ class HrPayslip(models.Model):
                             'amount': recargonocturnofestivo_amount,
                         }
                         res.append(hours_e)
+
             else:
                 # Asistencia
                 attendance_line = {

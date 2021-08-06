@@ -115,11 +115,11 @@ class PrestacionesReport(models.TransientModel):
                 init_date_prima = date(self.date_creation.year, 7, 1)
 
             if c.date_start <= init_date_prima:
-                init_date_prima = init_date_prima
+                date_init_prima = init_date_prima
             else:
-                init_date_prima = c.date_start
+                date_init_prima = c.date_start
 
-            dias_labor_prima = days360(init_date_prima, self.date_creation) + 1
+            dias_labor_prima = days360(date_init_prima, self.date_creation) + 1
 
             dias_liq_prima = dias_labor_prima / 360
 
@@ -255,13 +255,14 @@ class PrestacionesReport(models.TransientModel):
             total_prima = valor_unit_prima * dias_liq_prima
 
             # ---------------------- FECHA INICIAL CESANTIAS -----------------------
-            init_year = date(c.date_start.year, 1, 1)
+            init_year = date(date_from.year, 1, 1)
             if c.date_start <= init_year:
-                date_init = init_year
+                date_init_ces = init_year
             else:
-                date_init = c.date_start
+                date_init_ces = c.date_start
 
-            dias_labor_ces = days360(date_init, self.date_creation) + 1
+
+            dias_labor_ces = days360(date_init_ces, self.date_creation) + 1
 
             dias_liq_ces = dias_labor_ces / 360
 
@@ -274,6 +275,7 @@ class PrestacionesReport(models.TransientModel):
             amountc = 0
             date_from = self.date_creation
             date_to = self.date_creation
+
 
             hora_extra_year_now = self.env['hr.payslip'].get_inputs_hora_extra_year_now(c,date_from,date_to)
             if hora_extra_year_now:
@@ -536,7 +538,7 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, 'Cesantias')
             col += 1
 
-            ws.write(fila, col, '') if not date_init else ws.write(fila, col, date_init, format_date)
+            ws.write(fila, col, '') if not date_init_ces else ws.write(fila, col, date_init_ces, format_date)
             col += 1
 
             ws.write(fila, col, self.date_creation, format_date)
@@ -573,7 +575,7 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, 'Intereses Cesantias')
             col += 1
 
-            ws.write(fila, col, '') if not date_init else ws.write(fila, col, date_init, format_date)
+            ws.write(fila, col, '') if not date_init_ces else ws.write(fila, col, date_init_ces, format_date)
             col += 1
 
             ws.write(fila, col, self.date_creation, format_date)
@@ -611,7 +613,7 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, 'Vacaciones')
             col += 1
 
-            ws.write(fila, col, '') if not date_init else ws.write(fila, col, c.vacations_date, format_date)
+            ws.write(fila, col, '') if not c.vacations_date else ws.write(fila, col, c.vacations_date, format_date)
             col += 1
 
             ws.write(fila, col, self.date_creation, format_date)
