@@ -187,6 +187,11 @@ class VacationsReport(models.TransientModel):
                 date_creation = date_creation - relativedelta(days=1)
             total_days12y = days360(hm12_date_init, date_creation) + 1
 
+            if total_days12y < 30:
+                day_base = total_days12y
+            else:
+                day_base = 30
+
             for hora in horas_extras_12month_before:
                 if hora[1] == 'EXTRADIURNA':
                     extradiurna_amount = extradiurna_amount + hora[2]
@@ -203,13 +208,13 @@ class VacationsReport(models.TransientModel):
                 if hora[1] == 'RECARGONOCTURNOFESTIVO':
                     recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
 
-            extradiurna12m = (extradiurna_amount / total_days12y) * 30
-            extradiurnafestivo12m = (extradiurnafestivo_amount / total_days12y) * 30
-            extranocturna12m = (extranocturna_amount / total_days12y) * 30
-            extranocturnafestivo12m = (extranocturnafestivo_amount / total_days12y) * 30
-            recargonocturno12m = (recargonocturno_amount / total_days12y) * 30
-            recargodiurnofestivo12m = (recargodiurnofestivo_amount / total_days12y) * 30
-            recargonocturnofestivo12m = (recargonocturnofestivo_amount / total_days12y) * 30
+            extradiurna12m = (extradiurna_amount / total_days12y) * day_base
+            extradiurnafestivo12m = (extradiurnafestivo_amount / total_days12y) * day_base
+            extranocturna12m = (extranocturna_amount / total_days12y) * day_base
+            extranocturnafestivo12m = (extranocturnafestivo_amount / total_days12y) * day_base
+            recargonocturno12m = (recargonocturno_amount / total_days12y) * day_base
+            recargodiurnofestivo12m = (recargodiurnofestivo_amount / total_days12y) * day_base
+            recargonocturnofestivo12m = (recargonocturnofestivo_amount / total_days12y) * day_base
 
             #ws.write(fila, 11, 0, format_number1) if not total_dias else ws.write(fila, 11, extradiurna12m, format_number1)
             #ws.write(fila, 12, 0, format_number1) if not total_dias else ws.write(fila, 12, extradiurnafestivo12m, format_number1)
@@ -233,14 +238,19 @@ class VacationsReport(models.TransientModel):
                 date_creation = date_creation - relativedelta(days=1)
             total_dayl12 = days360(lm12_date_init, date_creation) + 1
 
+            if total_dayl12 < 30:
+                day_base = total_dayl12
+            else:
+                day_base = 30
+
             for loans in inputs_loans_12month_before:
                 if loans[1] == 'BONIFICACION':
                     amountb = amountb + loans[2]
                 if loans[1] == 'COMISION':
                     amountc = amountc + loans[2]
 
-            bonificacion12m = (amountb / total_dayl12) * 30
-            comision12m = (amountc / total_dayl12) * 30
+            bonificacion12m = (amountb / total_dayl12) * day_base
+            comision12m = (amountc / total_dayl12) * day_base
 
             #ws.write(fila, 18, 0, format_number1) if not total_dias else ws.write(fila, 11, bonificacion12m, format_number1)
             #ws.write(fila, 19, 0, format_number1) if not total_dias else ws.write(fila, 11, comision12m, format_number1)
