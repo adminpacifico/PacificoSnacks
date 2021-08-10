@@ -12,6 +12,7 @@
                      <field name="modo" required="1"/>
                      <field name="empleado" attrs="{'invisible': [['modo','!=','1']], 'required': [('modo','=','1')]}"/>
                      <field name="departamento" attrs="{'invisible': [['modo','!=','2']], 'required': [('modo','=','2')]}"/>
+                     <field name="date_creation"/>
                 </group>
                 <footer>
                     <button name="do_report" string="Generar" type="object" class="oe_highlight"/>
