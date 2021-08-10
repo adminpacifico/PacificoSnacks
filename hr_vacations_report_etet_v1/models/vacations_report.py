@@ -29,7 +29,7 @@ class VacationsReport(models.TransientModel):
     modo = fields.Selection(string="Generar reporte por:", selection=[('1', 'Empleado'), ('2', 'Estructura'),('3', 'General')])
     empleado = fields.Many2one('hr.employee', string='Empleado')
     departamento = fields.Many2one('hr.department', string='Departamento')
-    date_creation = fields.Date('Created Date', default=fields.Date.today())
+    date_creation = fields.Date(string='Fecha')
     hora = time.strftime('%Y-%m-%d')
 
     def do_report(self):
@@ -54,7 +54,9 @@ class VacationsReport(models.TransientModel):
         else:
             contratos = self.env['hr.contract'].search([('employee_id', '!=', False), ('state', '=', 'open')])
 
-        date_creation = fields.Date.today()
+        date_creation = self.date_creation
+        #date_creation = fields.Date.today()
+
         hora = time.strftime('%H:%M:%S')
         if not contratos:
             raise Warning(_('!No hay resultados para los datos seleccionados¡'))
@@ -123,8 +125,7 @@ class VacationsReport(models.TransientModel):
             ws.write(fila, 0, '') if not cont.employee_id.identification_id else ws.write(fila, 0, cont.employee_id.identification_id)
             ws.write(fila, 1, '') if not cont.employee_id.name else ws.write(fila, 1, cont.employee_id.name)
             ws.write(fila, 2, '') if not cont.date_start else ws.write(fila, 2, cont.date_start, format_date)
-            dias_calculo = date_creation - cont.date_start
-            dias_lab = dias_calculo.days
+            dias_lab = days360(cont.date_start, date_creation) + 1
             ws.write(fila, 3, 0) if not dias_lab else ws.write(fila, 3, dias_lab)
             ws.write(fila, 4, 0) if not cont.vacations_available else ws.write(fila, 4, cont.vacations_available)
 
@@ -239,7 +240,7 @@ class VacationsReport(models.TransientModel):
                     amountc = amountc + loans[2]
 
             bonificacion12m = (amountb / total_dayl12) * 30
-            comision12m = (amountb / total_dayl12) * 30
+            comision12m = (amountc / total_dayl12) * 30
 
             #ws.write(fila, 18, 0, format_number1) if not total_dias else ws.write(fila, 11, bonificacion12m, format_number1)
             #ws.write(fila, 19, 0, format_number1) if not total_dias else ws.write(fila, 11, comision12m, format_number1)
