@@ -70,12 +70,6 @@ class HrLeave(models.Model):
                     date_to = dateutil.parser.parse(date_to).date()
                     date_from = dateutil.parser.parse(date_from).date()
 
-                    if date_to.day <= 15:
-                        date_to = date(date_to.year, date_to.month, 15)
-
-                    if date_to.day > 15 and date_to.day <= 31:
-                        date_to = date(date_to.year, date_to.month, 30)
-
                     horas_extras_12month_before = record.env['hr.payslip'].get_inputs_hora_extra_12month_before(contract, date_from, date_to)
                     if horas_extras_12month_before:
                         hm12_date_ini = date_to - relativedelta(months=12)
