@@ -30,6 +30,11 @@ class HrContract(models.Model):
     _inherit = "hr.contract"
     _description = "Employee Contract"
 
+    # Informacion salarial
+    retention_method = fields.Selection(string='Metodo de rétencion', selection=[('NA', 'No aplica'),('M1', 'Metodo 1'),('M2', 'Metodo 2')], default='NA', required=True )
+    integral_salary = fields.Boolean(string="Salario Integral", default=False)
+
+    # Historial de vacciones
     vacation_initial = fields.Float(string="Vacaciones iniciales Disfrutadas", default=0)
     accumulated_vacation = fields.Float(string="Vacaciones Acumuladas", compute='get_accumulated_vacation' )
     vacation_used = fields.Float(string="Vacaciones Disfrutadas", compute='get_vacation_used')
@@ -37,9 +42,9 @@ class HrContract(models.Model):
     vacations_history = fields.Many2many('hr.leave' ,string="Historial", compute='get_history')
     vacations_date = fields.Date(string="Periodo Trabajado promedio", compute='get_vacations_date')
 
-    retention_method = fields.Selection(string='Metodo de rétencion', selection=[('NA', 'No aplica'),('M1', 'Metodo 1'),('M2', 'Metodo 2')], default='NA', required=True )
-    integral_salary = fields.Boolean(string="Salario Integral", default=False)
-
+    # Suspencion de trabajo
+    suspension = fields.Float(string="Suspensión de trabajo", compute='get_suspension')
+    suspension_history = fields.Many2many('hr.leave', string="Historial", compute='get_suspension_history')
 
     @api.onchange('wage')
     def _integral_salary(self):
@@ -55,7 +60,6 @@ class HrContract(models.Model):
         for record in self:
             dias_promedio_trabajado = (record.vacation_used * 365) / 15
             record.vacations_date = record.date_start + relativedelta(days=int(dias_promedio_trabajado))
-
 
     def get_accumulated_vacation(self):
         for record in self:
@@ -90,6 +94,18 @@ class HrContract(models.Model):
     def get_history(self):
         for record in self:
             record.vacations_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('contract_id', '=', record.id), ('holiday_status_id.code', 'in', ('VACATIONS','VACATIONS_MONEY','VACATIONS_LIQ','VACATIONS_MONEY_LIQ')), ('state', '=', 'validate')])
+
+    def get_suspension(self):
+        for record in self:
+            suspensions = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('contract_id', '=', record.id), ('holiday_status_id.code','=','SUSPENSION'), ('state', '=', 'validate')])
+            suspension = 0
+            for s in suspensions:
+                suspension = suspension + s.workday
+            record.suspension = suspension
+
+    def get_suspension_history(self):
+        for record in self:
+            record.suspension_history = record.env['hr.leave'].search([('employee_id', '=', record.employee_id.id), ('contract_id', '=', record.id), ('holiday_status_id.code','=','SUSPENSION'), ('state', '=', 'validate')])
 
     def get_all_structures(self):
         """

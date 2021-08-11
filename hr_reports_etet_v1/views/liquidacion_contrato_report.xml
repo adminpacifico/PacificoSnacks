@@ -116,7 +116,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Dias Suspención </strong></td>
-                                                    <td><span t-field="doc.contract_id.notice_days"/> </td>
+                                                    <td><span t-esc="int(doc.contract_id.suspension"/> </td>
                                                 </tr>
 
                                             </table>
