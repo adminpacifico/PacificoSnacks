@@ -117,7 +117,6 @@ class HrPayslip(models.Model):
         horas_extras = self._cr.fetchall()
         return horas_extras
 
-
     def get_inputs_loans(self, contract_id, date_from, date_to):
         self._cr.execute(''' SELECT i.name, i.code, l.amount, i.id
                                 FROM hr_loan_line l
@@ -321,6 +320,15 @@ class HrPayslip(models.Model):
                                 ORDER BY i.code ''',(contract_id.id,))
         loans_fijos_ids = self._cr.fetchall()
         return loans_fijos_ids
+
+    def get_suspensions_day(self, contract_id, date_from, date_to):
+        suspensions = self.env['hr.leave'].search([('contract_id', '=', contract_id.id),('holiday_status_id.code', '=', 'SUSPENSION'),
+                                                   ('state', '=', 'validate'), ("date_from", ">=", date_from), ("date_to", "<=", date_to)])
+        suspension = 0
+        for s in suspensions:
+            suspension = suspension + s.workday
+
+        return suspension
 
     @api.model
     def get_inputs(self, contracts, date_from, date_to):
@@ -1518,6 +1526,8 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_year_days = days360(date_init, date_to)+1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
                 attendances_year_total = {
@@ -1532,12 +1542,47 @@ class HrPayslip(models.Model):
                 }
                 res.append(attendances_year_total)
 
+                # Dias semestrales trabajados
+
+                if self.date_from.month <= 6 and self.date_from.day <= 31:
+                    date_init_year = date(self.date_from.year, 1, 1)
+
+                elif self.date_from.month <= 12 and self.date_from.day <= 31:
+                    date_init_year = date(self.date_from.year, 7, 1)
+
+                date_to = self.date_to
+                if contract.date_start <= date_init_year:
+                    date_init = date_init_year
+                else:
+                    date_init = contract.date_start
+                if date_to.day == 31:
+                    date_to = date_to - relativedelta(days=1)
+                total_year_days = days360(date_init, date_to) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYS6M')], limit=1)
+                attendances_year_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_year_total)
+
+
                 # Días trabajados desde inicio de contrato
                 date_to = self.date_to
                 date_init = contract.date_start
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_year_days = days360(date_init, date_to) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSCONTRACT')], limit=1)
                 attendances_yearc_total = {
@@ -1988,8 +2033,11 @@ class HrPayslip(models.Model):
                     date_init = contract.date_start
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
-                total_year_days = days360(date_init, date_to)+1
+                total_year_days = days360(date_init, date_to) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
                 attendances_year_total = {
                     'sequence': work_entry_type.sequence,
@@ -2019,6 +2067,8 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_year_days = days360(date_init, date_to) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYS6M')], limit=1)
                 attendances_year_total = {
@@ -2039,6 +2089,8 @@ class HrPayslip(models.Model):
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
                 total_year_days = days360(date_init, date_to) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_to)
+                total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSCONTRACT')], limit=1)
                 attendances_yearc_total = {
