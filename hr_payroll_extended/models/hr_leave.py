@@ -53,6 +53,11 @@ class HrLeave(models.Model):
     holiday = fields.Float(string="Días Festivos", default=0)
     manual_data = fields.Boolean(string="Carga Manual", default=False)
 
+    date_extended = fields.Boolean(string="Extensión de incapacidad", default=False)
+    #date_extended_id = fields.Many2one('hr.leave.date_extended', string='Historial de Extensión')
+    date_extended_id = fields.One2many('hr.leave.date_extended', 'leave_id', string='Historial de Extensión')
+    #date_extended_id = fields.Many2many('hr.leave.date_extended', 'leave_id', string='Historial de Extensión')
+
     amount_license = fields.Float(string="Base para pago")
 
     @api.onchange('date_from', 'date_to', 'employee_id', 'holiday_status_id', 'number_of_days')

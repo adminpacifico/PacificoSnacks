@@ -33,6 +33,27 @@
 					</field>
 				</page>
 			</xpath>
+			<xpath expr="//page[@name='information']" position="after">
+				<page string="Suspensiones" name="suspensions">
+					<group>
+						<group name="suspensions" string="Días de Suspensión">
+							<field name="suspension"/>
+						</group>
+					</group>
+					<group name="suspension history" string="Historial de Suspensión">
+					</group>
+					<field name="suspension_history">
+						<tree string="suspension_history_tree">
+							<field name="holiday_status_id" />
+							<field name="name" />
+							<field name="state" />
+							<field name="request_date_from" />
+							<field name="request_date_to" />
+							<field name="number_of_days" />
+						</tree>
+					</field>
+				</page>
+			</xpath>
 		</field>
 	</record>
 </odoo>

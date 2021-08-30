@@ -23,6 +23,13 @@
 				<field name="amount_license" attrs="{'invisible': [('holiday_status_name','not in',('Licencia de Maternidad','Licencia de Paternidad'))]}" />
 				<field name="manual_data" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
 				<field name="days_vacations" attrs="{'invisible': [('holiday_status_name','not in',('Vacaciones','Vacaciones en dinero','Vacaciones en dinero a liquidar','Vacaciones a liquidar'))]}" />
+				<field name="date_extended" attrs="{'invisible': [('holiday_status_name','not in',('Incapacidad General'))]}" />
+				<field name="date_extended_id" attrs="{'invisible': [('date_extended','!=',True)]}">
+					<tree string="Worked Days" editable="bottom" >
+						<field name="date_from"/>
+						<field name="date_to"/>
+					</tree>
+				</field>
 			</xpath>
 			<xpath expr="//field[@name='department_id']" position="before">
 				<field name="contract_id"/>
