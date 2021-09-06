@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+    <record id="plantilla_report_form" model="ir.ui.view">
+        <field name="name">plantilla.report.form</field>
+        <field name="model">plantilla.report</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="plantilla">
+                <group name="plantilla" string="plantilla">
+                        <!--<field name="lote" required="1"/>-->
+                        <field name="date_ini" required="1"/>
+                        <field name="date_fin" required="1"/>
+                        <!--<field name="nominas" required="1"/>-->
+
+                </group>
+                <footer>
+                    <button name="do_report" string="Generar" type="object" class="oe_highlight"/>
+                    <button string="Cancel" class="oe_link" special="cancel"/>
+                </footer>
+
+            </form>
+        </field>
+    </record>
+
+    <record id="plantilla_report_action" model="ir.actions.act_window">
+        <field name="name">plantilla.report.action</field>
+        <field name="res_model">plantilla.report</field>
+<!--        <field name="view_type">form</field>  -->
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="plantilla_report_form"/>
+    </record>
+
+    <menuitem
+        id="menu_plantilla_report"
+        parent="hr_payroll.menu_hr_payroll_report"
+        name="Plantilla Aportes en linea"
+        action="plantilla_report_action"
+        sequence="30"/>
+
+    </data>
+</odoo>
