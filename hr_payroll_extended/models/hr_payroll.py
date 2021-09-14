@@ -1302,6 +1302,34 @@ class HrPayslip(models.Model):
                         "name_input": 'Total Ingresos (1 Quincena)',
                     })
 
+            # Auxilio de Movilizacion Primera Quincena
+            get_inputs_aux_movilizacion = self.get_inputs_aux_movilizacion(contract, date_from, date_to)
+            if get_inputs_aux_movilizacion and date_from.day == 16:
+                aux_movilizacion_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_MOVILIZACION')], limit=1).id
+                if aux_movilizacion_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": get_inputs_aux_movilizacion.total,
+                        "payslip_id": self.id,
+                        "input_type_id": aux_movilizacion_type,
+                        "code_input": 'AUX_MOVILIZACION',
+                        "name_input": 'Auxilio de Movilización',
+                    })
+
+            # Rodamiento Primera Quincena
+            get_inputs_total_ingreso = self.get_inputs_total_ingreso(contract, date_from, date_to)
+            if get_inputs_total_ingreso and date_from.day == 16:
+                total_ingreso_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1).id
+                if total_ingreso_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": get_inputs_total_ingreso.total,
+                        "payslip_id": self.id,
+                        "input_type_id": total_ingreso_type,
+                        "code_input": 'NET115',
+                        "name_input": 'Total Ingresos (1 Quincena)',
+                    })
+
             # Total Deduciones para retencion en la fuente
             if contract.retention_method == 'M1':
                 # Deducciones

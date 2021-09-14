@@ -22,7 +22,7 @@ class HrPayslipLine(models.Model):
     _inherit = "hr.payslip.line"
     _description = "Payslip Line"
 
-    amount = fields.Float(digits=(0, 5))
+    amount = fields.Float(digits=(0, 8))
     rate = fields.Float(string='Rate (%)', digits=(0, 2), default=100.0)
 
     @api.depends('quantity', 'amount', 'rate')
