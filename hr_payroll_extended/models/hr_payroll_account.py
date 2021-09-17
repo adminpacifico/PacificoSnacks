@@ -136,45 +136,58 @@ class HrPayslip(models.Model):
 
     def _prepare_line_values(self, line, account_id, date, debit, credit):
 
+        analytic_tag_ids = False
+        analytic_account_id = False
+
         if line.code == 'ARL':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'arl')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'arl'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'CAJACOMPENSACION':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'ccf')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'ccf'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'SALUDEMPRESA':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'eps')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'eps'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'SALUDEMPLEADO':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'eps')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'eps'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'PENSIONEMPLEADO':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'PENSIONEMPRESA':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'CESANTIAS':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'FSP':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fsp')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fsp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'ICBF':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'icbf')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'icbf'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'SENA':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'sena')], limit=1).partner_id.id
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'sena'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         else:
             partner = line.employee_id.partner_id.id
 
         if line.salary_rule_id.analytic_account_id.id:
-            if line.salary_rule_id.analytic_account_id.tag_id.id:
-                analytic_tag_ids = (4, line.salary_rule_id.analytic_account_id.tag_id.id)
+            analytic_account_id = line.salary_rule_id.analytic_account_id.id
+            if line.salary_rule_id.analytic_account_id.tag_id.id and not line.salary_rule_id.tag_id:
+                tag_id = self.env['account.analytic.tag'].search([("id", "=", line.salary_rule_id.analytic_account_id.tag_id.id)]).id
+                analytic_tag_ids = (tag_id, tag_id)
             else:
-                raise ValidationError(_('La cuenta analitica ['+str(line.salary_rule_id.analytic_account_id.code)+
-                                        ' '+str(line.salary_rule_id.analytic_account_id.name)+'] no tiene etiqueta analitica'))
+                if line.salary_rule_id.tag_id.id:
+                    tag_id = self.env['account.analytic.tag'].search([("id", "=", line.salary_rule_id.tag_id.id)]).id
+                    analytic_tag_ids = (tag_id, tag_id)
+
         else:
             if line.slip_id.contract_id.analytic_account_id.id:
-                if line.slip_id.contract_id.analytic_account_id.tag_id.id:
-                    analytic_tag_ids = (4, line.slip_id.contract_id.analytic_account_id.tag_id.id)
+                analytic_account_id = line.slip_id.contract_id.analytic_account_id.id
+                if line.slip_id.contract_id.analytic_account_id.tag_id.id and not line.salary_rule_id.tag_id:
+                    tag_id = self.env['account.analytic.tag'].search([("id", "=", line.slip_id.contract_id.analytic_account_id.tag_id.id)]).id
+                    analytic_tag_ids = (tag_id, tag_id)
                 else:
-                    raise ValidationError(_('La cuenta analítica [' + str(line.slip_id.contract_id.analytic_account_id.code)
-                                            +' '+ str(line.slip_id.contract_id.analytic_account_id.name)
-                                            + '] no tiene etiqueta analítica asignada del contrato '+ line.slip_id.contract_id.name))
-            else:
-                raise ValidationError(_('El empleado ' + line.slip_id.contract_id.employee_id.name+' no tiene asignada una cuenta analítica en su contrato'))
+                    if line.salary_rule_id.tag_id.id:
+                        tag_id = self.env['account.analytic.tag'].search( [("id", "=", line.salary_rule_id.tag_id.id)]).id
+                        analytic_tag_ids = (tag_id, tag_id)
+
+        account = self.env['account.account'].search([("id", "=", account_id)])
+        if account:
+            if account.blocking_analytic_payroll == True:
+                analytic_tag_ids = False
+                analytic_account_id = False
 
         return {
             'name': line.name,
@@ -184,6 +197,6 @@ class HrPayslip(models.Model):
             'date': date,
             'debit': debit,
             'credit': credit,
-            'analytic_account_id': line.salary_rule_id.analytic_account_id.id or line.slip_id.contract_id.analytic_account_id.id,
-            #'analytic_tag_ids': analytic_tag_ids
+            'analytic_account_id': analytic_account_id,
+            'analytic_tag_ids': analytic_tag_ids
         }

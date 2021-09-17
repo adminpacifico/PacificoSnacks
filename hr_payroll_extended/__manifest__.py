@@ -38,6 +38,8 @@
         'views/hr_payroll_structure_view.xml',
         'views/account_analytic_account_view.xml',
         'views/hr_payroll_payslips_by_employees_views.xml',
+        'views/hr_salary_rule_view.xml',
+        'views/account_account_view.xml',
         'wizard/generate_hr_work_entry_view.xml',
         'data/data.xml',
         # 'views/hr_contract_view.xml',

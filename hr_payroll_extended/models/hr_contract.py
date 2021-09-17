@@ -46,6 +46,13 @@ class HrContract(models.Model):
     suspension = fields.Float(string="Suspensión de trabajo", compute='get_suspension')
     suspension_history = fields.Many2many('hr.leave', string="Historial", compute='get_suspension_history')
 
+    # Auxilios
+    aux_movilizacion = fields.Boolean(string="Auxilio Movilización", default=False)
+    aux_movilizacion_amount = fields.Float(string="Monto Mensual")
+    aux_rodamiento = fields.Boolean(string="Auxilio Rodamiento", default=False)
+    aux_rodamiento_amount = fields.Float(string="Monto Mensual")
+
+
     @api.onchange('wage')
     def _integral_salary(self):
         wage_min = self.env['hr.salary.rule'].search([("code", "=", 'SMLMV')], limit=1).amount_fix

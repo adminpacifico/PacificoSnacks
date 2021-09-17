@@ -175,6 +175,34 @@ class HrPayslip(models.Model):
             total_ingreso = False
         return total_ingreso
 
+    def get_inputs_aux_movilizacion(self, contract_id, date_from, date_to):
+        date_before_from = date(date_from.year, date_from.month, 1)
+        date_before_to = date(date_from.year, date_from.month, 15)
+        payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
+                                                 ("date_from", "=", date_before_from),
+                                                 ("date_to", "=", date_before_to),
+                                                 ("type_payslip_id.name", "=", 'Nomina'),
+                                                 ("state", "=", 'done')], limit=1)
+        if payslip.id :
+            aux_movilizacion = self.env['hr.payslip.line'].search([("code", "=", 'AUX_MOVILIZACION'),("slip_id.id", "=", payslip.id)], limit=1)
+        else:
+            aux_movilizacion = False
+        return aux_movilizacion
+
+    def get_inputs_aux_rodamiento(self, contract_id, date_from, date_to):
+        date_before_from = date(date_from.year, date_from.month, 1)
+        date_before_to = date(date_from.year, date_from.month, 15)
+        payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
+                                                 ("date_from", "=", date_before_from),
+                                                 ("date_to", "=", date_before_to),
+                                                 ("type_payslip_id.name", "=", 'Nomina'),
+                                                 ("state", "=", 'done')], limit=1)
+        if payslip.id :
+            aux_rodamiento = self.env['hr.payslip.line'].search([("code", "=", 'AUX_RODAMIENTO'),("slip_id.id", "=", payslip.id)], limit=1)
+        else:
+            aux_rodamiento = False
+        return aux_rodamiento
+
     def get_inputs_loans_12month_before(self, contract_id, date_from, date_to):
         lm12_date_ini = date_to - relativedelta(months=12)
         lm12_date_ini = lm12_date_ini + relativedelta(days=1)
@@ -1300,6 +1328,34 @@ class HrPayslip(models.Model):
                         "input_type_id": total_ingreso_type,
                         "code_input": 'NET115',
                         "name_input": 'Total Ingresos (1 Quincena)',
+                    })
+
+            # Auxilio de Movilizacion Primera Quincena
+            get_inputs_aux_movilizacion = self.get_inputs_aux_movilizacion(contract, date_from, date_to)
+            if get_inputs_aux_movilizacion and date_from.day == 16:
+                aux_movilizacion_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_MOVILIZACION')], limit=1).id
+                if aux_movilizacion_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": get_inputs_aux_movilizacion.total,
+                        "payslip_id": self.id,
+                        "input_type_id": aux_movilizacion_type,
+                        "code_input": 'AUX_MOVILIZACION',
+                        "name_input": 'Auxilio de Movilización (1 Quincena)',
+                    })
+
+            # Auxilio Rodamiento Primera Quincena
+            get_inputs_aux_rodamiento = self.get_inputs_aux_rodamiento(contract, date_from, date_to)
+            if get_inputs_aux_rodamiento and date_from.day == 16:
+                aux_rodamiento_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_RODAMIENTO')], limit=1).id
+                if aux_rodamiento_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": get_inputs_aux_rodamiento.total,
+                        "payslip_id": self.id,
+                        "input_type_id": aux_rodamiento_type,
+                        "code_input": 'AUX_RODAMIENTO',
+                        "name_input": 'Auxilio de Rodamiento (1 Quincena)',
                     })
 
             # Total Deduciones para retencion en la fuente

@@ -23,3 +23,5 @@ from . import hr_exempt_income_rt
 from . import hr_exempt_income_tax
 from . import hr_payslip_line
 from . import hr_leave_date_extended
+from . import hr_salary_rule
+from . import account_account

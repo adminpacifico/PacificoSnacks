@@ -11,7 +11,7 @@ class HrRuleParameter(models.Model):
     _inherit = "hr.rule.parameter"
 
 
-    amount = fields.Float(default=0.0000, digits=dp.get_precision('Factor Rule'), tracking=True)
+    amount = fields.Float(default=0.000000000, digits=dp.get_precision('Factor Rule'), tracking=True)
     salary_rule_id = fields.Many2one('hr.salary.rule', string='Regla salarial', tracking=True)
 
 

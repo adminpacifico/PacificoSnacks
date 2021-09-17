@@ -8,6 +8,10 @@
 			<xpath expr="//field[@name='advantages']" position="after">
 				<field name="integral_salary" default="False"/>
 				<field name="retention_method"/>
+				<field name="aux_movilizacion" default="False"/>
+				<field name="aux_movilizacion_amount" attrs="{'invisible': [('aux_movilizacion','=',False)]}" />
+				<field name="aux_rodamiento" default="False"/>
+				<field name="aux_rodamiento_amount" attrs="{'invisible': [('aux_rodamiento','=',False)]}"/>
 			</xpath>
 		</field>
 	</record>

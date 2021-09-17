@@ -12,5 +12,4 @@ from odoo.exceptions import UserError, AccessError, ValidationError
 class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
 
-
-    tag_id = fields.Many2one('account.analytic.tag', string="Etiqueta")
+    tag_id = fields.Many2one('account.analytic.tag', string="Etiqueta Analítica")

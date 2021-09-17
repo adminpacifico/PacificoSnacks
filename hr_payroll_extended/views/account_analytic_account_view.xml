@@ -7,7 +7,7 @@
 		<field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='currency_id']" position="after">
-				<field name="tag_id" required="1"/>
+				<field name="tag_id"/>
 			</xpath>
 		</field>
 	</record>
