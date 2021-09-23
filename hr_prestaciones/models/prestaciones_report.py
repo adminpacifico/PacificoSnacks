@@ -119,18 +119,26 @@ class PrestacionesReport(models.TransientModel):
             else:
                 date_init_prima = c.date_start
 
-            dias_labor_prima = days360(date_init_prima, self.date_creation) + 1
 
-            dias_liq_prima = dias_labor_prima / 360
 
             # ---------------------- VALOR PROMEDIO SEMESTRAL -----------------
 
             salary = c.wage
+            salary_min = self.env['hr.salary.rule'].search([("code", "=", 'SMLMV')], limit=1).amount_fix
+            auxtransporte = self.env['hr.salary.rule'].search([("code", "=", 'P_SUBSTRAN')], limit=1).amount_fix
             total_extra_hour = 0
             amountb = 0
             amountc = 0
             date_from = self.date_creation
             date_to = self.date_creation
+
+            if date_to.day == 31:
+                date_to = date_to - relativedelta(days=1)
+
+            dias_labor_prima = days360(date_init_prima, date_to) + 1
+
+            dias_liq_prima = dias_labor_prima * 15 / 180
+
 
             # Horas extras promedio semestral
             hora_extra_6month = self.env['hr.payslip'].get_inputs_hora_extra_6month(c, date_from, date_to)
@@ -246,9 +254,15 @@ class PrestacionesReport(models.TransientModel):
                 if not amountc == 0:
                     amountc = (amountc / ltotal_days) * day_base
 
+
+            if (salary / 30) <= (2 * (salary_min / 30)):
+                at = auxtransporte
+            else:
+                at = 0
+
             # ------------------------------ VALOR DERIVADO DEL PROMEDIO ANUAL  -----------------------------------------
 
-            valor_prima = salary + total_extra_hour + amountb + amountc
+            valor_prima = salary + total_extra_hour + amountb + amountc + at
 
             valor_unit_prima = valor_prima / 30
 
@@ -262,9 +276,10 @@ class PrestacionesReport(models.TransientModel):
                 date_init_ces = c.date_start
 
 
-            dias_labor_ces = days360(date_init_ces, self.date_creation) + 1
 
-            dias_liq_ces = dias_labor_ces / 360
+            dias_labor_ces = days360(date_init_ces, date_to) + 1
+
+            dias_liq_ces = dias_labor_ces * 30 / 360
 
 
             # ---------------------- VALOR CESANTIAS PROMEDIO ANUAL -----------------
@@ -279,15 +294,16 @@ class PrestacionesReport(models.TransientModel):
 
             hora_extra_year_now = self.env['hr.payslip'].get_inputs_hora_extra_year_now(c,date_from,date_to)
             if hora_extra_year_now:
-                hm12_date_ini = date_to - relativedelta(months=12)
-                hm12_date_ini = hm12_date_ini + relativedelta(days=1)
-                if c.date_start <= hm12_date_ini:
-                    hm12_date_init = hm12_date_ini
+
+                hdate_init_year = date(date_from.year, 1, 1)
+                if c.date_start <= hdate_init_year:
+                    hdate_init = hdate_init_year
                 else:
-                    hm12_date_init = c.date_start
+                    hdate_init = c.date_start
+                # total_days = days_between(hdate_init, date_to)
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
-                total_days12y = days360(hm12_date_init, date_to) + 1
+                total_days12y = days360(hdate_init, date_to) + 1
 
                 if total_days12y < 30:
                     day_base = total_days12y
@@ -336,15 +352,16 @@ class PrestacionesReport(models.TransientModel):
 
             inputs_loans_year_now = self.env['hr.payslip'].get_inputs_loans_year_now(c, date_from,date_to)
             if inputs_loans_year_now:
-                lm12_date_ini = date_to - relativedelta(months=12)
-                lm12_date_ini = lm12_date_ini + relativedelta(days=1)
-                if c.date_start <= lm12_date_ini:
-                    lm12_date_init = lm12_date_ini
+
+                ldate_init_year = date(date_from.year, 1, 1)
+                if c.date_start <= ldate_init_year:
+                    ldate_init = ldate_init_year
                 else:
-                    lm12_date_init = c.date_start
+                    ldate_init = c.date_start
+                # ltotal_days = days_between(ldate_init, date_to)
                 if date_to.day == 31:
                     date_to = date_to - relativedelta(days=1)
-                total_dayl12 = days360(lm12_date_init, date_to) + 1
+                total_dayl12 = days360(ldate_init, date_to) + 1
 
                 if total_dayl12 < 30:
                     day_base = total_dayl12
@@ -363,29 +380,34 @@ class PrestacionesReport(models.TransientModel):
                 if not amountc == 0:
                     amountc = (amountc / total_dayl12) * day_base
 
-
             # ------------------------------ VALOR DERIVADO DEL PROMEDIO CESANTIAS  -----------------------------------------
 
-            valor_ces = salary + total_extra_hour + amountb + amountc
+            valor_ces = salary + total_extra_hour + amountb + amountc + at
 
             valor_unit_ces = valor_ces / 30
 
-            total_ces = valor_unit_ces * dias_liq_ces
+            total_ces = (valor_ces * dias_labor_ces) / 360
 
             # ------------------------------ VALOR DERIVADO DEL PROMEDIO INT CESANTIAS  -----------------------------------------
 
-            valor_ces_int = (salary + total_extra_hour + amountb + amountc) * 0.12
+            porcentaje_ces_int = (dias_labor_ces * 0.12 / 360)
 
-            valor_unit_ces_int = valor_ces_int / 30
+            dias_liq_ces_int = dias_liq_ces * porcentaje_ces_int
 
-            total_ces_int = valor_unit_ces_int * dias_liq_ces
+            valor_ces_int = valor_ces
 
+            valor_unit_ces_int = valor_unit_ces
+
+            total_ces_int = valor_unit_ces_int * dias_liq_ces_int
 
             # ---------------------- VALOR VACACIONES PROMEDIO 12 MESES ATRAS -----------------
 
-            dias_labor_vaca = days360(c.vacations_date, self.date_creation) + 1
+            dias_labor_vaca = days360(c.vacations_date, date_to) + 1
 
-            dias_liq_vaca = c.vacations_available
+            if float(dias_labor_vaca) > 0:
+                dias_liq_vaca = (dias_labor_vaca / 30) * 1.25
+            else:
+                dias_liq_vaca = 0
 
             total_extra_hour_12m = 0
             amountb_12m = 0
@@ -587,7 +609,7 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, dias_labor_ces)
             col += 1
 
-            ws.write(fila, col, round(dias_liq_ces, 2))
+            ws.write(fila, col, round(dias_liq_ces_int, 2))
             col += 1
 
             ws.write(fila, col, valor_unit_ces_int, format_number)
@@ -645,5 +667,3 @@ class PrestacionesReport(models.TransientModel):
             self.data_name = 'prestaciones' + ".xls"
         except ValueError:
             raise Warning('No se pudo generar el archivo')
-
-#
