@@ -42,7 +42,7 @@ class PrestacionesReport(models.TransientModel):
     def make_file(self):
         _logger.error("INICIA LA FUNCIÓN CONSTRUIR EL ARCHIVO ")
 
-        contracts = self.env['hr.contract'].search([('state', '=', 'open'),('employee_id', '!=', False)])
+        contracts = self.env['hr.contract'].search([('state', '=', 'open'), ('employee_id', '!=', False), ('department_id.name', 'not in', ['SENA ADMINISTRATIVO', 'SENA OPERATIVO'])])
 
         if not contracts:
             raise Warning(_('!No hay resultados para los datos seleccionados¡'))
@@ -523,7 +523,7 @@ class PrestacionesReport(models.TransientModel):
             ws.write(fila, col, 'Prima Legal')
             col += 1
 
-            ws.write(fila, col, '') if not init_date_prima else ws.write(fila, col, init_date_prima, format_date)
+            ws.write(fila, col, '') if not date_init_prima else ws.write(fila, col, date_init_prima, format_date)
             col += 1
 
             ws.write(fila, col, self.date_creation, format_date)
