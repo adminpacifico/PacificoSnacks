@@ -931,6 +931,8 @@ class HrPayslip(models.Model):
             if loans_ids:
                 amountb = 0
                 inputb_type_id = 0
+                amountbnp = 0
+                inputbnp_type_id = 0
                 amountd = 0
                 inputd_type_id = 0
                 amountrip = 0
@@ -951,6 +953,11 @@ class HrPayslip(models.Model):
                        inputb_type_id = loans[3]
                        nameb = loans[0]
                        codeb = loans[1]
+                    if loans[1] == 'BONIFICACION_NP':
+                        amountbnp = amountbnp + loans[2]
+                        inputbnp_type_id = loans[3]
+                        namebnp = loans[0]
+                        codebnp = loans[1]
                     if loans[1] == 'DESCUENTOS':
                        amountd = amountd + loans[2]
                        inputd_type_id = loans[3]
@@ -995,6 +1002,15 @@ class HrPayslip(models.Model):
                      "input_type_id": inputb_type_id,
                      "name_input": nameb,
                      "code_input": codeb,
+                    })
+                if not amountbnp == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountbnp,
+                        "payslip_id": self.id,
+                        "input_type_id": inputbnp_type_id,
+                        "name_input": namebnp,
+                        "code_input": codebnp,
                     })
                 if not amountd == 0:
                     self.env['hr.payslip.input'].create({
