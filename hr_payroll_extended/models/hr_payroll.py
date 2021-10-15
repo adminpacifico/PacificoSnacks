@@ -161,7 +161,7 @@ class HrPayslip(models.Model):
         loans_ids = self._cr.fetchall()
         return loans_ids
 
-    def get_inputs_total_ingreso(self, contract_id, date_from, date_to):
+    def get_inputs_q1(self, contract_id, date_from, code_rules):
         date_before_from = date(date_from.year, date_from.month, 1)
         date_before_to = date(date_from.year, date_from.month, 15)
         payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
@@ -170,10 +170,10 @@ class HrPayslip(models.Model):
                                                  ("type_payslip_id.name", "=", 'Nomina'),
                                                  ("state", "=", 'done')], limit=1)
         if payslip.id :
-            total_ingreso = self.env['hr.payslip.line'].search([("code", "=", 'GROSS'),("slip_id.id", "=", payslip.id)], limit=1)
+            inputs_q1 = self.env['hr.payslip.line'].search([("code", "=", code_rules),("slip_id.id", "=", payslip.id)], limit=1)
         else:
-            total_ingreso = False
-        return total_ingreso
+            inputs_q1 = False
+        return inputs_q1
 
     def get_inputs_aux_movilizacion(self, contract_id, date_from, date_to):
         date_before_from = date(date_from.year, date_from.month, 1)
@@ -1333,45 +1333,78 @@ class HrPayslip(models.Model):
                 })
 
             # Total Ingresos Primera Quincena
-            get_inputs_total_ingreso = self.get_inputs_total_ingreso(contract, date_from, date_to)
-            if get_inputs_total_ingreso and date_from.day == 16:
-                total_ingreso_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1).id
-                if total_ingreso_type:
+            code_rules = "GROSS"
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'NET115')], limit=1)
+                if inputs_q1_type:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": get_inputs_total_ingreso.total,
+                        "amount": inputs_q1.total,
                         "payslip_id": self.id,
-                        "input_type_id": total_ingreso_type,
-                        "code_input": 'NET115',
-                        "name_input": 'Total Ingresos (1 Quincena)',
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
+                    })
+
+            # Salud Empleado Primera Quincena
+            code_rules = 'SALUDEMPLEADO'
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'SALUDEMPLEADO1Q')], limit=1)
+                if inputs_q1_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": inputs_q1.total,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
+                    })
+
+            # Pension Empleado Primera Quincena
+            code_rules = 'PENSIONEMPLEADO'
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'PENSIONEMPLEADO1Q')], limit=1)
+                if inputs_q1_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": inputs_q1.total,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
                     })
 
             # Auxilio de Movilizacion Primera Quincena
-            get_inputs_aux_movilizacion = self.get_inputs_aux_movilizacion(contract, date_from, date_to)
-            if get_inputs_aux_movilizacion and date_from.day == 16:
-                aux_movilizacion_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_MOVILIZACION')], limit=1).id
-                if aux_movilizacion_type:
+            code_rules = 'AUX_MOVILIZACION'
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_MOVILIZACION1Q')], limit=1)
+                if inputs_q1_type:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": get_inputs_aux_movilizacion.total,
+                        "amount": inputs_q1.total,
                         "payslip_id": self.id,
-                        "input_type_id": aux_movilizacion_type,
-                        "code_input": 'AUX_MOVILIZACION',
-                        "name_input": 'Auxilio de Movilización (1 Quincena)',
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
                     })
 
-            # Auxilio Rodamiento Primera Quincena
-            get_inputs_aux_rodamiento = self.get_inputs_aux_rodamiento(contract, date_from, date_to)
-            if get_inputs_aux_rodamiento and date_from.day == 16:
-                aux_rodamiento_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_RODAMIENTO')], limit=1).id
-                if aux_rodamiento_type:
+            # Auxilio de Movilizacion Primera Quincena
+            code_rules = 'AUX_RODAMIENTO'
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'AUX_RODAMIENTO1Q')], limit=1)
+                if inputs_q1_type:
                     self.env['hr.payslip.input'].create({
                         "sequence": 1,
-                        "amount": get_inputs_aux_rodamiento.total,
+                        "amount": inputs_q1.total,
                         "payslip_id": self.id,
-                        "input_type_id": aux_rodamiento_type,
-                        "code_input": 'AUX_RODAMIENTO',
-                        "name_input": 'Auxilio de Rodamiento (1 Quincena)',
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
                     })
 
             # Total Deduciones para retencion en la fuente
