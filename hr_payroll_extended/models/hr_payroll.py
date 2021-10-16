@@ -1407,6 +1407,21 @@ class HrPayslip(models.Model):
                         "name_input": inputs_q1_type.name,
                     })
 
+            # Retencion en la fuente M1 Primera Quincena
+            code_rules = 'RTFM1'
+            inputs_q1 = self.get_inputs_q1(contract, date_from, code_rules)
+            if inputs_q1 and date_from.day == 16:
+                inputs_q1_type = self.env['hr.payslip.input.type'].search([("code", "=", 'RTFM11Q')], limit=1)
+                if inputs_q1_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": inputs_q1.total,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_q1_type.id,
+                        "code_input": inputs_q1_type.code,
+                        "name_input": inputs_q1_type.name,
+                    })
+
             # Total Deduciones para retencion en la fuente
             if contract.retention_method == 'M1':
                 # Deducciones
