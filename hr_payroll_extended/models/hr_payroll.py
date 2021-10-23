@@ -175,7 +175,7 @@ class HrPayslip(models.Model):
             inputs_q1 = False
         return inputs_q1
 
-    def get_inputs_aux_movilizacion(self, contract_id, date_from, date_to):
+    def get_inputs_days(self, contract_id, date_from, code_days):
         date_before_from = date(date_from.year, date_from.month, 1)
         date_before_to = date(date_from.year, date_from.month, 15)
         payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
@@ -184,24 +184,11 @@ class HrPayslip(models.Model):
                                                  ("type_payslip_id.name", "=", 'Nomina'),
                                                  ("state", "=", 'done')], limit=1)
         if payslip.id :
-            aux_movilizacion = self.env['hr.payslip.line'].search([("code", "=", 'AUX_MOVILIZACION'),("slip_id.id", "=", payslip.id)], limit=1)
+            inputs_days = self.env['hr.payslip.worked_days'].search([("work_entry_type_id.code", "=", code_days),("payslip_id.id", "=", payslip.id)], limit=1)
         else:
-            aux_movilizacion = False
-        return aux_movilizacion
+            inputs_days = False
+        return inputs_days
 
-    def get_inputs_aux_rodamiento(self, contract_id, date_from, date_to):
-        date_before_from = date(date_from.year, date_from.month, 1)
-        date_before_to = date(date_from.year, date_from.month, 15)
-        payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
-                                                 ("date_from", "=", date_before_from),
-                                                 ("date_to", "=", date_before_to),
-                                                 ("type_payslip_id.name", "=", 'Nomina'),
-                                                 ("state", "=", 'done')], limit=1)
-        if payslip.id :
-            aux_rodamiento = self.env['hr.payslip.line'].search([("code", "=", 'AUX_RODAMIENTO'),("slip_id.id", "=", payslip.id)], limit=1)
-        else:
-            aux_rodamiento = False
-        return aux_rodamiento
 
     def get_inputs_loans_12month_before(self, contract_id, date_from, date_to):
         lm12_date_ini = date_to - relativedelta(months=12)
@@ -1977,6 +1964,23 @@ class HrPayslip(models.Model):
                         }
                         res.append(leave_lp)
 
+                # Dias trabajados Quincena anterior
+
+                code_days = "WORK100"
+                inputs_days_q1 = self.get_inputs_days(contract, self.date_from, code_days)
+                work_entry_type = self.env['hr.work.entry.type'].search( [("code", "=", 'WORK100Q1')], limit=1)
+                attendancesq1_WORK100 = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': inputs_days_q1.name,
+                    'number_of_days': inputs_days_q1.number_of_days,
+                    'number_of_hours': inputs_days_q1.number_of_hours,
+                    'number_of_days_total': inputs_days_q1.number_of_days_total,
+                    'number_of_hours_total': inputs_days_q1.number_of_hours_total,
+                    'amount': 0,
+                }
+                res.append(attendancesq1_WORK100)
+
                 # Horas Extras (# horas y valor x hora)
                 horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
                 if horas_extras:
@@ -2224,6 +2228,23 @@ class HrPayslip(models.Model):
                     'amount': 0,
                 }
                 res.append(attendances_yearc_total)
+
+                # Dias trabajados Quincena anterior
+
+                code_days = "WORK100"
+                inputs_days_q1 = self.get_inputs_days(contract, self.date_from, code_days)
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100Q1')], limit=1)
+                attendancesq1_WORK100 = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': inputs_days_q1.name,
+                    'number_of_days': inputs_days_q1.number_of_days,
+                    'number_of_hours': inputs_days_q1.number_of_hours,
+                    'number_of_days_total': inputs_days_q1.number_of_days_total,
+                    'number_of_hours_total': inputs_days_q1.number_of_hours_total,
+                    'amount': 0,
+                }
+                res.append(attendancesq1_WORK100)
 
                 # Horas Extras (# horas y valor x hora)
                 horas_extras = self.get_inputs_hora_extra(contract, self.date_from, self.date_to)
