@@ -936,6 +936,12 @@ class HrPayslip(models.Model):
                 input_fyc_type_id = 0
                 amountc = 0
                 inputc_type_id = 0
+                amountcomprae = 0
+                inputcomprae_type_id = 0
+                amountprestamo = 0
+                inputprestamo_type_id = 0
+                amountdescuentosfact = 0
+                inputdescuentosfact_type_id = 0
                 for loans in loans_ids:
                     if loans[1] == 'BONO':
                        amountbono = amountbono + loans[2]
@@ -992,7 +998,21 @@ class HrPayslip(models.Model):
                        inputc_type_id = loans[3]
                        namec = loans[0]
                        codec = loans[1]
-
+                    if loans[1] == 'COMPRAE':
+                       amountcomprae = amountcomprae + loans[2]
+                       inputcomprae_type_id = loans[3]
+                       namecomprae = loans[0]
+                       codecomprae = loans[1]
+                    if loans[1] == 'PRESTAMO':
+                       amountprestamo = amountprestamo + loans[2]
+                       inputprestamo_type_id = loans[3]
+                       nameprestamo = loans[0]
+                       codeprestamo = loans[1]
+                    if loans[1] == 'DESCUENTOSFACT':
+                       amountdescuentosfact = amountdescuentosfact + loans[2]
+                       inputdescuentosfact_type_id = loans[3]
+                       namedescuentosfact = loans[0]
+                       codedescuentosfact = loans[1]
                 if not amountbono == 0:
                     self.env['hr.payslip.input'].create({
                      "sequence": 1,
@@ -1083,6 +1103,33 @@ class HrPayslip(models.Model):
                         "input_type_id": inputc_type_id,
                         "name_input": namec,
                         "code_input": codec,
+                    })
+                if not amountcomprae == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountcomprae,
+                        "payslip_id": self.id,
+                        "input_type_id": inputcomprae_type_id,
+                        "name_input": namecomprae,
+                        "code_input": codecomprae,
+                    })
+                if not amountprestamo == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountprestamo,
+                        "payslip_id": self.id,
+                        "input_type_id": inputprestamo_type_id,
+                        "name_input": nameprestamo,
+                        "code_input": codeprestamo,
+                    })
+                if not amountdescuentosfact == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 1,
+                        "amount": amountdescuentosfact,
+                        "payslip_id": self.id,
+                        "input_type_id": inputdescuentosfact_type_id,
+                        "name_input": namedescuentosfact,
+                        "code_input": codedescuentosfact,
                     })
 
             # Bonificaciones y comisiones Mes actual
