@@ -1785,10 +1785,195 @@ class HrPayslip(models.Model):
                 res.append(attendances_yearc_total)
 
                 # Total ausencias por enfermedad
-                absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],limit=1).disability_percentage
+                absence_rate_2D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_2D')],
+                                                                           limit=1).disability_percentage
+                absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],
+                                                                            limit=1).disability_percentage
+                absence_rate_M91D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_M91D')],
+                                                                             limit=1).disability_percentage
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'INCAPACIDADGENERAL')], limit=1)
+                leave_sickness_amount_total = 0
+                leave_sickness_days_total = 0
+                leave_sickness_hours_total = 0
+                leave_days_t = 0
+                leave_hours_t = 0
+                wage_min_day = wage_min / 30
+                horas_extras_promedio12m_dia = 0
+                recargo_promedio12m_dia = 0
+                bonificacion_promedio12m_dia = 0
+                comision_promedio12m_dia = 0
+
+                inputs_loans_12month_before = self.get_inputs_loans_12month_before(contract, self.date_from,
+                                                                                   self.date_to)
+                if inputs_loans_12month_before:
+                    date_to = self.date_to
+                    lm12_date_ini = self.date_to - relativedelta(months=12)
+                    lm12_date_ini = lm12_date_ini + relativedelta(days=1)
+                    if contract.date_start <= lm12_date_ini:
+                        lm12_date_init = lm12_date_ini
+                    else:
+                        lm12_date_init = contract.date_start
+                    # total_dayl12 = days_between(lm12_date_init, date_to)
+                    if date_to.day == 31:
+                        date_to = date_to - relativedelta(days=1)
+                    total_dayl12 = days360(lm12_date_init, date_to) + 1
+                    if total_dayl12 == 15:
+                        day_base = 15
+                    else:
+                        day_base = 30
+                    bonificacion_promedio12m = 0
+                    comision_promedio12m = 0
+                    for loans in inputs_loans_12month_before:
+                        if loans[1] == 'BONIFICACION':
+                            bonificacion_promedio12m = bonificacion_promedio12m + loans[2]
+                        if loans[1] == 'COMISION':
+                            comision_promedio12m = comision_promedio12m + loans[2]
+                    if not bonificacion_promedio12m == 0:
+                        bonificacion_promedio12m = (bonificacion_promedio12m / total_dayl12) * day_base
+                    if not comision_promedio12m == 0:
+                        comision_promedio12m = (comision_promedio12m / total_dayl12) * day_base
+
+                    bonificacion_promedio12m_dia = ((bonificacion_promedio12m / total_dayl12) * 30) / 30
+                    comision_promedio12m_dia = ((comision_promedio12m / total_dayl12) * 30) / 30
+
+                horas_extras_12month_before = self.get_inputs_hora_extra_12month_before(contract, self.date_from,
+                                                                                        self.date_to)
+                if horas_extras_12month_before:
+                    date_to = self.date_to
+                    hm12_date_ini = self.date_to - relativedelta(months=12)
+                    hm12_date_ini = hm12_date_ini + relativedelta(days=1)
+                    if contract.date_start <= hm12_date_ini:
+                        hm12_date_init = hm12_date_ini
+                    else:
+                        hm12_date_init = contract.date_start
+                    # total_days12y = days_between(hm12_date_init, date_to)
+                    if date_to.day == 31:
+                        date_to = date_to - relativedelta(days=1)
+                    total_days12y = days360(hm12_date_init, date_to) + 1
+                    if total_days12y == 15:
+                        day_base = 15
+                    else:
+                        day_base = 30
+                    extradiurna_promedio12m = 0
+                    extradiurnafestivo_promedio12m = 0
+                    extranocturna_promedio12m = 0
+                    extranocturnafestivo_promedio12m = 0
+                    recargonocturno_promedio12m = 0
+                    recargodiurnofestivo_promedio12m = 0
+                    recargonocturnofestivo_promedio12m = 0
+                    for hora in horas_extras_12month_before:
+                        if hora[1] == 'EXTRADIURNA':
+                            extradiurna_promedio12m = extradiurna_promedio12m + hora[2]
+                        if hora[1] == 'EXTRADIURNAFESTIVO':
+                            extradiurnafestivo_promedio12m = extradiurnafestivo_promedio12m + hora[2]
+                        if hora[1] == 'EXTRANOCTURNA':
+                            extranocturna_promedio12m = extranocturna_promedio12m + hora[2]
+                        if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                            extranocturnafestivo_promedio12m = extranocturnafestivo_promedio12m + hora[2]
+                        if hora[1] == 'RECARGONOCTURNO':
+                            recargonocturno_promedio12m = recargonocturno_promedio12m + hora[2]
+                        if hora[1] == 'RECARGODIURNOFESTIVO':
+                            recargodiurnofestivo_promedio12m = recargodiurnofestivo_promedio12m + hora[2]
+                        if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                            recargonocturnofestivo_promedio12m = recargonocturnofestivo_promedio12m + hora[2]
+
+                    if not extradiurna_promedio12m == 0:
+                        extradiurna_promedio12m = (extradiurna_promedio12m / total_days12y) * day_base
+                    if not extradiurnafestivo_promedio12m == 0:
+                        extradiurnafestivo_promedio12m = (extradiurnafestivo_promedio12m / total_days12y) * day_base
+                    if not extranocturna_promedio12m == 0:
+                        extranocturna_promedio12m = (extranocturna_promedio12m / total_days12y) * day_base
+                    if not extranocturnafestivo_promedio12m == 0:
+                        extranocturnafestivo_promedio12m = (extranocturnafestivo_promedio12m / total_days12y) * day_base
+                    if not recargonocturno_promedio12m == 0:
+                        recargonocturno_promedio12m = (recargonocturno_promedio12m / total_days12y) * day_base
+                    if not recargodiurnofestivo_promedio12m == 0:
+                        recargodiurnofestivo_promedio12m = (recargodiurnofestivo_promedio12m / total_days12y) * day_base
+                    if not recargonocturnofestivo_promedio12m == 0:
+                        recargonocturnofestivo_promedio12m = (
+                                                                         recargonocturnofestivo_promedio12m / total_days12y) * day_base
+
+                    horas_extras_promedio12m = extradiurna_promedio12m + extradiurnafestivo_promedio12m + extranocturna_promedio12m + extranocturnafestivo_promedio12m
+                    recargo_promedio12m = recargonocturno_promedio12m + recargodiurnofestivo_promedio12m + recargonocturnofestivo_promedio12m
+
+                    horas_extras_promedio12m_dia = ((horas_extras_promedio12m / total_days12y) * 30) / 30
+                    recargo_promedio12m_dia = ((recargo_promedio12m / total_days12y) * 30) / 30
+
+                salario_contrato_dia = paid_amount / 30
+                total_valor_promedio_dia = salario_contrato_dia + bonificacion_promedio12m_dia + comision_promedio12m_dia + horas_extras_promedio12m_dia + recargo_promedio12m_dia
+
+                leave_sickness_all = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("work_entry_type_id", "=",
+                                                                        work_entry_type.id),
+                                                                       ("employee_id", "=",
+                                                                        contract.employee_id.id)])
+                for l in leave_sickness_all.leave_id:
+                    leave_days_total = l.number_of_days
+                    leave_hours_total = l.number_of_days * contract.resource_calendar_id.hours_per_day
+                    leave_sickness = self.env['hr.work.entry'].search([("date_start", ">=", self.date_from),
+                                                                       ("date_stop", "<=", self.date_to),
+                                                                       ("leave_id", "=", l.id),
+                                                                       ])
+                    leave_sickness_hours = 0
+                    for s in leave_sickness:
+                        leave_sickness_hours += s.duration
+
+                    leave_sickness_days = leave_sickness_hours / contract.resource_calendar_id.hours_per_day
+
+                    leave_sickness_base_amount = total_valor_promedio_dia
+
+                    if leave_days_total >= 1 and leave_days_total <= 2:
+                        leave_sickness_amount_base = round((leave_sickness_base_amount * absence_rate_2D) / 100)
+                    elif leave_days_total >= 3 and leave_days_total <= 90:
+                        leave_sickness_amount_base = round((leave_sickness_base_amount * absence_rate_90D) / 100)
+                    elif leave_days_total >= 91 and leave_days_total <= 180:
+                        leave_sickness_amount_base = round((leave_sickness_base_amount * absence_rate_M91D) / 100)
+                    else:
+                        leave_sickness_amount_base = 0
+
+                    leave_sickness_amount = leave_sickness_amount_base * leave_sickness_days
+
+                    if leave_sickness_amount_base < wage_min_day and leave_sickness_amount_base != 0:
+                        leave_sickness_amount = wage_min_day * leave_sickness_days
+
+                    work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
+                    leave_s = {
+                        'sequence': work_entry_type.sequence,
+                        'work_entry_type_id': work_entry_type.id,
+                        'name': work_entry_type.code,
+                        'number_of_days': leave_sickness_days,
+                        'number_of_hours': leave_sickness_hours,
+                        'number_of_days_total': leave_days_total,
+                        'number_of_hours_total': leave_hours_total,
+                        'amount': leave_sickness_amount,
+                    }
+                    leave_sickness_days_total += leave_sickness_days
+                    leave_sickness_hours_total += leave_sickness_hours
+                    leave_days_t += leave_days_total
+                    leave_hours_t += leave_hours_total
+                    leave_sickness_amount_total += leave_sickness_amount
+                    res.append(leave_s)
+
+                # Total de ausencia por enfermedad
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
+                totalae = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': leave_sickness_days_total,
+                    'number_of_hours': leave_sickness_hours_total,
+                    'number_of_days_total': leave_days_t,
+                    'number_of_hours_total': leave_hours_t,
+                    'amount': leave_sickness_amount_total,
+                }
+                if not leave_sickness_days_total == 0:
+                    res.append(totalae)
+
+                # Total ausencias por enfermedad 2 dias 100%
                 absence_rate_90D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_90D')],limit=1).disability_percentage
                 absence_rate_M91D = self.env['hr.payslip.input.type'].search([("code", "=", 'P_AUSENCIAS_M91D')],limit=1).disability_percentage
-                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'INCAPACIDADGENERAL')], limit=1)
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'INCAPACIDADGENERAL2D100')], limit=1)
                 leave_sickness_amount_total = 0
                 leave_sickness_days_total = 0
                 leave_sickness_hours_total = 0
@@ -1918,7 +2103,7 @@ class HrPayslip(models.Model):
                     leave_sickness_base_amount = total_valor_promedio_dia
 
                     if leave_days_total >= 1 and leave_days_total <= 2:
-                        leave_sickness_amount_base = round((leave_sickness_base_amount*absence_rate_2D)/100)
+                        leave_sickness_amount_base = round(leave_sickness_base_amount)
                     elif leave_days_total >= 3 and leave_days_total <= 90:
                         leave_sickness_amount_base = round((leave_sickness_base_amount*absence_rate_90D)/100)
                     elif leave_days_total >= 91 and leave_days_total <= 180:
@@ -1926,11 +2111,20 @@ class HrPayslip(models.Model):
                     else:
                         leave_sickness_amount_base = 0
 
-                    leave_sickness_amount = leave_sickness_amount_base * leave_sickness_days
+                    if leave_days_total > 2:
+                        leave_sickness_amount_init = leave_sickness_base_amount * 2
+                        leave_sickness_amount = leave_sickness_amount_base * (leave_sickness_days - 2)
+                        leave_sickness_amount = leave_sickness_amount_init + leave_sickness_amount
+                    else:
+                        leave_sickness_amount = leave_sickness_base_amount * leave_sickness_days
 
                     if leave_sickness_amount_base < wage_min_day and leave_sickness_amount_base != 0:
-                        leave_sickness_amount = wage_min_day * leave_sickness_days
-
+                        if leave_days_total > 2:
+                            leave_sickness_amount_init = wage_min_day * 2
+                            leave_sickness_amount = wage_min_day * (leave_sickness_days - 2)
+                            leave_sickness_amount = leave_sickness_amount_init + leave_sickness_amount
+                        else:
+                            leave_sickness_amount = wage_min_day * leave_sickness_days
 
                     work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'LEAVE110L')], limit=1)
                     leave_s = {
@@ -1952,7 +2146,7 @@ class HrPayslip(models.Model):
 
                 # Total de ausencia por enfermedad
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALAE')], limit=1)
-                totalae = {
+                totalae2d = {
                     'sequence': work_entry_type.sequence,
                     'work_entry_type_id': work_entry_type.id,
                     'name': work_entry_type.code,
@@ -1963,7 +2157,7 @@ class HrPayslip(models.Model):
                     'amount': leave_sickness_amount_total,
                 }
                 if not leave_sickness_days_total == 0:
-                    res.append(totalae)
+                    res.append(totalae2d)
 
                 # Dias Licencia Maternidad
 
