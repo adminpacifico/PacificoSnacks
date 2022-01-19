@@ -230,7 +230,7 @@
                                             <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PRIMA')" t-as="line_ids">
                                                 <td>
                                                     <span t-field="line_ids.name" />
-                                                    <t t-if="mes_liq &lt;= 6 and dia_liq &lt;= 31">
+                                                    <t t-if="mes_liq &gt; 0 and mes_liq &lt;= 6">
                                                         <t t-if="fecha_liq &lt;=fecha_ini_contrato">
                                                              01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
                                                         </t>
@@ -238,16 +238,13 @@
                                                            <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
                                                         </t>
                                                     </t>
-                                                    <t t-if="mes_liq &lt;= 12 and dia_liq &lt;= 31">
+                                                    <t t-if="mes_liq &gt; 6 and mes_liq &lt;= 12">
                                                         <t t-if="fecha_liq &lt;=fecha_ini_contrato">
                                                              07-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
                                                         </t>
                                                         <t t-else="">
                                                            <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
                                                         </t>
-                                                    </t>
-                                                    <t t-else="">
-                                                       01-01-<span t-esc="(doc.contract_id.date_end).year"/> a <span t-field="doc.contract_id.date_end"/>
                                                     </t>
                                                 </td>
                                                 <td class="text-right" ><span t-field="line_ids.total"  t-options='{"widget": "monetary", "display_currency": doc.company_id.currency_id}'/></td>
