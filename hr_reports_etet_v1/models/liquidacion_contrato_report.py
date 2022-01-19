@@ -13,6 +13,7 @@ import xlsxwriter
 import types
 import logging
 
+__import__('datetime')
 _logger = logging.getLogger(__name__)
 
 
