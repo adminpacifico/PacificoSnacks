@@ -96,6 +96,23 @@ class HrPayslip(models.Model):
         horas_extras = self._cr.fetchall()
         return horas_extras
 
+    def get_inputs_hora_extra_year_before(self, contract_id, date_from, date_to):
+        year_before = date_from - relativedelta(years=1)
+        date_init_year = date(year_before.year, 1, 1)
+        date_end_year = date(year_before.year, 12, 31)
+        if contract_id.date_start <= date_init_year:
+            date_init = date_init_year
+        else:
+            date_init = contract_id.date_start
+
+        self._cr.execute(''' SELECT i.name, i.code, h.total_money, i.id FROM hr_extras h
+                                INNER JOIN hr_payslip_input_type i ON i.id=h.input_id
+                                WHERE h.contract_id=%s AND h.state='approved'
+                                AND h.date BETWEEN %s AND %s
+                                ORDER BY i.code''',(contract_id.id, date_init, date_end_year))
+        horas_extras = self._cr.fetchall()
+        return horas_extras
+
     def get_inputs_hora_extra_6month(self, contract_id, date_from, date_to):
 
         if date_from.month <= 6 and date_from.day <= 31:
@@ -116,6 +133,7 @@ class HrPayslip(models.Model):
                                 ORDER BY i.code''',(contract_id.id, date_init, date_to))
         horas_extras = self._cr.fetchall()
         return horas_extras
+
 
     def get_inputs_loans(self, contract_id, date_from, date_to):
         self._cr.execute(''' SELECT i.name, i.code, l.amount, i.id
@@ -226,6 +244,26 @@ class HrPayslip(models.Model):
         loans_ids = self._cr.fetchall()
         return loans_ids
 
+    def get_inputs_loans_year_before(self, contract_id, date_from, date_to):
+        year_before = date_from - relativedelta(years=1)
+        date_init_year = date(year_before.year, 1, 1)
+        date_end_year = date(year_before.year, 12, 31)
+        if contract_id.date_start <= date_init_year:
+            date_init = date_init_year
+        else:
+            date_init = contract_id.date_start
+
+        self._cr.execute(''' SELECT i.name, i.code, l.amount, i.id
+                                FROM hr_loan_line l
+                                INNER JOIN hr_loan h ON h.id=l.loan_id
+                                INNER JOIN hr_payslip_input_type i ON i.id=h.input_id
+                                WHERE h.contract_id=%s AND h.state='approve'
+                                AND l.date BETWEEN %s AND %s
+                                AND h.loan_fijo IS False
+                                ORDER BY i.code ''', (contract_id.id, date_init, date_end_year))
+        loans_ids = self._cr.fetchall()
+        return loans_ids
+
     def get_inputs_loans_6month(self, contract_id, date_from, date_to):
         if date_from.month <= 6 and date_from.day <= 31:
             date_init_year = date(date_from.year, 1, 1)
@@ -301,6 +339,23 @@ class HrPayslip(models.Model):
             amount_transp = amount_transp / count
 
         return amount_transp
+
+    def get_payslip_year_before(self, contract_id, date_from, date_to):
+        year_before = date_from - relativedelta(years=1)
+        date_init_year = date(year_before.year, 1, 1)
+        date_end_year = date(year_before.year, 12, 31)
+        if contract_id.date_start <= date_init_year:
+            date_init = date_init_year
+        else:
+            date_init = contract_id.date_start
+
+        payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
+                                                 ("date_from", ">=", date_init),
+                                                 ("date_to", "<=", date_end_year),
+                                                 ("type_payslip_id.name", "=", 'Nomina'),
+                                                 ("state", "=", 'done')])
+
+        return payslip
 
     def get_inputs_withholding_tax(self, contract_id, date_from, date_to):
         date_month_now_from = date(date_from.year, date_from.month, 1)
@@ -1532,6 +1587,195 @@ class HrPayslip(models.Model):
                         "name_input": inputs_exempt_income_tax.input_id.name,
                     })
 
+            #-------- Para calculo de Cesantias ----------
+            # Salario promedio año anterior
+            salary = 0
+            count = 0
+            payslip = self.get_payslip_year_before(contract, self.date_from, self.date_to)
+            if payslip:
+                for p in payslip:
+                    if p.id:
+                        inputs = self.env['hr.payslip.line'].search(
+                            [("code", "=", 'SALCONTRACTO'), ("slip_id.id", "=", p.id)], limit=1)
+                        if inputs:
+                            salary += inputs.total
+                            count += 1
+                average_salary = salary / count
+
+                inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'SALCONTRACTOYEAR')],
+                                                                       limit=1)
+                if inputs_type:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": average_salary,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_type.id,
+                        "code_input": 'SALARY_YEARS_BEFORE',
+                        "name_input": 'Salario Promedio Año Anterior',
+                    })
+
+            # Horas extras año anterior
+            hora_extra_year_before = self.get_inputs_hora_extra_year_before(contract, self.date_from, self.date_to)
+            if hora_extra_year_before:
+                year_before = self.date_from - relativedelta(years=1)
+                date_end_year = date(year_before.year, 12, 30)
+
+                hdate_init_year = date(year_before.year, 1, 1)
+                if contract.date_start <= hdate_init_year:
+                    hdate_init = hdate_init_year
+                else:
+                    hdate_init = contract.date_start
+
+                total_days = days360(hdate_init, date_end_year) + 1
+
+                if total_days < 30:
+                    day_base = total_days
+                else:
+                    day_base = 30
+
+                extradiurna_amount = 0
+                extradiurnafestivo_amount = 0
+                extranocturna_amount = 0
+                extranocturnafestivo_amount = 0
+                recargonocturno_amount = 0
+                recargodiurnofestivo_amount = 0
+                recargonocturnofestivo_amount = 0
+                for hora in hora_extra_year_before:
+                    if hora[1] == 'EXTRADIURNA':
+                        extradiurna_amount = extradiurna_amount + hora[2]
+                        extradiurna_type_id = hora[3]
+                    if hora[1] == 'EXTRADIURNAFESTIVO':
+                        extradiurnafestivo_amount = extradiurnafestivo_amount + hora[2]
+                        extradiurnafestivo_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNA':
+                        extranocturna_amount = extranocturna_amount + hora[2]
+                        extranocturna_type_id = hora[3]
+                    if hora[1] == 'EXTRANOCTURNAFESTIVO':
+                        extranocturnafestivo_amount = extranocturnafestivo_amount + hora[2]
+                        extranocturnafestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNO':
+                        recargonocturno_amount = recargonocturno_amount + hora[2]
+                        recargonocturno_type_id = hora[3]
+                    if hora[1] == 'RECARGODIURNOFESTIVO':
+                        recargodiurnofestivo_amount = recargodiurnofestivo_amount + hora[2]
+                        recargodiurnofestivo_type_id = hora[3]
+                    if hora[1] == 'RECARGONOCTURNOFESTIVO':
+                        recargonocturnofestivo_amount = recargonocturnofestivo_amount + hora[2]
+                        recargonocturnofestivo_type_id = hora[3]
+
+                if not extradiurna_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (extradiurna_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": extradiurna_type_id,
+                        "code_input": 'EXTRADIURNA_YEARS_BEFORE',
+                        "name_input": 'Horas Extra Diurna (25%) Promedio Año Anterior',
+                    })
+                if not extradiurnafestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (extradiurnafestivo_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": extradiurnafestivo_type_id,
+                        "code_input": 'EXTRADIURNAFESTIVO_YEARS_BEFORE',
+                        "name_input": '	Horas Extra Diurna Festivo (100%) Promedio Año Anterior',
+                    })
+                if not extranocturna_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (extranocturna_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": extranocturna_type_id,
+                        "code_input": 'EXTRANOCTURNA_YEARS_BEFORE',
+                        "name_input": 'Horas Extra Nocturna (75%) Promedio Año Anterior',
+                    })
+                if not extranocturnafestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (extranocturnafestivo_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": extranocturnafestivo_type_id,
+                        "code_input": 'EXTRANOCTURNAFESTIVO_YEARS_BEFORE',
+                        "name_input": 'Horas Extra Nocturna Festivo (150%) Promedio Año Anterior',
+                    })
+                if not recargonocturno_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (recargonocturno_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturno_type_id,
+                        "code_input": 'RECARGONOCTURNO_YEARS_BEFORE',
+                        "name_input": 'Horas Recargo Nocturno (35%) Promedio Año Anterior',
+                    })
+                if not recargodiurnofestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (recargodiurnofestivo_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": recargodiurnofestivo_type_id,
+                        "code_input": 'RECARGODIURNOFESTIVO_YEARS_BEFORE',
+                        "name_input": 'Horas Recargo Diurno Festivo (75%) Promedio Año Anterior',
+                    })
+                if not recargonocturnofestivo_amount == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (recargonocturnofestivo_amount / total_days) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": recargonocturnofestivo_type_id,
+                        "code_input": 'RECARGONOCTURNOFESTIVO_YEARS_BEFORE',
+                        "name_input": 'Horas Recargo Nocturno Festivo (110%) Promedio Año Anterior',
+                    })
+
+            # Bonificacion y comision año anterior
+            inputs_loans_year_before = self.get_inputs_loans_year_before(contract, self.date_from, self.date_to)
+            if inputs_loans_year_before:
+
+                year_before = self.date_from - relativedelta(years=1)
+                date_end_year = date(year_before.year, 12, 30)
+                ldate_init_year = date(year_before.year, 1, 1)
+                if contract.date_start <= ldate_init_year:
+                    ldate_init = ldate_init_year
+                else:
+                    ldate_init = contract.date_start
+
+                total_dayl12 = days360(ldate_init, date_end_year) + 1
+
+                if total_dayl12 < 30:
+                    day_base = total_dayl12
+                else:
+                    day_base = 30
+
+                amountb = 0
+                amountc = 0
+                for loans in inputs_loans_year_before:
+                    if loans[1] == 'BONIFICACION':
+                        amountb = amountb + loans[2]
+                        inputb_type_id = loans[3]
+                    if loans[1] == 'COMISION':
+                        amountc = amountc + loans[2]
+                        inputc_type_id = loans[3]
+
+                if not amountb == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (amountb / total_dayl12) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": inputb_type_id,
+                        "code_input": 'BONIFICACION_YEARS_BEFORE',
+                        "name_input": 'Bonificación Promedio Año Anterior',
+                    })
+                if not amountc == 0:
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 2,
+                        "amount": (amountc / total_dayl12) * day_base,
+                        "payslip_id": self.id,
+                        "input_type_id": inputc_type_id,
+                        "code_input": 'COMISION_YEARS_BEFORE',
+                        "name_input": 'Comision Promedio Año Anterior',
+                    })
+
+
         return res
 
     @api.onchange('employee_id', 'struct_id', 'contract_id', 'date_from', 'date_to')
@@ -1717,6 +1961,31 @@ class HrPayslip(models.Model):
                 total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
                 work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARS')], limit=1)
+                attendances_year_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_year_total)
+
+                # Dias trabajados año anterior
+                year_before = self.date_from - relativedelta(years=1)
+                date_init_year = date(year_before.year, 1, 1)
+                date_end_year = date(year_before.year, 12, 30)
+                if contract.date_start <= date_init_year:
+                    date_init = date_init_year
+                else:
+                    date_init = contract.date_start
+                total_year_days = days360(date_init, date_end_year) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_end_year)
+                total_year_days = total_year_days - suspensions_day
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARSBEFORE')], limit=1)
                 attendances_year_total = {
                     'sequence': work_entry_type.sequence,
                     'work_entry_type_id': work_entry_type.id,
