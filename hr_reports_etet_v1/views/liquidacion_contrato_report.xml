@@ -233,8 +233,8 @@
                                             <tr style="height:150%;" t-foreach="doc.line_ids.filtered(lambda x: x.code == 'PRIMA')" t-as="line_ids">
                                                 <td>
                                                     <span t-field="line_ids.name" />
-                                                    <t t-if="mes_liq &gt; 0 and mes_liq &lt;= 6 ">
-                                                        <t t-if="fecha_ini_contrato &lt;= date1s and fecha_1 == anio_liq">
+                                                    <t t-if="mes_liq &gt;= 1 and mes_liq &lt;= 6 ">
+                                                        <t t-if="fecha_ini_contrato &gt;= date1s and fecha_1 == anio_liq">
                                                            <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
                                                         </t>
                                                         <t t-else="">
@@ -242,7 +242,7 @@
                                                         </t>
                                                     </t>
                                                     <t t-if="mes_liq &gt; 6 and mes_liq &lt;= 12">
-                                                        <t t-if="fecha_ini_contrato &lt;= date2s and fecha_1 == anio_liq">
+                                                        <t t-if="fecha_ini_contrato &gt;= date2s and fecha_1 == anio_liq">
                                                             <span t-field="doc.contract_id.date_start"></span> a <span t-field="doc.contract_id.date_end"></span>
                                                         </t>
                                                         <t t-else="">
@@ -388,15 +388,15 @@
                                 <table>
                                     <tr ><b>CONSTANCIA:  Se hace constar expresamente lo siguiente:</b>
                                     <br></br>
-                                        <p style="font-size:11px" class="text-justify"> 1) El patrono ha incorporado en la anterior liquidación, en lo pertinente, la totalidad de los valores correspondientes a sal arios, horas extras,recargos
-                                            por trabajos nocturnos, descansos remunerados, cesantía, intereses de cesantía,vacaciones, y en general, todo concepto relaci onado con salarios,
-                                            descansos, prestaciones o indemnizaciones de toda especie y en general, por toda acreencia laboral, que tenga por causa el co ntrato de trabajo que
+                                        <p style="font-size:11px" class="text-justify"> 1) El patrono ha incorporado en la anterior liquidación, en lo pertinente, la totalidad de los valores correspondientes a salarios, horas extras, recargos
+                                            por trabajos nocturnos, descansos remunerados, cesantía, intereses de cesantía, vacaciones y en general, todo concepto relacionado con salarios,
+                                            descansos, prestaciones o indemnizaciones de toda especie y en general, por toda acreencia laboral, que tenga por causa el contrato de trabajo que
                                             ha quedado extinguido.</p>
                                             <p style="font-size:11px" class="text-justify">2) El trabajador acepta expresamente que el tiempo transcurrido entre la terminaci ón del contrato y la fecha de pago de esta liquidación, está
                                             justificado.</p>
-                                            <p style="font-size:11px" class="text-justify">3) Que no obstante la anterior declaración, se hace constar por las partes, que con el pago de la suma de dinero a que hace r eferencia la anterior
-                                            liquidación, queda transada cualquier diferencia relativa al contrato de trabajo que ha quedado terminado, pues ha sido de co mún ánimo transar
-                                            definitiva-mente, como en efecto se transa, todo reclamo pasado, presente o futuro que tenga por causa el mencionado contrato.Por consig uiente ésta
+                                            <p style="font-size:11px" class="text-justify">3) Que no obstante la anterior declaración, se hace constar por las partes, que con el pago de la suma de dinero a que hace referencia la anterior
+                                            liquidación, queda transada cualquier diferencia relativa al contrato de trabajo que ha quedado terminado, pues ha sido de común ánimo transar
+                                            definitiva-mente, como en efecto se transa, todo reclamo pasado, presente o futuro que tenga por causa el mencionado contrato. Por consiguiente ésta
                                             transaccion tiene por efecto la extinción de las obligaciones provenientes de la relación laboral que existió entre el Patron o y el Trabajador quienes</p></tr>
                                 </table>
                                 <br></br>
