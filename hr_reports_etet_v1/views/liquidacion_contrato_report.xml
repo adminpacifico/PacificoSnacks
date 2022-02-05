@@ -19,7 +19,9 @@
                         <div class="page" style="margin-left: 5%; margin-right: 5%; margin-top: 9%">
                             <table style="width:100%; margin-right:25%" add="small">
                                 <tr style="border-bottom: 1px solid black">
-                                    <td style="width:12%" ><img src="/hr_reports_etet_v1/static/src/imagenes/descarga.jpeg"  class="text-center" style="font-size:12px; width:55%; padding-bottom: 5%; padding-top: 10%; margin-left:20%;" alt="Responsive image"/></td>
+                                    <td style="width:12%" >
+                                        <img src="/hr_reports_etet_v1/static/src/imagenes/descarga.jpeg"  class="text-center" style="font-size:12px; width:55%; padding-bottom: 5%; padding-top: 10%; margin-left:20%;" alt="Responsive image"/>
+                                    </td>
 
                                         <td class="text-center" style="margin-top:-25px; width:20%" add="small">
                                             <div><b><span style="font-size:20px" t-field="doc.company_id.name"/></b></div>
@@ -119,7 +121,7 @@
                                                 </tr>
                                                 <tr>
                                                     <td><strong>Dias Suspención </strong></td>
-                                                    <td><span t-field="doc.contract_id.notice_days"/> </td>
+                                                    <td><span t-esc="int(doc.contract_id.suspension)"/> </td>
                                                 </tr>
 
                                             </table>
