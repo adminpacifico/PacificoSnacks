@@ -1775,6 +1775,61 @@ class HrPayslip(models.Model):
                         "name_input": 'Comision Promedio Año Anterior',
                     })
 
+            # Pago Realizado de  Intereses Cesantias
+            if self.type_payslip_id.name == 'Liquidación de Contrato' and date_from.month <= 2:
+                date_before_from = date(self.date_from.year,1, 1)
+                date_month_next = self.date_from + relativedelta(months=1)
+                date_before_to = date(date_month_next.year, date_month_next.month, 1) - relativedelta(days=1)
+
+                payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
+                                                         ("date_from", ">=", date_before_from),
+                                                         ("date_to", "<=", date_before_to),
+                                                         ("type_payslip_id.name", "=", 'Nomina'),
+                                                         ("state", "=", 'done')])
+                intcens = 0
+                for p in payslip:
+                    int_cesantias = self.env['hr.payslip.line'].search([("code", "=", 'INTCESANTIAS'), ("slip_id.id", "=", p.id)], limit=1)
+                    if int_cesantias:
+                       intcens += int_cesantias.total
+
+                if intcens > 0:
+                    inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'INTCESANTIASPAG')], limit=1)
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 3,
+                        "amount": intcens,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_type.id,
+                        "code_input": 'INTCESANTIASPAG',
+                        "name_input": 'Intereses de Cesantías Pagados',
+                    })
+
+            # Pago Realizado de Cesantias
+            if self.type_payslip_id.name == 'Liquidación de Contrato' and date_from.month <= 2:
+                date_before_from = date(self.date_from.year, 1, 1)
+                date_month_next = self.date_from + relativedelta(months=1)
+                date_before_to = date(date_month_next.year, date_month_next.month, 1) - relativedelta(days=1)
+
+                payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
+                                                         ("date_from", ">=", date_before_from),
+                                                         ("date_to", "<=", date_before_to),
+                                                         ("type_payslip_id.name", "=", 'Nomina'),
+                                                         ("state", "=", 'done')])
+                cens = 0
+                for p in payslip:
+                    cesantias = self.env['hr.payslip.line'].search([("code", "=", 'CESANTIAS_LIQ'), ("slip_id.id", "=", p.id)], limit=1)
+                    if cesantias:
+                        cens += cesantias.total
+
+                if cens > 0:
+                    inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'CESANTIASPAG')],limit=1)
+                    self.env['hr.payslip.input'].create({
+                        "sequence": 3,
+                        "amount": cens,
+                        "payslip_id": self.id,
+                        "input_type_id": inputs_type.id,
+                        "code_input": 'CESANTIASPAG',
+                        "name_input": 'Cesantías Pagados',
+                    })
 
         return res
 
@@ -2718,6 +2773,32 @@ class HrPayslip(models.Model):
                     'amount': 0,
                 }
                 res.append(attendances_year_total)
+
+                # Dias trabajados año anterior
+                year_before = self.date_from - relativedelta(years=1)
+                date_init_year = date(year_before.year, 1, 1)
+                date_end_year = date(year_before.year, 12, 30)
+                if contract.date_start <= date_init_year:
+                    date_init = date_init_year
+                else:
+                    date_init = contract.date_start
+                total_year_days = days360(date_init, date_end_year) + 1
+                suspensions_day = self.get_suspensions_day(contract, date_init, date_end_year)
+                total_year_days = total_year_days - suspensions_day
+                total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
+                work_entry_type = self.env['hr.work.entry.type'].search([("code", "=", 'TOTALDAYSYEARSBEFORE')], limit=1)
+                attendances_year_total = {
+                    'sequence': work_entry_type.sequence,
+                    'work_entry_type_id': work_entry_type.id,
+                    'name': work_entry_type.code,
+                    'number_of_days': total_year_days,
+                    'number_of_hours': total_year_hours,
+                    'number_of_days_total': total_year_days,
+                    'number_of_hours_total': total_year_hours,
+                    'amount': 0,
+                }
+                res.append(attendances_year_total)
+
 
                 # Dias semestrales trabajados
 
