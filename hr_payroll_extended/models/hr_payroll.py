@@ -1808,7 +1808,7 @@ class HrPayslip(models.Model):
                 payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
                                                          ("date_from", ">=", date_before_from),
                                                          ("date_to", "<=", date_before_to),
-                                                         ("type_payslip_id.name", "=", 'Liquidación Cesantias'),
+                                                         ("type_payslip_id.name", "=", 'Nomina'),
                                                          ("state", "=", 'done')])
                 intcens = 0
                 for p in payslip:
@@ -1836,7 +1836,7 @@ class HrPayslip(models.Model):
                 payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
                                                          ("date_from", ">=", date_before_from),
                                                          ("date_to", "<=", date_before_to),
-                                                         ("type_payslip_id.name", "=", 'Liquidación Cesantias'),
+                                                         ("type_payslip_id.name", "=", 'Nomina'),
                                                          ("state", "=", 'done')])
                 cens = 0
                 for p in payslip:
@@ -1854,7 +1854,6 @@ class HrPayslip(models.Model):
                         "code_input": 'CESANTIASPAG',
                         "name_input": 'Cesantías Pagados',
                     })
-
 
         return res
 
