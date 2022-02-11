@@ -95,20 +95,20 @@ class DepartmentDetails(models.Model):
         res_user = self.env['res.users'].search([('id', '=', self._uid)])
         if res_user.has_group('hr.group_hr_manager'):
             return {
-                'name': _("Salary History"),
-                'view_mode': 'tree',
+                'name': _("Historial de salario"),
+                'view_mode': 'tree,form',
                 'res_model': 'salary.history',
                 'type': 'ir.actions.act_window',
-                'target': 'new',
+                'target': 'current',
                 'domain': [('employee_id', '=', self.id)]
             }
         elif self.id == self.env.user.employee_id.id:
             return {
-                'name': _("Salary History"),
-                'view_mode': 'tree',
+                'name': _("Historial de salario"),
+                'view_mode': 'tree,form',
                 'res_model': 'salary.history',
                 'type': 'ir.actions.act_window',
-                'target': 'new'
+                'target': 'current'
             }
         else:
             raise UserError('You cannot access this field!!!!')
@@ -119,19 +119,19 @@ class DepartmentDetails(models.Model):
         if res_user.has_group('hr.group_hr_manager'):
             return {
                 'name': _("Contract History"),
-                'view_mode': 'tree',
+                'view_mode': 'tree,form',
                 'res_model': 'contract.history',
                 'type': 'ir.actions.act_window',
-                'target': 'new',
+                'target': 'current',
                 'domain': [('employee_id', '=', self.id)]
             }
         if self.id == self.env.user.employee_id.id:
             return {
                 'name': _("Contract History"),
-                'view_mode': 'tree',
+                'view_mode': 'tree,form',
                 'res_model': 'contract.history',
                 'type': 'ir.actions.act_window',
-                'target': 'new'
+                'target': 'current'
             }
         else:
             raise UserError('You cannot access this field!!!!')
@@ -142,9 +142,11 @@ class WageDetails(models.Model):
 
     @api.onchange('wage')
     def onchange_wage(self):
+        search_ids = self.env['hr.contract'].search([])[-1].id
+        last_id = search_ids + 1
         vals = {
             'employee_id': self.employee_id.id,
-            'employee_name': self.employee_id,
+            'contract': self._origin.id or last_id,
             'updated_date': datetime.today(),
             'current_value': self.wage,
 
@@ -153,11 +155,13 @@ class WageDetails(models.Model):
 
     @api.onchange('name')
     def onchange_name(self):
+        search_ids = self.env['hr.contract'].search([])[-1].id
+        last_id = search_ids + 1
         vals = {
             'employee_id': self.employee_id.id,
-            'employee_name': self.employee_id,
+            'contract': self._origin.id or last_id,
             'updated_date': datetime.today(),
-            'changed_field': 'Contract Reference',
+            'changed_field': 'Referencia del contrato',
             'current_value': self.name,
 
         }
@@ -165,11 +169,13 @@ class WageDetails(models.Model):
 
     @api.onchange('date_start')
     def onchange_datestart(self):
+        search_ids = self.env['hr.contract'].search([])[-1].id
+        last_id = search_ids + 1
         vals = {
             'employee_id': self.employee_id.id,
-            'employee_name': self.employee_id,
+            'contract': self._origin.id or last_id,
             'updated_date': datetime.today(),
-            'changed_field': 'Start Date',
+            'changed_field': 'Fecha de inicio',
             'current_value': self.date_start,
 
         }
@@ -177,11 +183,13 @@ class WageDetails(models.Model):
 
     @api.onchange('date_end')
     def onchange_dateend(self):
+        search_ids = self.env['hr.contract'].search([])[-1].id
+        last_id = search_ids + 1
         vals = {
             'employee_id': self.employee_id.id,
-            'employee_name': self.employee_id,
+            'contract': self._origin.id or last_id,
             'updated_date': datetime.today(),
-            'changed_field': 'End Date',
+            'changed_field': 'Fecha final',
             'current_value': self.date_end,
 
         }
@@ -210,17 +218,52 @@ class TimesheetCost(models.Model):
 class SalaryHistory(models.Model):
     _name = 'salary.history'
 
-    employee_id = fields.Char(string='Employee Id', help="Employee")
-    employee_name = fields.Char(string='Employee Name', help="Name")
-    updated_date = fields.Date(string='Updated On', help="Salary Updated Date")
-    current_value = fields.Char(string='Current Salary', help="Updated Salary")
+    employee_id = fields.Many2one('hr.employee', string='Empleado')
+    contract = fields.Char(string='Contrato ID')
+    contract_id = fields.Many2one('hr.contract', string='Contracto', compute='get_contract_id')
+    updated_date = fields.Date(string='Actualizado en', help="Fecha de actualización del salario")
+    current_value = fields.Float(string='Salario actual', help="Salario actualizado")
+
+    def get_contract_id(self):
+        for record in self:
+            if record.contract:
+                contract = self.env["hr.contract"].search([('id', '=', int(record.contract))], limit=1)
+                if contract:
+                    record.contract_id = contract
+                else:
+                    record.contract_id = False
+            else:
+                record.contract_id = False
+
+    @api.onchange('employee_id')
+    def onchange_employee(self):
+        for record in self:
+            if record.employee_id:
+                contract = self.env["hr.contract"].search([('employee_id', '=', record.employee_id.id), ('state', '=', 'open')], limit=1)
+                if contract:
+                    record.contract = str(contract.id)
+                else:
+                    raise UserError(_('El empleado %s no tiene un contracto.') % (record.employee_id.name,))
 
 
 class ContractHistory(models.Model):
     _name = 'contract.history'
 
-    employee_id = fields.Char(string='Employee Id', help="Employee")
-    employee_name = fields.Char(string='Employee Name', help="Name")
-    updated_date = fields.Date(string='Updated On', help="Contract Updated Date")
-    changed_field = fields.Char(string='Changed Field', help="Updated Field's")
-    current_value = fields.Char(string='Current Contract', help="Updated Value of Contract")
+    employee_id = fields.Many2one('hr.employee', string='Empleado')
+    contract = fields.Char(string='Contrato ID')
+    contract_id = fields.Many2one('hr.contract', string='Contracto', compute='get_contract_id')
+    updated_date = fields.Date(string='Actualizado en', help="Fecha de actualización de contrato")
+    changed_field = fields.Char(string='Campo cambiado', help="Campo cambiado")
+    current_value = fields.Char(string='Valor actualizado del contrato', help="Valor actualizado del contrato")
+
+    def get_contract_id(self):
+        for record in self:
+            if record.contract:
+                contract = self.env["hr.contract"].search([('id', '=', int(record.contract))], limit=1)
+                if contract:
+                    record.contract_id = contract
+                else:
+                    record.contract_id = False
+            else:
+                record.contract_id = False
+
