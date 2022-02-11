@@ -1591,19 +1591,24 @@ class HrPayslip(models.Model):
             # Salario promedio año anterior
             salary = 0
             count = 0
-            payslip = self.get_payslip_year_before(contract, self.date_from, self.date_to)
-            if payslip:
-                for p in payslip:
-                    if p.id:
-                        inputs = self.env['hr.payslip.line'].search(
-                            [("code", "=", 'SALCONTRACTO'), ("slip_id.id", "=", p.id)], limit=1)
-                        if inputs:
-                            salary += inputs.total
-                            count += 1
+
+            year_before = self.date_from - relativedelta(years=1)
+            date_init = date(year_before.year, 10, 1)
+            date_end = date(year_before.year, 12, 31)
+
+            salary_history = self.env['salary.history'].search([("contract", "=", str(contract.id)),
+                                                                ("updated_date", ">=", date_init),
+                                                                ("updated_date", "<=", date_end)])
+
+            if salary_history:
+                for s in salary_history:
+                    if s.current_value:
+                        salary += s.current_value
+                        count += 1
+
                 average_salary = salary / count
 
-                inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'SALCONTRACTOYEAR')],
-                                                                       limit=1)
+                inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'SALCONTRACTOYEAR')],limit=1)
                 if inputs_type:
                     self.env['hr.payslip.input'].create({
                         "sequence": 2,
@@ -1613,6 +1618,25 @@ class HrPayslip(models.Model):
                         "code_input": 'SALARY_YEARS_BEFORE',
                         "name_input": 'Salario Promedio Año Anterior',
                     })
+            else:
+                date_init = date(1900, 1, 1)
+                date_end = date(year_before.year, 10, 1)
+                salary_history_last = self.env['salary.history'].search([("contract", "=", str(contract.id)),
+                                                                       ("updated_date", ">=", date_init),
+                                                                       ("updated_date", "<=", date_end)],
+                                                                       order="updated_date desc", limit=1)
+                if salary_history_last.current_value:
+                    average_salary = salary_history_last.current_value
+                    inputs_type = self.env['hr.payslip.input.type'].search([("code", "=", 'SALCONTRACTOYEAR')],limit=1)
+                    if inputs_type:
+                        self.env['hr.payslip.input'].create({
+                            "sequence": 2,
+                            "amount": average_salary,
+                            "payslip_id": self.id,
+                            "input_type_id": inputs_type.id,
+                            "code_input": 'SALARY_YEARS_BEFORE',
+                            "name_input": 'Salario Promedio Año Anterior',
+                        })
 
             # Horas extras año anterior
             hora_extra_year_before = self.get_inputs_hora_extra_year_before(contract, self.date_from, self.date_to)
@@ -1784,7 +1808,7 @@ class HrPayslip(models.Model):
                 payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
                                                          ("date_from", ">=", date_before_from),
                                                          ("date_to", "<=", date_before_to),
-                                                         ("type_payslip_id.name", "=", 'Nomina'),
+                                                         ("type_payslip_id.name", "=", 'Liquidación Cesantias'),
                                                          ("state", "=", 'done')])
                 intcens = 0
                 for p in payslip:
@@ -1812,7 +1836,7 @@ class HrPayslip(models.Model):
                 payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
                                                          ("date_from", ">=", date_before_from),
                                                          ("date_to", "<=", date_before_to),
-                                                         ("type_payslip_id.name", "=", 'Nomina'),
+                                                         ("type_payslip_id.name", "=", 'Liquidación Cesantias'),
                                                          ("state", "=", 'done')])
                 cens = 0
                 for p in payslip:
@@ -1830,6 +1854,7 @@ class HrPayslip(models.Model):
                         "code_input": 'CESANTIASPAG',
                         "name_input": 'Cesantías Pagados',
                     })
+
 
         return res
 

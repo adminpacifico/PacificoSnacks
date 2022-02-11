@@ -151,14 +151,18 @@ class HrPayslip(models.Model):
             partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'PENSIONEMPRESA':
             partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'afp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
-        elif line.code == 'CESANTIAS':
-            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'FSP':
             partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fsp'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'ICBF':
             partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'icbf'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         elif line.code == 'SENA':
             partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'sena'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
+        elif line.code == 'CESANTIAS':
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
+        elif line.code == 'CESANTIAS_LIQ':
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
+        elif line.code == 'INTCESANTIAS':
+            partner = line.slip_id.contract_id.entity_ids.search([("entity", "=", 'fc'), ("contract_id", "=", line.slip_id.contract_id.id)], limit=1).partner_id.id
         else:
             partner = line.employee_id.partner_id.id
 

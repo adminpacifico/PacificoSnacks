@@ -46,7 +46,7 @@ class HrPayslipEmployees(models.TransientModel):
 
         default_values = Payslip.default_get(Payslip.fields_get())
         for contract in contracts:
-            structure_selected = self.env['hr.payroll.structure'].search([("type_id", "=", payslip_run.type_payslip_id.id),
+            structure_selected = self.env['hr.payroll.structure'].search([("type_id.name", "=", payslip_run.type_payslip_id.name),
                                                                           ("department_id", "=", contract.department_id.id)], limit=1)
             if not structure_selected:
                 structure_selected = contract.structure_type_id.default_struct_id
