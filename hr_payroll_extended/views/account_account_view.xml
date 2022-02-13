@@ -8,6 +8,7 @@
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='deprecated']" position="after">
 				<field name="blocking_analytic_payroll"/>
+				<field name="partner_employee_payroll"/>
 			</xpath>
 		</field>
 	</record>
