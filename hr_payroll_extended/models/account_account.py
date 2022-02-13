@@ -13,3 +13,5 @@ class Account(models.Model):
     _inherit = 'account.account'
 
     blocking_analytic_payroll = fields.Boolean(string="Bloqueo Analítico Nomina", default=False)
+
+    partner_employee_payroll = fields.Boolean(string="Asociado Empleado Nomina", default=False)

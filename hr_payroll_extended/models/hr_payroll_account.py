@@ -187,11 +187,17 @@ class HrPayslip(models.Model):
                         tag_id = self.env['account.analytic.tag'].search( [("id", "=", line.salary_rule_id.tag_id.id)]).id
                         analytic_tag_ids = (tag_id, tag_id)
 
+        if line.slip_id.contract_id.tag_id.id:
+            tag_id = self.env['account.analytic.tag'].search([("id", "=", line.slip_id.contract_id.tag_id.id)]).id
+            analytic_tag_ids = (tag_id, tag_id)
+
         account = self.env['account.account'].search([("id", "=", account_id)])
         if account:
             if account.blocking_analytic_payroll == True:
                 analytic_tag_ids = False
                 analytic_account_id = False
+            if account.partner_employee_payroll == True:
+                partner = line.employee_id.partner_id.id
 
         return {
             'name': line.name,
