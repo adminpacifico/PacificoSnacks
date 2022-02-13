@@ -64,7 +64,7 @@ class HrLeave(models.Model):
     def get_amount_license(self):
         for record in self:
             contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id),('state','=','open')])
-            if contracts and record.holiday_status_id.name == 'Licencia de Maternidad' or contracts and record.holiday_status_id.name == 'Licencia de Paternidad':
+            if contracts and record.holiday_status_id.code == 'LICENCIAMATERNIDAD' or contracts and record.holiday_status_id.code == 'LICENCIAMATERNIDAD':
                 for contract in contracts:
                     salary = contract.wage
                     total_extra_hour = 0
@@ -184,14 +184,14 @@ class HrLeave(models.Model):
                 holidays = record.employee_id._get_work_days_data_batch(record.date_from, record.date_to, calendar=calendar)[record.employee_id.id]
                 record.workday = holidays['days']
                 record.holiday = record.number_of_days - record.workday
-                if record.holiday_status_id.name == 'Vacaciones en dinero' or record.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
+                if record.holiday_status_id.code == 'VACATIONS_MONEY' or record.holiday_status_id.code == 'VACATIONS_MONEY_LIQ':
                     record.workday = record.number_of_days
                     record.holiday = 0
 
     @api.onchange('holiday_status_id')
     def get_holiday_status_name(self):
         for record in self:
-            record.holiday_status_name = record.holiday_status_id.name
+            record.holiday_status_name = record.holiday_status_id.code
 
     def get_days_vacations(self):
         for record in self:
@@ -205,12 +205,12 @@ class HrLeave(models.Model):
     @api.onchange('date_from','date_to','employee_id','holiday_status_id','number_of_days')
     def get_amount_vacations(self):
         for record in self:
-            if record.holiday_status_id.name == 'Vacaciones en dinero':
+            if record.holiday_status_id.code == 'VACATIONS_MONEY':
                 record.request_date_to = record.date_from
                 record.date_to = record.date_from
             contracts = record.env['hr.contract'].search([('employee_id', '=', record.employee_id.id),('state','=','open')])
             if record.manual_data == False:
-                if contracts and record.holiday_status_id.name == 'Vacaciones' or contracts and record.holiday_status_id.name == 'Vacaciones a liquidar'or contracts and record.holiday_status_id.name == 'Vacaciones en dinero' or contracts and record.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
+                if contracts and record.holiday_status_id.code == 'VACATIONS' or contracts and record.holiday_status_id.code == 'VACATIONS_LIQ'or contracts and record.holiday_status_id.code == 'VACATIONS_MONEY' or contracts and record.holiday_status_id.code == 'VACATIONS_MONEY_LIQ':
                     for contract in contracts:
                         salary = contract.wage
                         total_extra_hour = 0
@@ -313,7 +313,12 @@ class HrLeave(models.Model):
                             if not amountc == 0:
                                 amountc = (amountc / total_dayl12) * day_base
 
-                        record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc)/30) * record.number_of_days))
+                        if contract.salario_integrado == True:
+                            sal_integrado = contract.salario_integrado_amount - salary
+                        else:
+                            sal_integrado = 0
+
+                        record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc + sal_integrado) / 30) * record.totalday))
                 else:
                     record.amount_vacations = 0
 
@@ -323,8 +328,12 @@ class HrLeave(models.Model):
         else:
             duration_vac = self.number_of_days
 
-        if self.holiday_status_id.name == 'Vacaciones en dinero' and  7 < duration_vac :
-            raise Warning('¡No es posible registrar la ausencia! Solo se puede solicitar un máximo de 7 días')
+        for record in self:
+            if record.holiday_status_id.code == 'VACATIONS_MONEY' and 7 < duration_vac:
+                raise Warning('¡No es posible registrar la ausencia! Solo se puede solicitar un máximo de 7 días')
+            if record.holiday_status_id.code == 'VACATIONS_MONEY_LIQ' and 7 < duration_vac:
+                raise Warning('¡No es posible registrar la ausencia! Solo se puede solicitar un máximo de 7 días')
+
         return super(HrLeave, self).write(values)
 
     def _create_resource_leave(self):
@@ -371,7 +380,7 @@ class HrLeave(models.Model):
         if not self:
             return
 
-        if self.holiday_status_id.name == 'Vacaciones en dinero' or self.holiday_status_id.name == 'Vacaciones en dinero a liquidar':
+        if self.holiday_status_id.code == 'VACATIONS_MONEY' or self.holiday_status_id.code == 'VACATIONS_MONEY_LIQ':
             return
         # 1. Create a work entry for each leave
         work_entries_vals_list = []
