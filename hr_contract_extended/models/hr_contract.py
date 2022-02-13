@@ -21,6 +21,7 @@ class HrContract(models.Model):
     ], string='Status', group_expand='_expand_states', copy=False,
        tracking=True, help='Status of the contract', default='draft')
     entity_ids = fields.One2many('hr.company.ss', 'contract_id', string='Entidad')
+    tag_id = fields.Many2one('account.analytic.tag', string="Etiqueta Analítica")
 
     @api.onchange('state')
     def _date_end_casual(self):
