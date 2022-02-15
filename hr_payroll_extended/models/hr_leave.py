@@ -318,7 +318,7 @@ class HrLeave(models.Model):
                         else:
                             sal_integrado = 0
 
-                        record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc + sal_integrado) / 30) * record.totalday))
+                        record.amount_vacations = round((((salary + total_extra_hour + amountb + amountc + sal_integrado) / 30) * record.number_of_days))
                 else:
                     record.amount_vacations = 0
 
