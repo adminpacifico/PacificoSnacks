@@ -12,6 +12,13 @@
 				<field name="aux_movilizacion_amount" attrs="{'invisible': [('aux_movilizacion','=',False)]}" />
 				<field name="aux_rodamiento" default="False"/>
 				<field name="aux_rodamiento_amount" attrs="{'invisible': [('aux_rodamiento','=',False)]}"/>
+				<field name="aux_telefonia" default="False"/>
+				<field name="aux_telefonia_amount" attrs="{'invisible': [('aux_telefonia','=',False)]}"/>
+				<field name="salario_integrado" default="False"/>
+				<field name="salario_integrado_amount" attrs="{'invisible': [('salario_integrado','=',False)]}"/>
+				<field name="garantizado" default="False"/>
+				<field name="garantizado_amount" attrs="{'invisible': [('garantizado','=',False)]}"/>
+				<field name="sena_stage"/>
 			</xpath>
 		</field>
 	</record>

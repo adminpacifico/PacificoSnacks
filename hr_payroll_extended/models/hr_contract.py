@@ -51,7 +51,19 @@ class HrContract(models.Model):
     aux_movilizacion_amount = fields.Float(string="Monto Mensual")
     aux_rodamiento = fields.Boolean(string="Auxilio Rodamiento", default=False)
     aux_rodamiento_amount = fields.Float(string="Monto Mensual")
+    aux_telefonia = fields.Boolean(string="Auxilio Telefonia", default=False)
+    aux_telefonia_amount = fields.Float(string="Monto Mensual")
 
+    # Salario Integrado
+    salario_integrado = fields.Boolean(string="Salario Integrado", default=False)
+    salario_integrado_amount = fields.Float(string="Monto Mensual")
+
+    # Garantizado
+    garantizado = fields.Boolean(string="Garantizado", default=False)
+    garantizado_amount = fields.Float(string="Monto Mensual")
+
+    # Sena
+    sena_stage = fields.Selection([('NA', 'No aplica'), ('E', 'Electiva'), ('P', 'Productiva')], 'Etapa Sena', default='NA')
 
     @api.onchange('wage')
     def _integral_salary(self):
