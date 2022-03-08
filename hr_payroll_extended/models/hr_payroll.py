@@ -1800,7 +1800,7 @@ class HrPayslip(models.Model):
                     })
 
             # Pago Realizado de  Intereses Cesantias
-            if date_from.month <= 2:
+            if date_from.month:
                 date_before_from = date(self.date_from.year,1, 1)
                 date_month_next = self.date_from + relativedelta(months=1)
                 date_before_to = date(date_month_next.year, date_month_next.month, 1) - relativedelta(days=1)
@@ -1828,7 +1828,7 @@ class HrPayslip(models.Model):
                     })
 
             # Pago Realizado de Cesantias
-            if self.type_payslip_id.name == 'Liquidación de Contrato' and date_from.month <= 2:
+            if self.type_payslip_id.name == 'Liquidación de Contrato':
                 date_before_from = date(self.date_from.year, 1, 1)
                 date_month_next = self.date_from + relativedelta(months=1)
                 date_before_to = date(date_month_next.year, date_month_next.month, 1) - relativedelta(days=1)
@@ -1836,7 +1836,7 @@ class HrPayslip(models.Model):
                 payslip = self.env['hr.payslip'].search([("contract_id", "=", contract.id),
                                                          ("date_from", ">=", date_before_from),
                                                          ("date_to", "<=", date_before_to),
-                                                         ("type_payslip_id.name", "=", 'Nomina'),
+                                                         ("type_payslip_id.name", "=", 'Liquidación Cesantias'),
                                                          ("state", "=", 'done')])
                 cens = 0
                 for p in payslip:
