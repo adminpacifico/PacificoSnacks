@@ -197,8 +197,8 @@ class HrPayslip(models.Model):
         date_before_from = date(date_from.year, date_from.month, 1)
         date_before_to = date(date_from.year, date_from.month, 15)
         payslip = self.env['hr.payslip'].search([("contract_id", "=", contract_id.id),
-                                                 ("date_from", "=", date_before_from),
-                                                 ("date_to", "=", date_before_to),
+                                                 ("date_from", ">=", date_before_from),
+                                                 ("date_to", "<=", date_before_to),
                                                  ("type_payslip_id.name", "=", 'Nomina'),
                                                  ("state", "=", 'done')], limit=1)
         if payslip.id :
