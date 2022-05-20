@@ -9,6 +9,7 @@
 		<field name="arch" type="xml">
 			<xpath expr="//field[@name='credit_note']" position="after">
 				<field name="type_payslip_id" required="1"/>
+				<field name="exclude_day"/>
 			</xpath>
 			<xpath expr="//button[@name='compute_sheet']" position="after">
 				<button string="Actualizar Entradas" name="actualizar_entradas" type="object" states="draft,verify" class="oe_highlight"/>

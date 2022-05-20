@@ -37,6 +37,7 @@ class HrPayslip(models.Model):
     _inherit = 'hr.payslip'
 
     type_payslip_id = fields.Many2one('hr.type.payslip', string="Type")
+    exclude_day = fields.Boolean(string="Excluir días", default=False)
 
     def actualizar_entradas(self):
         res = self._onchange_employee()
@@ -1910,7 +1911,9 @@ class HrPayslip(models.Model):
             add_days_rounding = 0
             print ('-------444', work_hours_ordered, work_hours, total_hours)
             novelties_days = 0
-            if self.date_from != self.date_to:
+            vacations_days = 0
+            vacations_liq_days = 0
+            if self.exclude_day == False:
                 for work_entry_type_id, hours in work_hours_ordered:
                     work_entry_type = self.env['hr.work.entry.type'].browse(work_entry_type_id)
                     is_paid = work_entry_type_id not in unpaid_work_entry_types
@@ -1921,28 +1924,76 @@ class HrPayslip(models.Model):
                         days += add_days_rounding
                     day_rounded = self._round_days(work_entry_type, days)
                     add_days_rounding += (days - day_rounded)
-                    if day_rounded > 15:
-                        day_rounded = 15
-                    attendance_line = {
-                        'sequence': work_entry_type.sequence,
-                        'work_entry_type_id': work_entry_type_id,
-                        'name': work_entry_type.code,
-                        'number_of_days': day_rounded,
-                        'number_of_hours': hours,
-                        'number_of_days_total': day_rounded,
-                        'number_of_hours_total': hours,
-                        'amount': 0,
-                    }
-                    assistance_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
-                    if not work_entry_type_id == assistance_type.id:
-                        res.append(attendance_line)
-                        novelties_days += day_rounded
+                    # Dias por rango de fecha (manejo de 30 dias)
+                    all_days = days_between(self.date_from, self.date_to)
+                    if all_days >= 30:
+                        if day_rounded > 30:
+                            day_rounded = 30
+                        attendance_line = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type_id,
+                            'name': work_entry_type.code,
+                            'number_of_days': day_rounded,
+                            'number_of_hours': hours,
+                            'number_of_days_total': day_rounded,
+                            'number_of_hours_total': hours,
+                            'amount': 0,
+                        }
+                        assistance_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
+                        if not work_entry_type_id == assistance_type.id:
+                            res.append(attendance_line)
+                            novelties_days += day_rounded
 
-                    if novelties_days > 15:
-                        novelties_days = 15
+                        if novelties_days > 30:
+                            novelties_days = 30
 
-                        # Dias por rango de fecha (manejo de 30 dias)
+                        vacations_type = self.env['hr.work.entry.type'].search([("code", "=", 'VACATIONS')], limit=1)
+                        if work_entry_type_id == vacations_type.id:
+                            res.append(attendance_line)
+                            vacations_days += day_rounded
+
+                        vacations_liq_type = self.env['hr.work.entry.type'].search([("code", "=", 'VACATIONS')],
+                                                                                   limit=1)
+                        if work_entry_type_id == vacations_liq_type.id:
+                            res.append(attendance_line)
+                            vacations_liq_days += day_rounded
+
+                    else:
+                        if day_rounded > 15:
+                            day_rounded = 15
+                        attendance_line = {
+                            'sequence': work_entry_type.sequence,
+                            'work_entry_type_id': work_entry_type_id,
+                            'name': work_entry_type.code,
+                            'number_of_days': day_rounded,
+                            'number_of_hours': hours,
+                            'number_of_days_total': day_rounded,
+                            'number_of_hours_total': hours,
+                            'amount': 0,
+                        }
+                        assistance_type = self.env['hr.work.entry.type'].search([("code", "=", 'WORK100')], limit=1)
+                        if not work_entry_type_id == assistance_type.id:
+                            res.append(attendance_line)
+                            novelties_days += day_rounded
+
+                        if novelties_days > 15:
+                            novelties_days = 15
+
+                        vacations_type = self.env['hr.work.entry.type'].search([("code", "=", 'VACATIONS')], limit=1)
+                        if work_entry_type_id == vacations_type.id:
+                            vacations_days += day_rounded
+
+                        vacations_liq_type = self.env['hr.work.entry.type'].search([("code", "=", 'VACATIONS_LIQ')],
+                                                                                   limit=1)
+                        if work_entry_type_id == vacations_liq_type.id:
+                            vacations_liq_days += day_rounded
+
+                # Dias por rango de fecha (manejo de 30 dias)
                 all_days = days_between(self.date_from, self.date_to)
+
+                # Manejo de 31 para las vacaciones
+                if vacations_days > 0 or vacations_liq_days > 0:
+                    all_days = (self.date_to - self.date_from).days + 1
 
                 # Dias de asistencia
                 assistance_days = all_days - novelties_days
