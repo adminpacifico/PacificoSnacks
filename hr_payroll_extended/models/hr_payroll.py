@@ -2113,7 +2113,9 @@ class HrPayslip(models.Model):
                     date_init = contract.date_start
                 if date_end_year < date_init:
                     date_init = date_end_year
-                total_year_days = days360(date_init, date_end_year) + 1
+                    total_year_days = 0
+                else:
+                    total_year_days = days360(date_init, date_end_year) + 1
                 suspensions_day = self.get_suspensions_day(contract, date_init, date_end_year)
                 total_year_days = total_year_days - suspensions_day
                 total_year_hours = total_year_days * contract.resource_calendar_id.hours_per_day
