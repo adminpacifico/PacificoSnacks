@@ -30,6 +30,7 @@ class AccountFiscalPosition(models.Model):
     key_dian = fields.Many2one('ln10_co_etet.diancodes', ondelete='cascade', string='DIAN Code', required=True,
                                domain=[('type', '=', 'fiscalposition')])
 
+    '''
     def map_tax(self, taxes, product=None, partner=None):
         """
         Sobreescritura del método para cambio funcional de Locaclización Colombiana.
@@ -88,6 +89,7 @@ class AccountFiscalPosition(models.Model):
                 "Por favor verificar\nLa definición de Impuestos entre la Compañia y el Tercero no está definida")
 
         return relation_fpos_id.map_tax(taxes)
+    '''
 
 class TaxesType(models.Model):
     _name = 'ln10_co_etet.taxestype'

@@ -72,7 +72,7 @@ class AccountMove(models.Model):
     def _validation_invoice_resolution(self):
         parameter = self.env['ir.config_parameter'].sudo()
         fe_active = parameter.get_param('res.config.settings.fe_active')
-
+        '''
         if fe_active:
             if self.journal_id:
                 if self.journal_id.type == 'sale':
@@ -87,6 +87,7 @@ class AccountMove(models.Model):
                                 raise exceptions.Warning(_("The type of invoice resolution must be electronic"))
                         else:
                             raise exceptions.Warning(_("The journal must have a resolution of credit note"))
+        '''
 
     def _validate_resolution_data(self, next_number):
         resolution_data = super(AccountMove, self)._validate_resolution_data(next_number)
