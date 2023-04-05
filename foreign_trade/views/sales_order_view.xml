@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="sales_order_view_form" model="ir.ui.view"><!--Esta linea va el modelo que se va a intervenir  -->
+            <field name="name">sales.order.view.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//group[@name='utm_link']" position="after">
+                    <group string="Responsable" name="Responsable">
+                        <field name="responsible"/>
+                        <field name="other_format"/>
+                        <field name="responsible_position"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_infoexport,acceso a infoexport rol user,model_infoexport,base.group_user,1,1,1,1
+access_account_move,acceso a account_movet rol user,model_account_move,base.group_user,1,1,1,1

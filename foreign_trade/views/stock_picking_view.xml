@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- Inherit Form View to Modify it -->
+        <record id="stock_view_picking_view_form" model="ir.ui.view"><!--Esta linea va el modelo que se va a intervenir  -->
+            <field name="name">stock_view_picking_view_form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='scheduled_date']" position="after">
+                    <field name="sale_order_id"/>
+                </xpath>
+          </field>
+        </record>
+
+
+    </data>
+</odoo>

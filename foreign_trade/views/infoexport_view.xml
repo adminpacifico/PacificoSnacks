@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="infoexport_tree_view" model="ir.ui.view">
+        <field name="name">infoexport.tree.view</field>
+        <field name="model">infoexport</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="empty_percentage"/>
+                <field name="origin_freight"/>
+                <field name="other_origin_expenses"/>
+                <field name="sure"/>
+                <field name="reach_vuce"/>
+                <field name="responsible_name"/>
+                <field name="position"/>
+                <field name="responsible_certificate"/>
+                <field name="expedition_place"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="infoexport_view_form" model="ir.ui.view">
+        <field name="name">infoexport.view.form</field>
+        <field name="model">infoexport</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                        <field name="name"/>
+                        <field name="empty_percentage"/>
+                        <field name="origin_freight"/>
+                        <field name="sea_freight"/>
+                        <field name="other_origin_expenses"/>
+                        <field name="other_expenses"/>
+
+                        <field name="sure"/>
+                         </group>
+
+                        <group>
+                        <field name="reach_vuce"/>
+                        <field name="responsible_name"/>
+                        <field name="position"/>
+                        <field name="responsible_certificate"/>
+                        <!--<field name="expedition_place"/>-->
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+        <record model="ir.actions.act_window" id="action_infoexport">
+        <field name="name">Datos informe</field>
+        <field name="res_model">infoexport</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_configuration" name="Datos informe" sequence="114" parent="studio_customization.comercio_exterior_2aecc87f-2d13-436b-8b5e-83e410e5384c" action="action_infoexport">
+
+    </menuitem>
+
+    <menuitem id="opc_infoexport" name="Datos informe" parent="menu_configuration" sequence="14"/>
+
+
+
+
+
+
+<!--
+    <record model="ir.actions.act_window" id="action_infoexport">
+        <field name="name">Datos informe</field>
+        <field name="res_model">infoexport</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+
+
+
+    <menuitem id="menu_configuration" name="Configuracion" sequence="113" parent="menu_exportacion">
+        <menuitem id="opc_infoexport" name="Datos Informe"  action="action_infoexport" sequence="13"/>
+    </menuitem>-->
+
+
+
+</odoo>
