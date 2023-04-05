@@ -1147,11 +1147,11 @@ class FeMfMethods(models.AbstractModel):
 #           list_document_invoice = self.get_document_attachment(parameter['url'], parameter['token'], posted_document)
             list_document_invoice = False
             send = None
-            #send = self.insert_invoice(parameter['url'], parameter['token'], posted_document, parameter_settings['fe_own_gr'], list_document_invoice)
+            send = self.insert_invoice(parameter['url'], parameter['token'], posted_document, parameter_settings['fe_own_gr'], list_document_invoice)
 
         if posted_document.type == 'out_refund':
             send = None
-            #send = self.insert_note(parameter['url'], parameter['token'], posted_document,parameter_settings['fe_own_gr'])
+            send = self.insert_note(parameter['url'], parameter['token'], posted_document,parameter_settings['fe_own_gr'])
 
         return send
 
