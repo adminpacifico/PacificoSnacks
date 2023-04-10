@@ -14,7 +14,7 @@ class Stock_picking(models.Model):
                 record.sale_order_id = self.env['sale.order'].search([('name', '=', record.origin)])
                 record.x_studio_exportacion_ = record.sale_order_id.x_studio_exportacion_
             else:
-                record.sale_order = False
+                record.sale_order_id = False
 
 
 

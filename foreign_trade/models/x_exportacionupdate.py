@@ -13,8 +13,6 @@ class Exportacion(models.Model):
     responsable_exp = fields.Many2one(comodel_name='hr.employee',string='Responsable')
     cargo_responsable_expo = fields.Many2one(comodel_name='hr.job', compute='compute_cargo_responsable_expo',string='Cargo')
 
-
-
     @api.depends('responsable_exp')
     def compute_cargo_responsable_expo(self):
         for record in self:
