@@ -12,7 +12,36 @@ class Exportacion(models.Model):
     x_studio_field_Xjy46 = fields.Many2one(comodel_name='sale.order',inverse_name='exportacion_ids', string='Orden venta', copy=False)
     responsable_exp = fields.Many2one(comodel_name='hr.employee',string='Responsable')
     cargo_responsable_expo = fields.Many2one(comodel_name='hr.job', compute='compute_cargo_responsable_expo',string='Cargo')
+    imp = fields.Char(compute='compute_imp',string='IMP')
+    imp_id = fields.Many2one(comodel_name='x_importacion',compute='compute_imp_id',string='IMP')
 
+
+
+# __________________________________________________________________________________________________________________________________________
+    @api.depends('imp')
+    def compute_imp(self):
+        for record in self:
+            if record.x_name:
+                cons = self.env['purchase.order'].search([('x_studio_op_', '=', record.x_name)])
+                if cons.x_studio_imp__1.x_name == 'False':
+                    record.imp= " "
+                else:
+
+                    record.imp = cons.x_studio_imp__1.x_name
+
+            else:
+                record.imp = ' '
+#__________________________________________________________________________________________________________________________________________
+    @api.depends('imp_id')
+    def compute_imp_id(self):
+        for record in self:
+            if record.imp:
+                record.imp_id = self.env['x_importacion'].search([('x_name', '=', record.imp)])
+            else:
+                record.imp_id = False
+
+
+#__________________________________________________________________________________________________________________________________________
     @api.depends('responsable_exp')
     def compute_cargo_responsable_expo(self):
         for record in self:

@@ -1,1 +1,1 @@
-from . import sales_order,account_move,x_exportacionupdate,infoexport,stock_picking,res_partner
+from . import sales_order,account_move,x_exportacionupdate,infoexport,stock_picking,res_partner,x_importacion
