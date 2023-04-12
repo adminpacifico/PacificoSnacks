@@ -1151,7 +1151,7 @@ class FeMfMethods(models.AbstractModel):
 
         if posted_document.type == 'out_refund':
             send = None
-            send = self.insert_note(parameter['url'], parameter['token'], posted_document,parameter_settings['fe_own_gr'])
+            #send = self.insert_note(parameter['url'], parameter['token'], posted_document,parameter_settings['fe_own_gr'])
 
         return send
 
