@@ -14,10 +14,20 @@ class Exportacion(models.Model):
     cargo_responsable_expo = fields.Many2one(comodel_name='hr.job', compute='compute_cargo_responsable_expo',string='Cargo')
     imp = fields.Char(compute='compute_imp',string='IMP')
     imp_id = fields.Many2one(comodel_name='x_importacion',compute='compute_imp_id',string='IMP')
+    x_studio_valor_factura = fields.Float(string='Valor Factura',compute='compute_valor_factura')
 
 
+    @api.depends('x_studio_factura__1')
+    def compute_valor_factura(self):
+        for record in self:
+            if record.x_studio_factura__1:
+                record.x_studio_valor_factura = record.x_studio_factura__1.amount_total
+            else:
+                record.x_studio_valor_factura = ''
+#______________________________________________________________________________________________________
 
-# __________________________________________________________________________________________________________________________________________
+
+            # __________________________________________________________________________________________________________________________________________
     @api.depends('imp')
     def compute_imp(self):
         for record in self:
