@@ -16,6 +16,8 @@
         'views/account_move_view.xml',
         'views/stock_picking_view.xml',
         'views/res_partner_view.xml',
+        'views/product_template_view.xml',
+
 
 
     ],
