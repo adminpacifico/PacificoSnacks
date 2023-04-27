@@ -24,14 +24,17 @@ class Account_move(models.Model):
                         record.sales_order = order_origin
                         record.export_order = record.sales_order.x_studio_exportacion_
                         record.x_studio_field_3lEMz = record.sales_order.x_studio_exportacion_
-                        if record.sales_order.possible_arrival_date_destination:
-                            if record.invoice_payment_term_id.line_ids:
-                                dias =  timedelta(days=record.invoice_payment_term_id.line_ids.days)
-                            else:
-                                dias = 0
-                            record.x_studio_fecha_de_vencimiento = record.sales_order.possible_arrival_date_destination + dias
+                        if record.invoice_date_due:
+                            record.x_studio_fecha_de_vencimiento = record.invoice_date_due
                         else:
-                            record.x_studio_fecha_de_vencimiento = False
+                            if record.sales_order.possible_arrival_date_destination:
+                                if record.invoice_payment_term_id.line_ids:
+                                    dias =  timedelta(days=record.invoice_payment_term_id.line_ids.days)
+                                else:
+                                    dias = 0
+                                record.x_studio_fecha_de_vencimiento = record.sales_order.possible_arrival_date_destination + dias
+                            else:
+                                record.x_studio_fecha_de_vencimiento = False
                 else:
                     record.sales_order = False
             else:
