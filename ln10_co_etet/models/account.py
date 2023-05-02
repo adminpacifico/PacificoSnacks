@@ -44,7 +44,13 @@ class AccountMove(models.Model):
             code = record.journal_id.code
             if code != False and record.name != '/':
                numberf = (record.name).split(code)
-               record.number = numberf[1]
+               if numberf[0]:
+                   cadena = numberf[0]
+                   subcadena = cadena[2:]
+                   record.number = subcadena
+               else:
+
+                   record.number = numberf[1]
             else:
                 record.number = False
 
