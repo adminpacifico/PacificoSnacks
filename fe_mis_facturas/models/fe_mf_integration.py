@@ -647,8 +647,7 @@ class FeMfMethods(models.AbstractModel):
                             posted_document.x_studio_field_3lEMz.x_studio_contenedor_asignado) + ' / ' + str(
                             posted_document.x_studio_field_3lEMz.x_studio_descripcion_contenedor_1) + ' / NON PALLETIZED CARGO / ' + 'GOODS TO BE RESOLD UNDER ' + RegistrationName + '  TRADE NAME ',
                         "ExternalGR": 'false',
-                        "InvoiceDueDate": (posted_document.date + timedelta(
-                            days=posted_document.invoice_payment_term_id.line_ids.days)).strftime("%Y-%m-%d"),
+                        "InvoiceDueDate": (posted_document.x_studio_fecha_de_vencimiento).strftime("%Y-%m-%d") ,
                         "StartDateTime": "0001-01-01T00:00:00",
                         "EndDateTime": "0001-01-01T00:00:00"
                     },
