@@ -24,7 +24,7 @@ class Account_move(models.Model):
                         record.sales_order = order_origin
                         record.export_order = record.sales_order.x_studio_exportacion_
                         record.x_studio_field_3lEMz = record.sales_order.x_studio_exportacion_
-                        if record.invoice_date_due:
+                        if record.invoice_date_due and not record.invoice_payment_term_id:
                             record.x_studio_fecha_de_vencimiento = record.invoice_date_due
                         else:
                             if record.sales_order.possible_arrival_date_destination:
