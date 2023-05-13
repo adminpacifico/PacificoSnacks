@@ -9,6 +9,7 @@
                 <xpath expr="//field[@name='expense_policy']" position="after">
                     <field name="box_weight"/>
                     <field name="laminated_weight"/>
+                    <field name="package_weight"/>
                 </xpath>
           </field>
         </record>

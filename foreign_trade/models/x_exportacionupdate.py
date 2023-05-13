@@ -14,9 +14,18 @@ class Exportacion(models.Model):
     cargo_responsable_expo = fields.Many2one(comodel_name='hr.job', compute='compute_cargo_responsable_expo',string='Cargo')
     imp = fields.Char(compute='compute_imp',string='IMP')
     imp_id = fields.Many2one(comodel_name='x_importacion',compute='compute_imp_id',string='IMP')
+    precio_exw = fields.Float(string='Precio EXW',compute='compute_precio_exw')
     x_studio_valor_factura = fields.Float(string='Valor Factura',compute='compute_valor_factura')
     merchandise_description = fields.Text(string='Descripción de la mercancía')
     port_control_company = fields.Char(string='Compañía control porturario')
+
+    @api.depends('x_studio_factura__1')
+    def compute_precio_exw(self):
+        for record in self:
+            if record.x_studio_factura__1:
+                record.precio_exw = round(record.x_studio_factura__1.total_net)
+            else:
+                record.precio_exw = ''
 
 
     @api.depends('x_studio_factura__1')

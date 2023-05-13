@@ -234,14 +234,22 @@ class FeMfMethods(models.AbstractModel):
                         [('move_line_id', '=', line.id), ('move_id', '=', line.move_id.id)])
                     line_total_taxes = 0
                     line_tot_producto = 0
-                    line_flete = round(
-                        (posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm),
-                        2)
-                    line_otros = round(
-                        (posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm),
-                        2)
+
+                    if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
+                        line_otros = (posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm) + posted_document.x_studio_field_3lEMz.x_studio_otros_gastos_destino_usd
+                    else:
+                        line_otros = posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm
+
+
+                    if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
+                        line_flete = (posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm) + posted_document.x_studio_field_3lEMz.x_studio_monto_flete_maritimo_en_usd_1
+                    else:
+                        line_flete = posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm
+
                     line_seguro = posted_document.x_studio_field_3lEMz.x_studio_monto_seguro_usd_1
                     line_tot_otros = (line_flete + line_otros + line_seguro) / cont_line
+
+
                     line_tot_producto = line.price_subtotal - line_tot_otros
 
                     precio_un_producto = round((line_tot_producto / line.quantity),2)
@@ -532,12 +540,29 @@ class FeMfMethods(models.AbstractModel):
                 total_peso_bruto = 0
                 total_caja = 0
                 total_unidades = 0
+                box_weight = 0
+                laminated_weight = 0
+                empaque = 0
+                peso_paquete = 0
+                if posted_document.x_studio_field_3lEMz:
+                    if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
+                        puerto = posted_document.x_studio_field_3lEMz.x_studio_entregar_en_1
+                    else:
+                        puerto = posted_document.x_studio_field_3lEMz.x_studio_puerto_de_origen
+
+
                 for p in line_product:
                     total_peso_bruto += round(int(p.quantity)/p.product_id.x_studio_unidad_de_empaque) * p.product_id.x_studio_peso_bruto
                     total_caja += int(int(p.quantity)/p.product_id.x_studio_unidad_de_empaque)
                     total_unidades += int(p.quantity)
+                    box_weight += p.product_id.box_weight
+                    laminated_weight += p.product_id.laminated_weight
+                    empaque += p.product_id.x_studio_unidad_de_empaque
+                    peso_paquete += p.product_id.package_weight * p.quantity
 
-                total_peso_neto = round((total_peso_bruto - (total_caja * 0.75)))
+
+                #total_peso_neto = round((total_peso_bruto - (total_caja * ((laminated_weight*empaque)+box_weight))))
+                total_peso_neto = round(peso_paquete)
                 tax_total = self.load_invoice_total_tax_to_json(template_id, posted_document)
                 tax_exclusive_amount = 0
                 tax_inclusive_amount = 0
@@ -592,9 +617,15 @@ class FeMfMethods(models.AbstractModel):
                     TaxSchemeCode = "01" if posted_document.partner_id.property_account_position_id.key_dian.key_dian == '48' else 'ZY'
                     TaxSchemeName = "IVA" if posted_document.partner_id.property_account_position_id.key_dian == '48' else 'No causa'
 
-                line_tot_flete = round((posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm),2)
+                if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
+                    line_tot_flete = round((posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm) + posted_document.x_studio_field_3lEMz.x_studio_monto_flete_maritimo_en_usd_1,2)
+                else:
+                    line_tot_flete = round(posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm ,2)
+                if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
+                    line_tot_otros = round((posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm) + posted_document.x_studio_field_3lEMz.x_studio_otros_gastos_destino_usd,2)
+                else:
+                    line_tot_otros = round(posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm,2)
                 line_tot_seguro = posted_document.x_studio_field_3lEMz.x_studio_monto_seguro_usd_1
-                line_tot_otros = round((posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm),2)
                 line_tot_cargos = line_tot_flete + line_tot_seguro + line_tot_otros
 
 #                line_sub_total_tax = line_sub_total
@@ -634,8 +665,8 @@ class FeMfMethods(models.AbstractModel):
                         "PreinvoiceNumber": posted_document.number,
                         "InvoiceNumber": posted_document.number,
                         "IssueDate": str(posted_document.invoice_date),
-                        "DaysOff": posted_document.invoice_payment_term_id.line_ids.days,
-#                        "DaysOff": posted_document.invoice_payment_term_id.name,
+                        #"DaysOff": posted_document.invoice_payment_term_id.line_ids.days,
+                        "DaysOff": "",
                         "Currency": posted_document.currency_id.name,
                         "ExchangeRate": float(posted_document.trm),
                         "ExchangeRateDate": str(posted_document.invoice_date),
@@ -647,9 +678,9 @@ class FeMfMethods(models.AbstractModel):
                             posted_document.x_studio_field_3lEMz.x_studio_contenedor_asignado) + ' / ' + str(
                             posted_document.x_studio_field_3lEMz.x_studio_descripcion_contenedor_1) + ' / NON PALLETIZED CARGO / ' + 'GOODS TO BE RESOLD UNDER ' + RegistrationName + '  TRADE NAME ',
                         "ExternalGR": 'false',
-                        "InvoiceDueDate": (posted_document.x_studio_fecha_de_vencimiento).strftime("%Y-%m-%d") ,
-                        "StartDateTime": "0001-01-01T00:00:00",
-                        "EndDateTime": "0001-01-01T00:00:00"
+                        "InvoiceDueDate": str(posted_document.x_studio_fecha_de_vencimiento),
+                        #"StartDateTime": "0001-01-01T00:00:00",
+                        #"EndDateTime": "0001-01-01T00:00:00"
                     },
                     "Delivery": {
 #                        "AddressLine": str(posted_document.partner_id.street) + " " + str(posted_document.partner_id.state_id.code) + " " + str(posted_document.partner_id.zip),
@@ -682,7 +713,8 @@ class FeMfMethods(models.AbstractModel):
                     "AdditionalDocumentReceipt": [],
                     "AdditionalProperty": [
                         {"Name": "Puerto Origen",
-                         "Value": posted_document.x_studio_field_3lEMz.x_studio_puerto_de_origen},
+                         #"Value": posted_document.x_studio_field_3lEMz.x_studio_puerto_de_origen},
+                         "Value": puerto},
                         {"Name": "TEL/PHO:",
                          "Value": posted_document.partner_id.phone},
                         {"Name": "Doc. Interno",
@@ -702,14 +734,11 @@ class FeMfMethods(models.AbstractModel):
                              posted_document.partner_id.zip) + " " + str(posted_document.partner_id.country_id.name)
                          },
                         {"Name": "FLETE / FREIGHT",
-                         "Value": round(
-                             (posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm),
-                             2) if posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop > 0 else 0},
+                         "Value": round(line_tot_flete,2)},
                         {"Name": "SEGURO / INSURANCE",
                          "Value": posted_document.x_studio_field_3lEMz.x_studio_monto_seguro_usd_1},
                         {"Name": "OTROS / OTHERS",
-                         "Value": round((posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm),
-                                        2) if posted_document.x_studio_field_3lEMz.x_studio_otros_cop > 0 else 0},
+                         "Value": round(line_tot_otros,2)},
                         {"Name": "VALOR INCOTERM / TOTAL INCOTERM",
                          "Value": posted_document.amount_untaxed + tax_inclusive_amount},
                         {"Name": "INBOLSAS / INBAG",
@@ -720,7 +749,8 @@ class FeMfMethods(models.AbstractModel):
                         }
                     ],
                     "PaymentSummary": {
-                        "PaymentType": int(posted_document.partner_id.payment_type),
+                        #"PaymentType": int(posted_document.partner_id.payment_type),
+                        "PaymentType": int(posted_document.payment_type_1),
                         "PaymentMeans": int(posted_document.payment_method.key_dian),
                         "PaymentNote": posted_document.invoice_payment_term_id.name
                     },
@@ -732,12 +762,8 @@ class FeMfMethods(models.AbstractModel):
                             "ChargeIndicator": "true",
                             "AllowanceChargeReason": "Flete",
                             "MultiplierFactorNumeric": 0,
-                            "Amount": round(
-                             (posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm),
-                             2) if posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop > 0 else 0,
-                            "BaseAmount": round(
-                             (posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop / posted_document.trm),
-                             2) if posted_document.x_studio_field_3lEMz.x_studio_flete_origen_cop > 0 else 0
+                            "Amount": round(line_tot_flete,2),
+                            "BaseAmount": round(line_tot_flete,2),
                         },
                         {
                             "Id": "02",
@@ -752,10 +778,8 @@ class FeMfMethods(models.AbstractModel):
                             "ChargeIndicator": "true",
                             "AllowanceChargeReason": "Otros",
                             "MultiplierFactorNumeric": 0,
-                            "Amount": round((posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm),
-                                        2) if posted_document.x_studio_field_3lEMz.x_studio_otros_cop > 0 else 0,
-                            "BaseAmount": round((posted_document.x_studio_field_3lEMz.x_studio_otros_cop / posted_document.trm),
-                                        2) if posted_document.x_studio_field_3lEMz.x_studio_otros_cop > 0 else 0
+                            "Amount": round(line_tot_otros,2),
+                            "BaseAmount": round(line_tot_otros,2),
                         }
                     ],
                     "InvoiceTotal": {

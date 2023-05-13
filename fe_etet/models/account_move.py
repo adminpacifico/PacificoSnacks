@@ -13,9 +13,9 @@ class AccountMove(models.Model):
         return fe_active
 
     method = fields.Many2many('ln10_co_etet.diancodes')
-    payment_type_1 = fields.Selection(string='Payment Type', selection=[('1', 'Debito'), ('2', 'Credito')], default='1',
+    payment_type_1 = fields.Selection(string='Forma de pago', selection=[('1', 'Contado'), ('2', 'Credito')], default='1',
                                     states={'draft': [('readonly', False)]}, readonly=True)
-    payment_method = fields.Many2one('ln10_co_etet.diancodes', string='Payment Method',
+    payment_method = fields.Many2one('ln10_co_etet.diancodes', string='Medios de pago',
                                      domain=[('type', '=', 'paymentmethod')], states={'draft': [('readonly', False)]},
                                      readonly=True)
     export_bill = fields.Boolean('Export bill', copy=False, states={'draft': [('readonly', False)]}, readonly=True)

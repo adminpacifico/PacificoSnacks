@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="account_move_view_form" model="ir.ui.view">
+            <field name="name">account.move.view.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_untaxed']" position="before">
+                    <field name="numb_line" colspan="2" />
+                    <field name="flete" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="seguro" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="otros" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="total_net" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='quantity']" position="before">
+                    <field name="cost_export" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='price_unit']" position="before">
+                    <field name="price_prd" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='price_subtotal']" position="before">
+                    <field name="subtotal_net" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+          </field>
+        </record>
+    </data>
+</odoo>
