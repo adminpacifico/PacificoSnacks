@@ -23,7 +23,7 @@ class Exportacion(models.Model):
     def compute_precio_exw(self):
         for record in self:
             if record.x_studio_factura__1:
-                record.precio_exw = round(record.x_studio_factura__1.total_net)
+                record.precio_exw = record.x_studio_factura__1.total_net
             else:
                 record.precio_exw = ''
 
