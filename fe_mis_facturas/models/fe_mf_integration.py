@@ -536,33 +536,13 @@ class FeMfMethods(models.AbstractModel):
             }
 
         if template_id == 217:
-                line_product = posted_document.invoice_line_ids
-                total_peso_bruto = 0
-                total_caja = 0
-                total_unidades = 0
-                box_weight = 0
-                laminated_weight = 0
-                empaque = 0
-                peso_paquete = 0
+
                 if posted_document.x_studio_field_3lEMz:
                     if posted_document.x_studio_field_3lEMz.x_studio_incoterm_1 == 'DDP':
                         puerto = posted_document.x_studio_field_3lEMz.x_studio_entregar_en_1
                     else:
                         puerto = posted_document.x_studio_field_3lEMz.x_studio_puerto_de_origen
 
-
-                for p in line_product:
-                    total_peso_bruto += round(int(p.quantity)/p.product_id.x_studio_unidad_de_empaque) * p.product_id.x_studio_peso_bruto
-                    total_caja += int(int(p.quantity)/p.product_id.x_studio_unidad_de_empaque)
-                    total_unidades += int(p.quantity)
-                    box_weight += p.product_id.box_weight
-                    laminated_weight += p.product_id.laminated_weight
-                    empaque += p.product_id.x_studio_unidad_de_empaque
-                    peso_paquete += p.product_id.package_weight * p.quantity
-
-
-                #total_peso_neto = round((total_peso_bruto - (total_caja * ((laminated_weight*empaque)+box_weight))))
-                total_peso_neto = round(peso_paquete)
                 tax_total = self.load_invoice_total_tax_to_json(template_id, posted_document)
                 tax_exclusive_amount = 0
                 tax_inclusive_amount = 0
@@ -674,7 +654,7 @@ class FeMfMethods(models.AbstractModel):
                         "SchemeID": "",
                         "SalesPerson": posted_document.invoice_user_id.name,
                         "Note": 'INGREDIENTS : ' + str(
-                            posted_document.partner_id.x_studio_ingredientes) + ' / PRODUCT OF COLOMBIA ' + ' / FDA REGISTRATION NUMBER: 12218565886 ' + ' / NET WEIGHT: ' + str(total_peso_neto) + 'Kg / GROSS WEIGHT: ' + str(round(total_peso_bruto)) + 'Kg  / TOTAL UNITS: ' + str(total_unidades) + ' / TOTAL CASES: ' + str(total_caja) + ' CONTAINER NUMBER: ' + str(
+                            posted_document.partner_id.x_studio_ingredientes) + ' / PRODUCT OF COLOMBIA ' + ' / FDA REGISTRATION NUMBER: 12218565886 ' + ' / NET WEIGHT: ' + str(posted_document.total_net_weight) + 'Kg / GROSS WEIGHT: ' + str(round(posted_document.total_gross_weight)) + 'Kg  / TOTAL UNITS: ' + str(posted_document.total_units) + ' / TOTAL CASES: ' + str(posted_document.total_box) + ' CONTAINER NUMBER: ' + str(
                             posted_document.x_studio_field_3lEMz.x_studio_contenedor_asignado) + ' / ' + str(
                             posted_document.x_studio_field_3lEMz.x_studio_descripcion_contenedor_1) + ' / NON PALLETIZED CARGO / ' + 'GOODS TO BE RESOLD UNDER ' + RegistrationName + '  TRADE NAME ',
                         "ExternalGR": 'false',

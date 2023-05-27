@@ -15,6 +15,9 @@ class Exportacion(models.Model):
     imp = fields.Char(compute='compute_imp',string='IMP')
     imp_id = fields.Many2one(comodel_name='x_importacion',compute='compute_imp_id',string='IMP')
     precio_exw = fields.Float(string='Precio EXW',compute='compute_precio_exw')
+    net_weight = fields.Float(string='Peso neto',compute='compute_net_weight')
+    gross_weight =fields.Float(string='Peso bruto', compute= 'compute_gross_weight')
+    total_box = fields.Integer(string='Total Cajas', compute='compute_total_box')
     x_studio_valor_factura = fields.Float(string='Valor Factura',compute='compute_valor_factura')
     merchandise_description = fields.Text(string='Descripción de la mercancía')
     port_control_company = fields.Char(string='Compañía control porturario')
@@ -23,9 +26,33 @@ class Exportacion(models.Model):
     def compute_precio_exw(self):
         for record in self:
             if record.x_studio_factura__1:
-                record.precio_exw = record.x_studio_factura__1.total_net
+                record.precio_exw = round((record.x_studio_factura__1.total_net),2)
             else:
                 record.precio_exw = ''
+
+    @api.depends('x_studio_factura__1')
+    def compute_net_weight(self):
+        for record in self:
+            if record.x_studio_factura__1:
+                record.net_weight = round((record.x_studio_factura__1.total_net_weight),2)
+            else:
+                record.net_weight = ''
+
+    @api.depends('x_studio_factura__1')
+    def compute_gross_weight(self):
+        for record in self:
+            if record.x_studio_factura__1:
+                record.gross_weight = round((record.x_studio_factura__1.total_gross_weight),2)
+            else:
+                record.gross_weight = ''
+
+    @api.depends('x_studio_factura__1')
+    def compute_total_box(self):
+        for record in self:
+            if record.x_studio_factura__1:
+                record.total_box = record.x_studio_factura__1.total_box
+            else:
+                record.total_box = 0
 
 
     @api.depends('x_studio_factura__1')

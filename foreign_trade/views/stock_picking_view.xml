@@ -11,6 +11,7 @@
 
                 <xpath expr="//field[@name='scheduled_date']" position="after">
                     <field name="sale_order_id"/>
+                    <!--<field name="factura_order_id"/>-->
                 </xpath>
           </field>
         </record>
