@@ -933,11 +933,11 @@ class FeMfMethods(models.AbstractModel):
             if posted_document.partner_id.category_id:
                 get_category = False
                 for category in posted_document.partner_id.category_id:
-                    if category.id == 100:
+                    if category.id == 142:
                         template_id = 217
                         get_category = True
                         break
-                    elif category.id == 4:
+                    elif category.id == 141:
                         template_id = 73
                         get_category = True
                         break
