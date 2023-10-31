@@ -294,11 +294,32 @@ class AccountMove(models.Model):
 
     # Inherit Buttons  Boton publicar
     def action_post(self):
-        super(AccountMove, self).action_post()
+        if self.type in ['out_invoice', 'out_refund']:
+            parameter = self.env['ir.config_parameter'].sudo()
+            #            fe_online = parameter.get_param('res.config.settings.fe_online')
+            fe_online = True
+            #            fe_active = parameter.get_param('res.config.settings.fe_active')
+            fe_active = True
+
+            if self._validate_electronic_invoice()[1]:
+                return self.notification('The following fields are invalid:', self._validate_electronic_invoice()[0])
+
+            if fe_online and fe_active:
+                self.partner_id.validate_fields_invoice()
+                validate_unit_measure = self.validate_unite_measure()
+                if validate_unit_measure:
+                    return self.notification("Error:", validate_unit_measure)
+
+            super(AccountMove, self).action_post()
+
+            if fe_online and fe_active:
+                self.process_document()
+        else:
+            super(AccountMove, self).action_post()
 
     def button_draft(self):
-        #if self.send_status:
-            #return self.notification('Error', "No se pudo completar la acción por que la factura ya se envio a la DIAN")
+        if self.send_status:
+            return self.notification('Error', "No se pudo completar la acción por que la factura ya se envio a la DIAN")
         return super(AccountMove, self).button_draft()
 
     # Methods for fe_invoice
