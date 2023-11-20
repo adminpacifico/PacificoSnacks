@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Inherit Form View to Modify it -->
+        <record id="maintenance_equipment_form_supplier" model="ir.ui.view">
+            <field name="name">maintenance.equipment.form.supplier</field>
+            <field name="model">maintenance.equipment</field>
+            <field name="inherit_id" ref="maintenance.hr_equipment_view_form"/>
+            <field name="priority">17</field>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='workcenter_id']" position="after">
+                    <field name="account_asset_id"/>
+                    <field name="account_asset_reference"/>
+                    <field name="equipment_code"/>
+                </xpath>
+            </field>
+        </record>
+    
+    </data>
+</odoo>
