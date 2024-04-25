@@ -198,7 +198,7 @@ class AccountMove(models.Model):
             status = True
         if not self.partner_id.state_id.key_dian and not self.partner_id.state_id.key_dian:
             if self.partner_id.state_id:
-                message += "<li>" + self._fields['partner_id.state_id'].string + "</li>"
+                message += "<li>" + self._fields['partner_id.state_id.name'].string + "</li>"
             else:
                 message += "<li>" + " " + "</li>"
             status = True
