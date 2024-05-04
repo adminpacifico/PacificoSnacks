@@ -1,4 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_hr_risk,hr.risk,model_hr_risk,hr_contract.group_hr_contract_manager,1,1,1,1
-access_hr_causal_termination,hr.causal.termination,model_hr_causal_termination,hr_contract.group_hr_contract_manager,1,1,1,1
-access_hr_company_ss,hr.company.ss,model_hr_company_ss,hr_contract.group_hr_contract_manager,1,1,1,1
