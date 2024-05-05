@@ -18,7 +18,7 @@ class Account_move(models.Model):
     def compute_sales_order(self):
         for record in self:
             if record.invoice_origin:
-                if record.type == 'out_invoice':
+                if record.move_type == 'out_invoice':
                     order_origin = self.env['sale.order'].search([('name', '=', record.invoice_origin)])
                     if order_origin:
                         record.sales_order = order_origin
