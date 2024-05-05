@@ -10,9 +10,9 @@ class Account_move(models.Model):
     export_order = fields.Many2one(comodel_name='x_exportacion',string='Orden exportacion')
     responsible = fields.Many2one(comodel_name='hr.employee', string='Responsable')
     responsible_position = fields.Many2one(comodel_name='hr.job',compute='compute_cargo_responsable',string='Cargo del responsable')
-    total_net_weight = fields.Decimal("Total Peso Neto")
-    total_gross_weight = fields.Decimal("Total Peso Bruto")
-    total_box = fields.Integer("Total Box")
+    total_net_weight = fields.Decimal('Total Peso Neto')
+    total_gross_weight = fields.Decimal('Total Peso Bruto')
+    total_box = fields.Integer('Total Box')
 
 
 
