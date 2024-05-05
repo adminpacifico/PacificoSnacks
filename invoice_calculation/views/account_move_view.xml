@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="account_move_view_form" model="ir.ui.view">
+            <field name="name">account.move.view.form</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='amount_untaxed']" position="before">
+                    <field name="numb_line" colspan="2" />
+                    <field name="total_units" colspan="2" />
+                    <field name="total_box" colspan="2" />
+                    <field name="flete" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="seguro" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="otros" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+                    <field name="total_net" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='quantity']" position="before">
+                    <field name="cost_export" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='price_unit']" position="before">
+                    <field name="net_weight" colspan="2" optional="hidden"/>
+                    <field name="laminated_weight" colspan="2"  optional="hidden"/>
+                    <field name="box_weight" colspan="2"  optional="hidden"/>
+                    <field name="price_prd" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+
+                <xpath expr="//field[@name='price_subtotal']" position="before">
+                    <field name="subtotal_net" colspan="2" widget='monetary' options="{'currency_field': 'currency_id'}" optional="hidden"/>
+			    </xpath>
+                <xpath expr="//field[@name='amount_residual']" position="after">
+                    <hr> </hr>
+                    <hr> </hr>
+                    <field name="total_net_weight"/>
+                    <field name="total_laminated_weight" />
+                    <field name="total_box_weight" />
+                    <field name="total_gross_weight"/>
+			    </xpath>
+          </field>
+        </record>
+    </data>
+</odoo>
