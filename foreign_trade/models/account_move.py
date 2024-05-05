@@ -11,8 +11,10 @@ class Account_move(models.Model):
     responsible = fields.Many2one(comodel_name='hr.employee', string='Responsable')
     responsible_position = fields.Many2one(comodel_name='hr.job',compute='compute_cargo_responsable',string='Cargo del responsable')
     total_net_weight = fields.Float('Total Peso Neto')
+    total_laminated_weight =  fields.Float('Total Peso Laminado')
     total_gross_weight = fields.Float('Total Peso Bruto')
-    total_box = fields.Integer('Total Box')
+    total_box_weight = fields.Float('Total Peso Caja')
+    total_box = fields.Integer('Total Cajas')
 
 
 
