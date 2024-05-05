@@ -29,7 +29,7 @@ class Account_move(models.Model):
                         else:
                             if record.sales_order.possible_arrival_date_destination:
                                 if record.invoice_payment_term_id.line_ids:
-                                    dias =  timedelta(days=record.invoice_payment_term_id.line_ids.days)
+                                    dias =  timedelta(days=record.invoice_payment_term_id.line_ids.nb_days)
                                 else:
                                     dias = 0
                                 record.x_studio_fecha_de_vencimiento = record.sales_order.possible_arrival_date_destination + dias
