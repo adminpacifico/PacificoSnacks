@@ -95,7 +95,7 @@ class ResCompany(models.Model):
     ei_ignore_edi_email_check = fields.Boolean(string="Ignore edi email check", default=False)
 
     # Nimbus api key
-    nimbus_api_key = fields.Char(string="Nimbus api key")
+    #nimbus_api_key = fields.Char(string="Nimbus api key")
 
     def _compute_vat_formatted(self):
         for rec in self:
