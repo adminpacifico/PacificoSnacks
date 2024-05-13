@@ -43,6 +43,7 @@
                     </button>
                 </xpath>
                 <xpath expr="//field[@name='ref']" position="after">
+                    <field name="ei_type_document_id" invisible="1"/>
                     <field name="payment_form_id"/>
                     <field name="payment_method_id" readonly="state != 'draft'"/>
                     <field name="ei_operation"
@@ -53,7 +54,7 @@
                            readonly="state != 'draft'"/>
                     <field name="ei_correction_concept_credit_id"
                            invisible="move_type not in ('out_refund', 'in_refund') or (not reversed_entry_id and not ei_is_correction_without_reference)"
-                           readonly="state != 'draft'"/>
+                           readonly="state != 'draft'" domain="[('type_document_id','=',ei_type_document_id)]"/>
                     <field name="ei_correction_concept_debit_id"
                            invisible="move_type not in ('out_invoice', 'in_invoice') or (not debit_origin_id and not ei_is_correction_without_reference)"
                            readonly="state != 'draft'"/>
@@ -119,7 +120,6 @@
                             <field name="ei_attached_zip_base64_bytes" readonly="state != 'draft'"/>
                             <field name="ei_payload" groups="base.group_no_one" class="text-break"/>
                             <field name="ei_qr_image" widget="image"/>
-                            <field name="event"/>
                         </group>
                     </page>
                     <page name="dian_events" string="Dian Events"
@@ -253,6 +253,14 @@
             <field name="binding_model_id" ref="l10n_co_edi_jorels.model_account_move"/>
             <field name="state">code</field>
             <field name="code">records.validate_dian()</field>
+        </record>
+
+        <record id="action_get_uuid_from_nimbus" model="ir.actions.server">
+            <field name="name">Get Edi UUID from Nimbus</field>
+            <field name="model_id" ref="account.model_account_move"/>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">records.get_uuid_from_nimbus()</field>
         </record>
     </data>
 </odoo>
