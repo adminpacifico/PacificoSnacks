@@ -68,7 +68,7 @@ class ResConfigSettings(models.TransientModel):
                                                string="Ignore edi email check", default=False, readonly=False)
 
     # Api key
-    nimbus_api_key = fields.Char(related="company_id.nimbus_api_key", string="Nimbus api key", readonly=False)
+    #nimbus_api_key = fields.Char(related="company_id.nimbus_api_key", string="Nimbus api key", readonly=False)
 
     # Update resolutions on Odoo database
     @api.model
