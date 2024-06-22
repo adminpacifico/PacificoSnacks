@@ -33,26 +33,26 @@ class Exportacion(models.Model):
     @api.depends('x_studio_factura__1')
     def compute_net_weight(self):
         for record in self:
-            #if record.x_studio_factura__1:
-            #    record.net_weight = round((record.x_studio_factura__1.total_net_weight),2)
-            #else:
-            record.net_weight = ''
+            if record.x_studio_factura__1:
+                record.net_weight = round((record.x_studio_factura__1.total_net_weight),2)
+            else:
+                record.net_weight = ''
 
     @api.depends('x_studio_factura__1')
     def compute_gross_weight(self):
         for record in self:
-            #if record.x_studio_factura__1:
-            #    record.gross_weight = round((record.x_studio_factura__1.total_gross_weight),2)
-            #else:
-            record.gross_weight = ''
+            if record.x_studio_factura__1:
+                record.gross_weight = round((record.x_studio_factura__1.total_gross_weight),2)
+            else:
+                record.gross_weight = ''
 
     @api.depends('x_studio_factura__1')
     def compute_total_box(self):
         for record in self:
-            #if record.x_studio_factura__1:
-            #    record.total_box = record.x_studio_factura__1.total_box
-            #else:
-            record.total_box = 0
+            if record.x_studio_factura__1:
+                record.total_box = record.x_studio_factura__1.total_box
+            else:
+                record.total_box = 0
 
 
     @api.depends('x_studio_factura__1')
