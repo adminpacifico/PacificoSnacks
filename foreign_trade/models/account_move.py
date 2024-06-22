@@ -10,7 +10,7 @@ class Account_move(models.Model):
     export_order = fields.Many2one(comodel_name='x_exportacion',string='Orden exportacion')
     responsible = fields.Many2one(comodel_name='hr.employee', string='Responsable')
     responsible_position = fields.Many2one(comodel_name='hr.job',compute='compute_cargo_responsable',string='Cargo del responsable')
-    total_net_weight = fields.Float('Total Peso Neto')
+    total_net_weight = fields.Float('Total Peso Neto',compute='compute_net_weight')
     total_laminated_weight =  fields.Float('Total Peso Laminado')
     total_gross_weight = fields.Float('Total Peso Bruto')
     total_box_weight = fields.Float('Total Peso Caja')
@@ -52,3 +52,19 @@ class Account_move(models.Model):
                 record.responsible_position= record.responsible.job_id
             else:
                 record.responsible_position = False
+#################################################################
+    def compute_net_weight(self):
+        for record in self:
+            if record.invoice_origin:
+                if record.move_type == 'out_invoice':
+                    order_origin = self.env['sale.order'].search([('name', '=', record.invoice_origin)])
+                    if order_origin:
+                        for picking in order_origin.picking_ids:
+                            if 'WH/OUT/' in picking.name:
+                                if picking.total_net_weight_oc:
+                                    record.total_net_weight = picking.total_net_weight_oc
+                                    record.total_laminated_weight = picking.total_laminated_weight_oc
+                                    record.total_box_weight = picking.total_box_weight_oc
+                                    record.total_gross_weight = picking.total_gross_weight_oc
+                                    record.total_box = picking.total_box
+        
