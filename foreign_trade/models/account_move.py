@@ -63,8 +63,12 @@ class Account_move(models.Model):
                             if 'WH/OUT/' in picking.name:
                                 if picking.total_net_weight_oc:
                                     record.total_net_weight = picking.total_net_weight_oc
+                                if picking.total_laminated_weight_oc:
                                     record.total_laminated_weight = picking.total_laminated_weight_oc
+                                if picking.total_laminated_weight_oc:
                                     record.total_box_weight = picking.total_box_weight_oc
+                                if picking.total_gross_weight_oc:
                                     record.total_gross_weight = picking.total_gross_weight_oc
+                                if picking.total_box_oc:
                                     record.total_box = picking.total_box_oc
         
