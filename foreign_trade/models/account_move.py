@@ -66,5 +66,5 @@ class Account_move(models.Model):
                                     record.total_laminated_weight = picking.total_laminated_weight_oc
                                     record.total_box_weight = picking.total_box_weight_oc
                                     record.total_gross_weight = picking.total_gross_weight_oc
-                                    record.total_box = picking.total_box
+                                    record.total_box = picking.total_box_oc
         
