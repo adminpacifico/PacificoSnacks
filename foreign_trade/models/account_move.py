@@ -55,7 +55,7 @@ class Account_move(models.Model):
 #################################################################
     def compute_net_weight(self):
         for record in self:
-            if record.invoice_origin:
+            if record.invoice_origin and record.company_id.id == 1:
                 if record.move_type == 'out_invoice':
                     order_origin = self.env['sale.order'].search([('name', '=', record.invoice_origin)])
                     if order_origin:
