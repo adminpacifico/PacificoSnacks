@@ -60,7 +60,7 @@ class Account_move(models.Model):
                     order_origin = self.env['sale.order'].search([('name', '=', record.invoice_origin)])
                     if order_origin:
                         for picking in order_origin.picking_ids:
-                            if 'WH/OUT/' in picking.name:
+                            if 'WH/OUT/' in picking.name and picking.total_net_weight_oc:
                                 if picking.total_net_weight_oc:
                                     record.total_net_weight = picking.total_net_weight_oc
                                 else:
