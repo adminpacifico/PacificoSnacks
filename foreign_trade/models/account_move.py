@@ -73,6 +73,8 @@ class Account_move(models.Model):
                                     record.total_gross_weight = picking.total_gross_weight_oc
                                 if picking.total_box_oc:
                                     record.total_box = picking.total_box_oc
+                            else:
+                                record.total_net_weight = 0
                     else:
                         record.total_net_weight = 0
                 else:
