@@ -55,31 +55,24 @@ class Account_move(models.Model):
 #################################################################
     def compute_net_weight(self):
         for record in self:
+            record.total_net_weight = 0
             if record.invoice_origin and record.company_id.id == 1:
                 if record.move_type == 'out_invoice':
                     order_origin = self.env['sale.order'].search([('name', '=', record.invoice_origin)])
                     if order_origin:
-                        for picking in order_origin.picking_ids:
-                            if 'WH/OUT/' in picking.name and picking.total_net_weight_oc:
-                                if picking.total_net_weight_oc:
-                                    record.total_net_weight = picking.total_net_weight_oc
-                                else:
-                                    record.total_net_weight = 0
-                                if picking.total_laminated_weight_oc:
-                                    record.total_laminated_weight = picking.total_laminated_weight_oc
-                                if picking.total_laminated_weight_oc:
-                                    record.total_box_weight = picking.total_box_weight_oc
-                                if picking.total_gross_weight_oc:
-                                    record.total_gross_weight = picking.total_gross_weight_oc
-                                if picking.total_box_oc:
-                                    record.total_box = picking.total_box_oc
-                            else:
-                                record.total_net_weight = 0
-                    else:
-                        record.total_net_weight = 0
-                else:
-                    record.total_net_weight = 0
-            else:
-                record.total_net_weight = 0
-                        
+                        if order_origin.picking_ids:
+                            for picking in order_origin.picking_ids:
+                                if 'WH/OUT/' in picking.name and picking.total_net_weight_oc:
+                                    if picking.total_net_weight_oc:
+                                        record.total_net_weight = picking.total_net_weight_oc
+                                    else:
+                                        record.total_net_weight = 0
+                                    if picking.total_laminated_weight_oc:
+                                        record.total_laminated_weight = picking.total_laminated_weight_oc
+                                    if picking.total_laminated_weight_oc:
+                                        record.total_box_weight = picking.total_box_weight_oc
+                                    if picking.total_gross_weight_oc:
+                                        record.total_gross_weight = picking.total_gross_weight_oc
+                                    if picking.total_box_oc:
+                                        record.total_box = picking.total_box_oc
         
