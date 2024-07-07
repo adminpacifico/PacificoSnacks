@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_exogena_report" model="ir.ui.view">
+            <field name="name">pt.exogena.report.tree</field>
+            <field name="model">pt.exogena.report</field>
+            <field name="arch" type="xml">
+                <tree string="Sales Margin Wizard" create="false" delete="false">
+                        <field name="col_1"/>
+                        <field name="col_2"/>
+                        <field name="col_3"/>
+                        <field name="col_4"/>
+                        <field name="col_5"/>
+                        <field name="col_6"/>
+                        <field name="col_7"/>
+                        <field name="col_8"/>
+                        <field name="col_9"/>
+                        <field name="col_10"/>
+                        <field name="col_11"/>
+                        <field name="col_12"/>
+                        <field name="col_13"/>
+                        <field name="col_14"/>
+                        <field name="col_15"/>
+                        <field name="col_16"/>
+                        <field name="col_17"/>
+                        <field name="col_18"/>
+                        <field name="col_19"/>
+                        <field name="col_20"/>
+                        <field name="col_21"/>
+                        <field name="col_22"/>
+                        <field name="col_23"/>
+                        <field name="col_24"/>
+                        <field name="col_25"/>
+                        <field name="col_26"/>
+                        <field name="col_27"/>
+                        <field name="col_28"/>
+                        <field name="col_29"/>
+                        <field name="col_30"/>
+                        <field name="col_31"/>
+                        <field name="col_32"/>
+                        <field name="col_33"/>
+                        <field name="col_34"/>
+                        <field name="col_35"/>
+                        <field name="col_36"/>
+                        <field name="col_37"/>
+                        <field name="col_38"/>
+                        <field name="col_39"/>
+                        <field name="col_40"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_exogena_report" model="ir.actions.act_window">
+            <field name="name">Exogena Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pt.exogena.report</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="view_exogena_report"/>
+            <field name="target">current</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report id="action_exogena_xlsx_report"
+                model ="pt.exogena.wizard"
+                string="Exogena XLSX Report"
+                report_type="xlsx"
+                name="pt_exogena.exogena_xlsx_report"
+                file="exogena_xlsx_report"
+                attachment_use="False"
+                />
+    </data>
+</odoo>

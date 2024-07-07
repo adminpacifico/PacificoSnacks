@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+        <record id="pt_config_accounts_form_view" model="ir.ui.view">
+            <field name="name">pt.config.accounts.form.view</field>
+            <field name="model">pt.config.accounts</field>
+            <field name="arch" type="xml">
+                <form string="Account">
+                   <sheet>
+                       <group>
+                       <field name="code" />
+                       <field name="name" />
+                       </group>
+                       <notebook>
+                           <page string="Concepts">
+                               <field name="pt_config_account_line_ids">
+                                   <tree string="Journal Items">
+                                        <field name="code" />
+                                        <field name="name" />
+                                   </tree>
+                               </field>
+                           </page>
+                       </notebook>
+                   </sheet>
+               </form>
+            </field>
+        </record>
+
+        <record id="pt_config_accounts_tree_view" model="ir.ui.view">
+            <field name="name">pt.config.accounts.tree.view</field>
+            <field name="model">pt.config.accounts</field>
+            <field name="arch" type="xml">
+                <tree string="Account">
+                   <field name="code" />
+                   <field name="name" />
+               </tree>
+            </field>
+        </record>
+
+        <record id="pt_config_accounts_concepts_form_view" model="ir.ui.view">
+            <field name="name">pt.config.accounts.concepts.form.view</field>
+            <field name="model">pt.config.accounts.concepts</field>
+            <field name="arch" type="xml">
+                <form string="Account Concepts">
+                   <sheet>
+                       <group>
+                           <field name="code" />
+                           <field name="name" />
+                       </group>
+                       <notebook>
+                           <page string="Accounts">
+                               <field name="pt_config_accounts_concepts_line_ids">
+                                   <tree string="Accounts" editable="bottom">
+                                       <field name="code" />
+                                       <field name="name" />
+                                       <field name="account_id" />
+                                       <field name="column_number" />
+                                       <field name="calculation_type" />
+                                   </tree>
+                               </field>
+                           </page>
+                       </notebook>
+                   </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_pt_config_accounts_form" model="ir.actions.act_window">
+            <field name="name">Config Accounts</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pt.config.accounts</field>
+            <field name="view_id" ref="pt_config_accounts_tree_view"/>
+        </record>
+
+        <menuitem
+            id="menu_action_pt_config_accounts"
+            name="Conf Medios Magneticos"
+            action="action_pt_config_accounts_form"
+            parent="account.menu_finance_configuration"
+            groups="account.group_account_invoice"
+            sequence="99"/>
+    </data>
+</odoo>

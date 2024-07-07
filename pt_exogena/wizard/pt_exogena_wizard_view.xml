@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_pt_exogena_wizard_form" model="ir.ui.view">
+            <field name="name">pt.exogena.wizard.form</field>
+            <field name="model">pt.exogena.wizard</field>
+            <field name="arch" type="xml">
+                <form string="Exogena Report">
+                    <group>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                        <field name="report_type"/>
+                        <field name="pt_config_accounts_id"/>
+                    </group>
+                    <footer>
+                        <button name="generate_xlsx_report" string="Report xlsx" type="object" class="btn-primary" />
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+       <record id="action_exogena_report_wizard" model="ir.actions.act_window">
+            <field name="name">Exogena Report Wizard</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">pt.exogena.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_pt_exogena_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem id="menu_exogena_report_wizard"
+              name="Exogena Report Wizard"
+              action="action_exogena_report_wizard"
+              parent="account.menu_finance_entries"
+              groups="account.group_account_invoice"
+              sequence="99"/>
+    </data>
+</odoo>
