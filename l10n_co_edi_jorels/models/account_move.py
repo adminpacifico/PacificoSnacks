@@ -278,6 +278,8 @@ class AccountMove(models.Model):
     def _onchange_is_out_country(self):
         for rec in self:
             rec.is_out_country = rec.get_default_is_out_country()
+            if rec.move_type == 'in_invoice' and rec.journal_id.resolution_invoice_id:
+                rec.resolution_id = rec.journal_id.resolution_invoice_id.id
 
     def is_journal_pos(self):
         self.ensure_one()
