@@ -18,15 +18,11 @@
     'support': 'administracion@parati.com.co',
 
     # Odoo, OCA and dependencies
-    'depends': [
-        'account',
-        'report_xlsx',
-    ],
+    'depends': ['account'],
     'data': [
         'views/pt_exogena_report.xml',
         'views/pt_config_accounts_view.xml',
         'wizard/pt_exogena_wizard_view.xml',
-        'report/pt_exogena_xlsx_report.xml',
     ],
     'installable': True,
     'application': True,
