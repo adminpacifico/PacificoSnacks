@@ -17,13 +17,15 @@ class PtExogenaWizard(models.TransientModel):
         records = []
         date_start = data['date_start']
         date_end = data['date_end']
+        company_id = self.env.company.id
 
         for record in data["pt_config_accounts_id"].pt_config_account_line_ids:
             print(record.pt_config_accounts_concepts_line_ids)
             for line in record.pt_config_accounts_concepts_line_ids:
                 acc_moves = self.env['account.move.line'].read_group([('account_id', '=', line.account_id.id),
                                                                       ('date', '>=', date_start),
-                                                                      ('date', '<=', date_end)],
+                                                                      ('date', '<=', date_end),
+                                                                      ('company_id', '=', company_id)],
                                                                      ['debit', 'credit', 'balance'], ['partner_id'])
                 for acc_move in acc_moves:
                     data ={
