@@ -18,6 +18,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def generate_report(self):
         self.ensure_one()
+        company_id = self.env.company.id
         query = """
             WITH initial_balances AS (
                 SELECT
@@ -35,7 +36,7 @@ class PartnerBalanceWizard(models.TransientModel):
                 JOIN
                     account_account a ON aml.account_id = a.id
                 WHERE
-                    aml.date < %s
+                    aml.date < %s and aml.company_id = %s
                 GROUP BY
                     aml.partner_id, p.vat, p.name, aml.account_id, a.code, a.name
             ),
@@ -56,7 +57,7 @@ class PartnerBalanceWizard(models.TransientModel):
                 JOIN
                     account_account a ON aml.account_id = a.id
                 WHERE
-                    aml.date BETWEEN %s AND %s
+                    aml.date BETWEEN %s AND %s AND aml.company_id = %s
                 GROUP BY
                     aml.partner_id, p.name, p.vat, aml.account_id, a.code, a.name
             )
@@ -78,7 +79,7 @@ class PartnerBalanceWizard(models.TransientModel):
             ORDER BY
                 partner_name, account_name;
         """
-        self.env.cr.execute(query, (self.start_date, self.start_date, self.end_date))
+        self.env.cr.execute(query, (self.start_date, company_id, self.start_date, self.end_date, company_id))
         results = self.env.cr.dictfetchall()
 
         report_obj = self.env['partner.balance.report']
