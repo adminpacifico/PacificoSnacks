@@ -230,11 +230,11 @@ class PtExogenaWizard(models.TransientModel):
             else:
                 direccion = partner.street
 
-            if not partner.fe_municipality_id:
+            if not partner.municipality_id:
                 codigo_mcp = ''
                 codigo_dpto = ''
             else:
-                codigo_mcp = partner.fe_municipality_id.code
+                codigo_mcp = partner.municipality_id.code
                 codigo_dpto = codigo_mcp[:2]
 
             if not partner.country_id:
