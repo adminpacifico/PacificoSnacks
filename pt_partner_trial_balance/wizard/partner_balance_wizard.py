@@ -15,71 +15,109 @@ class PartnerBalanceWizard(models.TransientModel):
 
     start_date = fields.Date(string='Start Date', required=True)
     end_date = fields.Date(string='End Date', required=True)
+    partner_ids = fields.Many2many('res.partner', string='Partners')
+    account_ids = fields.Many2many('account.account', string='Accounts')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+
+    def _prepare_query_conditions(self):
+        conditions = [
+            "aml.date < %s",
+            "aml.company_id = %s"
+        ]
+        params = [self.start_date, self.company_id.id]
+
+        if self.partner_ids:
+            conditions.append("aml.partner_id = ANY(%s)")
+            params.append(self.partner_ids.ids)
+        if self.account_ids:
+            conditions.append("aml.account_id = ANY(%s)")
+            params.append(self.account_ids.ids)
+
+        return " AND ".join(conditions), params
+
+    def _prepare_transactions_conditions(self):
+        conditions = [
+            "aml.date BETWEEN %s AND %s",
+            "aml.company_id = %s"
+        ]
+        params = [self.start_date, self.end_date, self.company_id.id]
+
+        if self.partner_ids:
+            conditions.append("aml.partner_id = ANY(%s)")
+            params.append(self.partner_ids.ids)
+        if self.account_ids:
+            conditions.append("aml.account_id = ANY(%s)")
+            params.append(self.account_ids.ids)
+
+        return " AND ".join(conditions), params
 
     def generate_report(self):
         self.ensure_one()
-        company_id = self.env.company.id
-        query = """
-            WITH initial_balances AS (
-                SELECT
-                    aml.partner_id,
-                    COALESCE(p.name, 'No Partner') AS partner_name,
-                    p.vat AS partner_vat,
-                    aml.account_id,
-                    a.code AS account_code,
-                    a.name AS account_name,
-                    SUM(aml.debit - aml.credit) AS initial_balance
-                FROM
-                    account_move_line aml
-                LEFT JOIN
-                    res_partner p ON aml.partner_id = p.id
-                JOIN
-                    account_account a ON aml.account_id = a.id
-                WHERE
-                    aml.date < %s and aml.company_id = %s
-                GROUP BY
-                    aml.partner_id, p.vat, p.name, aml.account_id, a.code, a.name
-            ),
-            transactions AS (
-                SELECT
-                    aml.partner_id,
-                    COALESCE(p.name, 'No Partner') AS partner_name,
-                    p.vat AS partner_vat,
-                    aml.account_id,
-                    a.code AS account_code,
-                    a.name AS account_name,
-                    SUM(aml.debit) AS sum_debits,
-                    SUM(aml.credit) AS sum_credits
-                FROM
-                    account_move_line aml
-                LEFT JOIN
-                    res_partner p ON aml.partner_id = p.id
-                JOIN
-                    account_account a ON aml.account_id = a.id
-                WHERE
-                    aml.date BETWEEN %s AND %s AND aml.company_id = %s
-                GROUP BY
-                    aml.partner_id, p.name, p.vat, aml.account_id, a.code, a.name
-            )
-            SELECT
-                COALESCE(t.partner_id, i.partner_id) AS partner_id,
-                COALESCE(t.partner_vat, i.partner_vat) AS partner_vat,
-                COALESCE(t.partner_name, i.partner_name) AS partner_name,
-                COALESCE(t.account_id, i.account_id) AS account_id,
-                COALESCE(t.account_code, i.account_code) AS account_code,
-                COALESCE(t.account_name, i.account_name) AS account_name,
-                COALESCE(i.initial_balance, 0) AS initial_balance,
-                COALESCE(t.sum_debits, 0) AS sum_debits,
-                COALESCE(t.sum_credits, 0) AS sum_credits,
-                COALESCE(i.initial_balance, 0) + COALESCE(t.sum_debits, 0) - COALESCE(t.sum_credits, 0) AS ending_balance
-            FROM
-                initial_balances i
-            FULL OUTER JOIN
-                transactions t ON i.partner_id = t.partner_id AND i.account_id = t.account_id
-            ORDER BY
-                partner_name, account_name;
-        """
-        self.env.cr.execute(query, (self.start_date, company_id, self.start_date, self.end_date, company_id))
+        initial_conditions, initial_params = self._prepare_query_conditions()
+        transactions_conditions, transactions_params = self._prepare_transactions_conditions()
+
+        query = f"""
+                            WITH initial_balances AS (
+                                SELECT
+                                    aml.partner_id,
+                                    COALESCE(p.name, 'No Partner') AS partner_name,
+                                    p.vat AS partner_vat,
+                                    aml.account_id,
+                                    a.name AS account_name,
+                                    a.code AS account_code,
+                                    SUM(aml.debit - aml.credit) AS initial_balance
+                                FROM
+                                    account_move_line aml
+                                LEFT JOIN
+                                    res_partner p ON aml.partner_id = p.id
+                                JOIN
+                                    account_account a ON aml.account_id = a.id
+                                WHERE
+                                    {initial_conditions}
+                                GROUP BY
+                                    aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
+                            ),
+                            transactions AS (
+                                SELECT
+                                    aml.partner_id,
+                                    COALESCE(p.name, 'No Partner') AS partner_name,
+                                    p.vat AS partner_vat,
+                                    aml.account_id,
+                                    a.name AS account_name,
+                                    a.code AS account_code,
+                                    SUM(aml.debit) AS sum_debits,
+                                    SUM(aml.credit) AS sum_credits
+                                FROM
+                                    account_move_line aml
+                                LEFT JOIN
+                                    res_partner p ON aml.partner_id = p.id
+                                JOIN
+                                    account_account a ON aml.account_id = a.id
+                                WHERE
+                                    {transactions_conditions}
+                                GROUP BY
+                                    aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
+                            )
+                            SELECT
+                                COALESCE(t.partner_id, i.partner_id) AS partner_id,
+                                COALESCE(t.partner_name, i.partner_name) AS partner_name,
+                                COALESCE(t.partner_vat, i.partner_vat) AS partner_vat,
+                                COALESCE(t.account_id, i.account_id) AS account_id,
+                                COALESCE(t.account_name, i.account_name) AS account_name,
+                                COALESCE(t.account_code, i.account_code) AS account_code,
+                                COALESCE(i.initial_balance, 0) AS initial_balance,
+                                COALESCE(t.sum_debits, 0) AS sum_debits,
+                                COALESCE(t.sum_credits, 0) AS sum_credits,
+                                COALESCE(i.initial_balance, 0) + COALESCE(t.sum_debits, 0) - COALESCE(t.sum_credits, 0) AS ending_balance
+                            FROM
+                                initial_balances i
+                            FULL OUTER JOIN
+                                transactions t ON i.partner_id = t.partner_id AND i.account_id = t.account_id
+                            ORDER BY
+                                partner_name, account_name;
+                        """
+        params = initial_params + transactions_params
+        self.env.cr.execute(query, params)
         results = self.env.cr.dictfetchall()
 
         report_obj = self.env['partner.balance.report']

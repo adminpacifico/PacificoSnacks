@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="partner_view_advance_accounts">
+            <field name="name">partner.view.advance.accounts</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='property_account_payable_id']" position="after">
+                        <field name="sale_advance_account_id"/>
+                        <field name="purchase_advance_account_id"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_wizard_invoice_payment_form" model="ir.ui.view">
+            <field name="name">wizard.invoice.payment.form</field>
+            <field name="model">wizard.invoice.payment</field>
+            <field name="arch" type="xml">
+                <form string="Invoice Payment Wizard">
+                    <group>
+                        <field name="journal_id" domain="[('type','in',('bank','cash'))]"/>
+                        <field name="rebate_journal_id" domain="[('type','=','general')]"/>
+                        <field name="rebate_account_id"/>
+                    </group>
+                    <notebook>
+                        <page>
+                            <field name="invoice_ids" readonly="0">
+                                <tree editable="bottom" create="false">
+                                    <field name="invoice_id"/>
+                                    <field name="customer_id"/>
+                                    <field name="date_invoice"/>
+                                    <field name="date_due"/>
+                                    <field name="amount_residual" sum="Total to pay"/>
+                                    <field name="amount_to_pay" readonly="0" sum="Total Payment"/>
+                                    <field name="full_pay" readonly="0"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                    <footer>
+                        <button string="Process Payments" type="object" name="process_payments" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_invoice_payment" model="ir.actions.act_window">
+            <field name="name">Mass Invoice Payment</field>
+            <field name="res_model">wizard.invoice.payment</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="binding_model_id" ref="account.model_account_move"/>
+            <field name="binding_view_types">list</field>
+        </record>
+    </data>
+</odoo>
