@@ -147,8 +147,10 @@ class PtExogenaWizard(models.TransientModel):
             'id_card': '12',
             'passport': '41',
             'foreigner_id_card': '22',
+            'foreign_colombian_card': '22',
             'external_id': '42',
             'diplomatic_card': '42',
+            'foreign_resident_card': '21',
             'residence_document': '21',
             'civil_registration': '11',
         }
@@ -198,25 +200,25 @@ class PtExogenaWizard(models.TransientModel):
                 partnerant = partner.id
                 codeant = data['code']
 
-            if not partner.primer_nombre:
+            if not partner.first_name:
                 primer_nombre = ''
             else:
-                primer_nombre = partner.primer_nombre
+                primer_nombre = partner.first_name
 
-            if not partner.segundo_nombre:
+            if not partner.other_names:
                 segundo_nombre = ''
             else:
-                segundo_nombre = partner.segundo_nombre
+                segundo_nombre = partner.other_names
 
-            if not partner.primer_apellido:
+            if not partner.surname:
                 primer_apellido = ''    
             else:
-                primer_apellido = partner.primer_apellido
+                primer_apellido = partner.surname
 
-            if not partner.segundo_apellido:
+            if not partner.second_surname:
                 segundo_apellido = ''
             else:
-                segundo_apellido = partner.segundo_apellido
+                segundo_apellido = partner.second_surname
 
             if not partner.name:
                 razon_social = ''
