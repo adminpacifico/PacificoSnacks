@@ -63,7 +63,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     COALESCE(p.name, 'No Partner') AS partner_name,
                                     COALESCE(p.vat, '') AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'en_US'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit - aml.credit) AS initial_balance
                                 FROM
@@ -83,7 +83,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     COALESCE(p.name, 'No Partner') AS partner_name,
                                     COALESCE(p.vat, '') AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'en_US'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit) AS sum_debits,
                                     SUM(aml.credit) AS sum_credits
