@@ -21,7 +21,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def _prepare_query_conditions(self):
         conditions = [
-            "AND aml.date <= %s",
+            "AND aml.date at time zone 'utc' at time zone 'america/bogota' < %s",
             "aml.company_id = %s"
         ]
         params = [self.start_date, self.company_id.id]
@@ -37,7 +37,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def _prepare_transactions_conditions(self):
         conditions = [
-            "AND aml.date BETWEEN %s AND %s",
+            "AND aml.date at time zone 'utc' at time zone 'america/bogota' BETWEEN %s AND %s",
             "aml.company_id = %s"
         ]
         params = [self.start_date, self.end_date, self.company_id.id]
@@ -63,7 +63,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     COALESCE(p.name, 'No Partner') AS partner_name,
                                     p.vat AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'es_CO'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit - aml.credit) AS initial_balance
                                 FROM
@@ -83,7 +83,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     COALESCE(p.name, 'No Partner') AS partner_name,
                                     p.vat AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'es_CO'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit) AS sum_debits,
                                     SUM(aml.credit) AS sum_credits
