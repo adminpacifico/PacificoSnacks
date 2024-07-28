@@ -21,7 +21,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def _prepare_query_conditions(self):
         conditions = [
-            "AND aml.date < %s",
+            "AND aml.date <= %s",
             "aml.company_id = %s"
         ]
         params = [self.start_date, self.company_id.id]
