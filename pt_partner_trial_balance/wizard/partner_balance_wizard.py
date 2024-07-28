@@ -72,8 +72,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     res_partner p ON aml.partner_id = p.id
                                 JOIN
                                     account_account a ON aml.account_id = a.id
-                                WHERE
-                                    aml.parent_state = 'posted'
+                                WHERE aml.parent_state = 'posted' 
                                     {initial_conditions}
                                 GROUP BY
                                     aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
@@ -94,8 +93,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     res_partner p ON aml.partner_id = p.id
                                 JOIN
                                     account_account a ON aml.account_id = a.id
-                                WHERE
-                                    aml.parent_state = 'posted'
+                                WHERE aml.parent_state = 'posted' 
                                     {transactions_conditions}
                                 GROUP BY
                                     aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
