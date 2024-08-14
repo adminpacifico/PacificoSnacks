@@ -10,7 +10,8 @@ class AccountMove(models.Model):
     def compute_trm(self):
         for record in self:
             rates = self.env["res.currency.rate"].search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)])
-            for tarifa in rates:
-                if tarifa.x_studio_field_rqbWr > 0:
-                    record.trm = tarifa.x_studio_field_rqbWr
+            for tasa in rates:
+                if tasa:
+                    if tasa.x_studio_field_rqbWr > 0.0:
+                        record.trm = tarifa.x_studio_field_rqbWr
 
