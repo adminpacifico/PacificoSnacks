@@ -15,5 +15,6 @@ class AccountMove(models.Model):
                     if tasas.x_studio_field_rqbWr > 0:
                         record.trm = tasas.x_studio_field_rqbWr
         else:
-            record.trm = 0.0
+            for record in self:
+                self.trm = 0.0
 
