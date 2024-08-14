@@ -11,5 +11,6 @@ class AccountMove(models.Model):
         for record in self:
             rates = self.env["res.currency.rate"].search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)])
             for rate in rates:
-                if rate.x_studio_field_rqbWr != 0:
+                if rate.x_studio_field_rqbWr > 0:
                     record.trm = rate.x_studio_field_rqbWr
+
