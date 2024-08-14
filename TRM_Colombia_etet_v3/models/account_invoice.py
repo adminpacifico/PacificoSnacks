@@ -12,5 +12,5 @@ class AccountMove(models.Model):
             rates = self.env["res.currency.rate"].sudo().search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)])
             for tasas in rates:
                 if tasas.x_studio_field_rqbWr > 0:
-                    record.trm = rates.x_studio_field_rqbWr
+                    record.trm = tasas.x_studio_field_rqbWr
 
