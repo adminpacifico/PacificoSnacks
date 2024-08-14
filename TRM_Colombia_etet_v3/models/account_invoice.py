@@ -9,7 +9,7 @@ class AccountMove(models.Model):
     @api.onchange('invoice_date', 'currency_id')
     def compute_trm(self):
         for record in self:
-            rates = self.env["res.currency.rate"].search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)])
+            rates = self.env["res.currency.rate"].search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)], limit=1)
             record.trm = rates.x_studio_field_rqbWr
 
 
