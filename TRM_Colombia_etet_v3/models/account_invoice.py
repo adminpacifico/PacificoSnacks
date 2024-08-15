@@ -8,7 +8,7 @@ class AccountMove(models.Model):
 
     @api.onchange('invoice_date', 'currency_id')
     def compute_trm(self):
-        if self.currency_id.name != "COP":
+        if self.currency_id.name != "COP" and self.move_type in ['out_invoice','in_invoice']:
             for record in self:
                 rates = self.env["res.currency.rate"].sudo().search([("name", "=", record.invoice_date), ("currency_id", "=", record.currency_id.id)])
                 for tasas in rates:
