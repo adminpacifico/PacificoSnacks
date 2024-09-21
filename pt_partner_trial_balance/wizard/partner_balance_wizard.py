@@ -21,7 +21,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def _prepare_query_conditions(self):
         conditions = [
-            "aml.date < %s",
+            "AND aml.date < %s",
             "aml.company_id = %s"
         ]
         params = [self.start_date, self.company_id.id]
@@ -37,7 +37,7 @@ class PartnerBalanceWizard(models.TransientModel):
 
     def _prepare_transactions_conditions(self):
         conditions = [
-            "aml.date BETWEEN %s AND %s",
+            "AND aml.date AT TIME ZONE 'UTC-5' BETWEEN %s AND %s",
             "aml.company_id = %s"
         ]
         params = [self.start_date, self.end_date, self.company_id.id]
@@ -61,9 +61,9 @@ class PartnerBalanceWizard(models.TransientModel):
                                 SELECT
                                     aml.partner_id,
                                     COALESCE(p.name, 'No Partner') AS partner_name,
-                                    p.vat AS partner_vat,
+                                    COALESCE(p.vat, '') AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'en_US'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit - aml.credit) AS initial_balance
                                 FROM
@@ -72,7 +72,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     res_partner p ON aml.partner_id = p.id
                                 JOIN
                                     account_account a ON aml.account_id = a.id
-                                WHERE
+                                WHERE aml.parent_state = 'posted' 
                                     {initial_conditions}
                                 GROUP BY
                                     aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
@@ -81,9 +81,9 @@ class PartnerBalanceWizard(models.TransientModel):
                                 SELECT
                                     aml.partner_id,
                                     COALESCE(p.name, 'No Partner') AS partner_name,
-                                    p.vat AS partner_vat,
+                                    COALESCE(p.vat, '') AS partner_vat,
                                     aml.account_id,
-                                    a.name AS account_name,
+                                    a.name::json->>'en_US'::text AS account_name,
                                     a.code AS account_code,
                                     SUM(aml.debit) AS sum_debits,
                                     SUM(aml.credit) AS sum_credits
@@ -93,7 +93,7 @@ class PartnerBalanceWizard(models.TransientModel):
                                     res_partner p ON aml.partner_id = p.id
                                 JOIN
                                     account_account a ON aml.account_id = a.id
-                                WHERE
+                                WHERE aml.parent_state = 'posted' 
                                     {transactions_conditions}
                                 GROUP BY
                                     aml.partner_id, p.name, p.vat, aml.account_id, a.name, a.code
