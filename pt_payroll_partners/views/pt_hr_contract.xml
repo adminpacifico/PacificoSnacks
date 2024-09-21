@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+        <record id="pt_hr_contract" model="ir.ui.view">
+            <field name="name">hr_contract.hr_contract_view_form.inherit</field>
+            <field name="model">hr.contract</field>
+            <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+            <field name="arch" type="xml">
+				<xpath expr="//page[@name='information']" position="after">
+					<page name="Proveedores" string="Proveedores">
+						<group>
+							<group>
+			                    <field name="otros_uno_id"/>
+			                    <field name="otros_dos_id"/>
+								<field name="otros_tres_id"/>
+								<field name="otros_cuatro_id"/>
+								<field name="otros_cinco_id"/>
+								<field name="otros_seis_id"/>
+			                    <field name="otros_siete_id"/>
+								<field name="otros_ocho_id"/>
+								<field name="otros_nueve_id"/>
+								<field name="otros_diez_id"/>
+							</group>
+							<group>
+								<field name="monto_uno"/>
+								<field name="monto_dos"/>
+								<field name="monto_tres"/>
+								<field name="monto_cuatro"/>
+								<field name="monto_cinco"/>
+								<field name="monto_seis"/>
+								<field name="monto_siete"/>
+								<field name="monto_ocho"/>
+								<field name="monto_nueve"/>
+								<field name="monto_diez"/>
+							</group>
+						</group>
+					</page>
+                </xpath>
+			</field>
+        </record>
+ 	</data>
+</openerp>

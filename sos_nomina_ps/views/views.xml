@@ -1,0 +1,18 @@
+<odoo>
+  <data>
+    <record id="hr_payslip_run_ps_view_form" model="ir.ui.view">
+        <field name="name">hr.payslip.run.ps.view.form</field>
+        <field name="model">hr.payslip.run</field>
+        <field name="inherit_id" ref="hr_payroll.hr_payslip_run_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group//group" position='before'>
+                <group string="Prestaciones Sociales">
+                    <field name="liquidar_prima"/>
+                    <field name="liquidar_interes_cesantia"/>
+                    <field name="liquidar_cesantia"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+  </data>
+</odoo>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+  
+    <!-- Herencia de la vista del formulario de contrato -->
+    <record id="hr_contract_view_form" model="ir.ui.view">
+        <field name="name">hr.contract.view.form</field>
+        <field name="model">hr.contract</field>
+        <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="Seguridad Social" string="Seguridad Social">
+                    <group>
+                        <field name="eps_id"/>
+                        <field name="arl_id"/>
+                        <field name="tarifa_riesgos"/>
+                        <field name="afp_id"/>
+                        <field name="afc_id"/>
+                        <field name="ccf_id"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Herencia de la vista del formulario de res.partner -->
+    <record id="hr_entidad_ss_view_form" model="ir.ui.view">
+        <field name="name">hr.entidad.ss.view.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page name="Recursos Humanos" string="Recursos Humanos">
+                    <group>
+                        <field name="tipo_entidad_ss"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Herencia de la vista del formulario de reglas salariales -->
+    <record id="hr_salary_rule_ss_view_form" model="ir.ui.view">
+        <field name="name">hr.salary.rule.ss.view.form</field>
+        <field name="model">hr.salary.rule</field>
+        <field name="inherit_id" ref="hr_payroll.hr_salary_rule_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general']" position="after">
+                <page name="Seguridad Social" string="Seguridad Social">
+                    <group>
+                        <field name="tipo_entidad_asociada"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+    
+  </data>
+</odoo>

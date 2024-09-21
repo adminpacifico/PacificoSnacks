@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+    
+    <record id="seq_recepcion_laboratorio" model="ir.sequence">
+            <field name="name">recepcion_laboratorio_sequencer</field>
+            <field name="code">recepcion.laboratorio</field>
+            <field name="prefix"></field>
+            <field name="padding">4</field>
+    </record>
+    
+    <record id="seq_entrega_laboratorio" model="ir.sequence">
+            <field name="name">entrega_laboratorio_sequencer</field>
+            <field name="code">entrega.laboratorio</field>
+            <field name="prefix"></field>
+            <field name="padding">4</field>
+    </record>
+    
+    <record id="seq_cierre_proveedor" model="ir.sequence">
+            <field name="name">cierre_proveedor_sequencer</field>
+            <field name="code">cierre.proveedor</field>
+            <field name="prefix"></field>
+            <field name="padding">4</field>
+    </record>
+    
+    <record id="product_product_oro" model="product.product">
+            <field name="name">Oro</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="list_price">1</field>
+            <field name="standard_price">1</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="default_code">ORO</field>
+    </record>
+    
+    <record id="product_product_plata" model="product.product">
+            <field name="name">Plata</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="list_price">1</field>
+            <field name="standard_price">1</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="default_code">PLATA</field>
+    </record>
+    
+    <record id="product_product_platino" model="product.product">
+            <field name="name">Platino</field>
+            <field name="categ_id" ref="product.product_category_1"/>
+            <field name="list_price">1</field>
+            <field name="standard_price">1</field>
+            <field name="type">service</field>
+            <field name="uom_id" ref="product.product_uom_unit"/>
+            <field name="uom_po_id" ref="product.product_uom_unit"/>
+            <field name="default_code">PLATINO</field>
+    </record>
+    
+    </data>
+</odoo>
+    
