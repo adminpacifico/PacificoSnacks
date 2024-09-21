@@ -35,6 +35,7 @@ import requests
 from num2words import num2words
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools.sql import column_exists, create_column
 
 _logger = logging.getLogger(__name__)
 
@@ -135,6 +136,12 @@ class AccountMove(models.Model):
     ei_amount_excluded_company = fields.Monetary("Excluded in Company Currency", compute="_compute_amount", store=True,
                                                  currency_field='company_currency_id')
 
+    # Commercial sample
+    ei_amount_commercial_sample = fields.Monetary("Total commercial sample", compute="_compute_amount", store=True)
+    ei_amount_commercial_sample_company = fields.Monetary("Total commercial sample in Company Currency",
+                                                          compute="_compute_amount", store=True,
+                                                          currency_field='company_currency_id')
+
     # Required field for credit and debit notes in DIAN
     ei_correction_concept_id = fields.Many2one(comodel_name='l10n_co_edi_jorels.correction_concepts',
                                                string="Correction concept", copy=False, readonly=True,
@@ -192,6 +199,53 @@ class AccountMove(models.Model):
 
     is_edi_mail_sent = fields.Boolean(readonly=True, default=False, copy=False,
                                       help="It indicates that the edi document has been sent.")
+
+    def _auto_init(self):
+        # Edi type document
+        if not column_exists(self.env.cr, "account_move", "ei_type_document_id"):
+            create_column(self.env.cr, "account_move", "ei_type_document_id", "integer")
+
+        if not column_exists(self.env.cr, "account_move", "ei_type_document"):
+            create_column(self.env.cr, "account_move", "ei_type_document", "varchar")
+
+        # Totals in Invoice Currency
+        if not column_exists(self.env.cr, "account_move", "ei_amount_tax_withholding"):
+            create_column(self.env.cr, "account_move", "ei_amount_tax_withholding", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_tax_no_withholding"):
+            create_column(self.env.cr, "account_move", "ei_amount_tax_no_withholding", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_total_no_withholding"):
+            create_column(self.env.cr, "account_move", "ei_amount_total_no_withholding", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_excluded"):
+            create_column(self.env.cr, "account_move", "ei_amount_excluded", "numeric")
+
+        # Totals in Company Currency
+        if not column_exists(self.env.cr, "account_move", "ei_amount_tax_withholding_company"):
+            create_column(self.env.cr, "account_move", "ei_amount_tax_withholding_company", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_tax_no_withholding_company"):
+            create_column(self.env.cr, "account_move", "ei_amount_tax_no_withholding_company", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_total_no_withholding_company"):
+            create_column(self.env.cr, "account_move", "ei_amount_total_no_withholding_company", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_excluded_company"):
+            create_column(self.env.cr, "account_move", "ei_amount_excluded_company", "numeric")
+
+        # Commercial samples
+        if not column_exists(self.env.cr, "account_move", "ei_amount_commercial_sample"):
+            create_column(self.env.cr, "account_move", "ei_amount_commercial_sample", "numeric")
+
+        if not column_exists(self.env.cr, "account_move", "ei_amount_commercial_sample_company"):
+            create_column(self.env.cr, "account_move", "ei_amount_commercial_sample_company", "numeric")
+
+        # Value letters
+        if not column_exists(self.env.cr, "account_move", "value_letters"):
+            create_column(self.env.cr, "account_move", "value_letters", "varchar")
+
+        return super()._auto_init()
 
     def dian_preview(self):
         for rec in self:
@@ -278,8 +332,6 @@ class AccountMove(models.Model):
     def _onchange_is_out_country(self):
         for rec in self:
             rec.is_out_country = rec.get_default_is_out_country()
-            if rec.move_type == 'in_invoice' and rec.journal_id.resolution_invoice_id:
-                rec.resolution_id = rec.journal_id.resolution_invoice_id.id
 
     def is_journal_pos(self):
         self.ensure_one()
@@ -380,7 +432,7 @@ class AccountMove(models.Model):
             type_document_identification_id = rec.get_type_document_identification_id()
             if type_document_identification_id:
                 if rec.partner_id.vat:
-                    if type_document_identification_id in (1, 2, 3, 4, 5, 6, 10):
+                    if type_document_identification_id in (1, 2, 3, 4, 5, 6, 10, 24, 38):
                         identification_number_general = ''.join([i for i in rec.partner_id.vat if i.isdigit()])
                     else:
                         identification_number_general = rec.partner_id.vat
@@ -470,7 +522,8 @@ class AccountMove(models.Model):
     def get_ei_legal_monetary_totals(self):
         self.ensure_one()
         line_extension_amount = abs(self.amount_untaxed_signed)
-        tax_exclusive_amount = abs(self.amount_untaxed_signed) - self.ei_amount_excluded_company
+        tax_exclusive_amount = abs(
+            self.amount_untaxed_signed) - self.ei_amount_excluded_company + self.ei_amount_commercial_sample_company
 
         allowance_total_amount = 0.0
         if self.is_universal_discount():
@@ -736,6 +789,9 @@ class AccountMove(models.Model):
             amount_tax_no_withholding_company = 0
             amount_excluded = 0
             amount_excluded_company = 0
+            amount_commercial_sample = 0
+            amount_commercial_sample_company = 0
+
             rate = rec.currency_id.with_context(dict(rec._context or {}, date=rec.invoice_date)).rate
             inverse_rate = rec.currency_id.with_context(dict(rec._context or {}, date=rec.invoice_date)).inverse_rate
             for invoice_line_id in rec.invoice_line_ids:
@@ -750,9 +806,14 @@ class AccountMove(models.Model):
                         #   raise UserError(
                         #       _("Commercial samples doesn't seem to be compatible with multi-currencies."))
 
-                        lst_price_invoice = invoice_line_id.product_id.lst_price * rate
+                        lst_price_company = invoice_line_id.product_id.lst_price
+                        lst_price_invoice = lst_price_company * rate
+
                         taxable_amount = lst_price_invoice * invoice_line_id.quantity
-                        taxable_amount_company = invoice_line_id.product_id.lst_price * invoice_line_id.quantity
+                        taxable_amount_company = lst_price_company * invoice_line_id.quantity
+
+                        amount_commercial_sample = amount_commercial_sample + taxable_amount
+                        amount_commercial_sample_company = amount_commercial_sample_company + taxable_amount_company
 
                     for invoice_line_tax_id in invoice_line_id.tax_ids:
                         tax_name = invoice_line_tax_id.description or ''
@@ -805,6 +866,9 @@ class AccountMove(models.Model):
             rec.ei_amount_excluded = amount_excluded
             rec.ei_amount_excluded_company = amount_excluded_company
 
+            rec.ei_amount_commercial_sample = amount_commercial_sample
+            rec.ei_amount_commercial_sample_company = amount_commercial_sample_company
+
             if self.is_universal_discount():
                 # if rec.currency_id and rec.company_id and rec.currency_id != rec.company_id.currency_id:
                 #     raise UserError(
@@ -824,7 +888,7 @@ class AccountMove(models.Model):
                                                               rec.ks_amount_discount)
 
             # Value in letters
-            decimal_part, integer_part = math.modf(abs(rec.amount_total_signed))
+            decimal_part, integer_part = math.modf(abs(rec.ei_amount_total_no_withholding_company))
             if decimal_part:
                 decimal_part = round(decimal_part * math.pow(10, rec.company_currency_id.decimal_places))
             if integer_part:
@@ -839,6 +903,7 @@ class AccountMove(models.Model):
                     rec.value_letters = (rec.value_letters + ', ' +
                                          num2words(decimal_part, lang=lang).upper() + ' ' +
                                          rec.company_currency_id.currency_subunit_label.upper() + '.')
+
     def get_ei_payment_form(self):
         for rec in self:
             if rec.invoice_date and rec.invoice_date_due:
@@ -977,7 +1042,7 @@ class AccountMove(models.Model):
     def _compute_resolution(self):
         for rec in self:
             type_edi_document = rec.ei_type_document
-            if rec.should_send_document_to_dian():
+            if type_edi_document:
                 if type_edi_document in ('invoice', 'doc_support') and rec.journal_id.resolution_invoice_id:
                     # Sales invoice
                     rec.resolution_id = rec.journal_id.resolution_invoice_id.id
@@ -990,7 +1055,6 @@ class AccountMove(models.Model):
                     rec.resolution_id = rec.journal_id.resolution_debit_note_id.id
                 else:
                     rec.resolution_id = None
-                    _logger.debug("This type of document does not have a DIAN resolution assigned: %s" % rec.name)
             else:
                 rec.resolution_id = None
 
@@ -1624,10 +1688,11 @@ class AccountMove(models.Model):
                 with BytesIO(base64.b64decode(rec.ei_attached_document_base64_bytes)) as file:
                     search_ok = False
                     for line in file:
-                        search_string = '<cbc:ParentDocumentID>' + rec.number_formatted + '</cbc:ParentDocumentID>'
-                        if search_string in str(line):
-                            search_ok = True
-                            break
+                        if rec.number_formatted and isinstance(rec.number_formatted, str):
+                            search_string = '<cbc:ParentDocumentID>' + rec.number_formatted + '</cbc:ParentDocumentID>'
+                            if search_string in str(line):
+                                search_ok = True
+                                break
                     rec.is_attached_document_matched = search_ok
             else:
                 rec.is_attached_document_matched = False
