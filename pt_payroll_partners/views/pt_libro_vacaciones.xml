@@ -9,7 +9,7 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Vacaciones Tomadas">
                     <field name="vacaciones_tomadas_ids" mode="tree">
-                        <tree>
+                        <tree  editable="top">
                             <field name="name"/>
                             <field name="fecha_inicio"/>
                             <field name="fecha_fin"/>
@@ -22,7 +22,7 @@
                 <!-- Add the second page for Libro Vacaciones -->
                 <page string="Libro Vacaciones">
                     <field name="libro_vacaciones_ids" mode="tree">
-                        <tree>
+                        <tree  editable="top">
                             <field name="name"/>
                             <field name="fecha_inicio"/>
                             <field name="fecha_fin"/>

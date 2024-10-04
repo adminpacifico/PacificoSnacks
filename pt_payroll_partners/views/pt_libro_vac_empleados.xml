@@ -5,7 +5,7 @@
         <field name="name">libro.vacaciones.tree.view</field>
         <field name="model">pt.libro.vacaciones</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree  editable="top">
                 <field name="name"/>
                 <field name="empleado_id"/>
                 <field name="fecha_inicio"/>
