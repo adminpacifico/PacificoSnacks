@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Define the tree view for Libro de Vacaciones -->
+    <record id="view_libro_vacaciones_tree" model="ir.ui.view">
+        <field name="name">libro.vacaciones.tree.view</field>
+        <field name="model">libro.vacaciones</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="empleado_id"/>
+                <field name="fecha_inicio"/>
+                <field name="fecha_fin"/>
+                <field name="dias_vacaciones"/>
+                <field name="dias_tomados"/>
+                <field name="dias_restantes"/>
+                <field name="dias_pasan"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Create an action that uses the above tree view -->
+    <record id="action_libro_vacaciones" model="ir.actions.act_window">
+        <field name="name">Libro de Vacaciones</field>
+        <field name="res_model">libro.vacaciones</field>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="view_libro_vacaciones_tree"/>
+        <field name="target">current</field>
+    </record>
+
+    <!-- Add a menu item under hr.hr_menu_hr_reports for the "Libro de Vacaciones" -->
+    <menuitem id="menu_libro_vacaciones"
+              name="Libro de Vacaciones"
+              parent="hr.hr_menu_hr_reports"
+              action="action_libro_vacaciones"
+              sequence="10"/>
+</odoo>

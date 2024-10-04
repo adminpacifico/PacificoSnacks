@@ -8,3 +8,4 @@
 
 from . import pt_payroll_partners
 from . import pt_hr_contract
+from . import pt_libro_vacaciones

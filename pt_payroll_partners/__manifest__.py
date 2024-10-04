@@ -22,6 +22,8 @@
     'data': [
         'views/pt_hr_contract.xml',
         'views/pt_payroll_partner.xml',
+        'views/pt_libro_vacaciones.xml',
+        'views/pt_libro_vac_empleados.xml',
     ],
     'installable': True,
     'application': False,

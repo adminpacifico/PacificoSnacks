@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    Odoo
-#    Copyright (C) 2017 CodUP (<http://codup.com>).
+#    Copyright (C) 2024 Cesar Ortiz  Para ti.co SAS
 #
 ##############################################################################
 
@@ -56,4 +56,4 @@ class PtHrContract(models.Model):
     monto_ocho = fields.Float(string='Monto Ocho', help="En caso que sea un monto fijo para el proveedor ocho - campo - monto_ocho")
     monto_nueve = fields.Float(string='Monto Nueve', help="En caso que sea un monto fijo para el proveedor nueve - campo - monto_nueve")
     monto_diez = fields.Float(string='Monto Diez', help="En caso que sea un monto fijo para el proveedor diez - campo - monto_diez")
-
+    tipo_retencion = fields.Selection([('1', 'Método Uno'), ('2', 'Método Dos'), ('3', 'No aplica'), ], string='Tipo de Retención', help="Tipo de retención salarial", default='3')
