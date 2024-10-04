@@ -22,6 +22,7 @@
     'data': [
         'views/pt_hr_contract.xml',
         'views/pt_payroll_partner.xml',
+        'security/ir.model.access.csv',
         'views/pt_libro_vacaciones.xml',
         'views/pt_libro_vac_empleados.xml',
     ],
