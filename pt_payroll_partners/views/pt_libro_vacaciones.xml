@@ -11,6 +11,7 @@
                     <field name="vacaciones_tomadas_ids" mode="tree">
                         <tree  editable="top">
                             <field name="name"/>
+                            <field name="contract_id"/>
                             <field name="fecha_inicio"/>
                             <field name="fecha_fin"/>
                             <field name="dias_tomados"/>
@@ -24,6 +25,7 @@
                     <field name="libro_vacaciones_ids" mode="tree">
                         <tree  editable="top">
                             <field name="name"/>
+                            <field name="contract_id"/>
                             <field name="fecha_inicio"/>
                             <field name="fecha_fin"/>
                             <field name="dias_vacaciones"/>

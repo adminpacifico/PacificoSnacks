@@ -8,6 +8,7 @@
             <tree  editable="top">
                 <field name="name"/>
                 <field name="empleado_id"/>
+                <field name="contract_id"/>
                 <field name="fecha_inicio"/>
                 <field name="fecha_fin"/>
                 <field name="dias_vacaciones"/>
