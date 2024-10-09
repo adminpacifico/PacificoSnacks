@@ -17,6 +17,7 @@ class PtLibroVacaciones(models.Model):
     fecha_inicio = fields.Date(string='Fecha de inicio', required=True)
     fecha_fin = fields.Date(string='Fecha de fin', required=True)
     empleado_id = fields.Many2one('hr.employee', string='Empleado')
+    contract_id = fields.Many2one('hr.contract', string='Contrato')
     dias_vacaciones = fields.Integer(string='Días de vacaciones') # dias ganados en el año
     dias_tomados = fields.Integer(string='Días tomados') # dias tomados en el año
     dias_restantes = fields.Integer(string='Días restantes', compute='_compute_dias_restantes') # dias restantes en el año
@@ -36,6 +37,7 @@ class PTVacacionesTomadas(models.Model):
     fecha_inicio = fields.Date(string='Fecha de inicio', required=True)
     fecha_fin = fields.Date(string='Fecha de fin', required=True)
     empleado_id = fields.Many2one('hr.employee', string='Empleado')
+    contract_id = fields.Many2one('hr.contract', string='Contrato')
     dias_tomados = fields.Integer(string='Días tomados')
     registrado = fields.Boolean(string='Registrado', default=False)
 
@@ -62,3 +64,8 @@ class HrEmployee(models.Model):
 
     libro_vacaciones_ids = fields.One2many('pt.libro.vacaciones', 'empleado_id', string='Libro de vacaciones')
     vacaciones_tomadas_ids = fields.One2many('pt.vacaciones.tomadas', 'empleado_id', string='Vacaciones tomadas')
+
+
+class HrContract(models.Model):
+    libros_vacaciones_ids = fields.One2many('pt.libro.vacaciones', 'contract_id', string='Libros de vacaciones')
+    vacaciones_tomadas_ids = fields.One2many('pt.vacaciones.tomadas', 'contract_id', string='Vacaciones tomadas')
