@@ -67,5 +67,6 @@ class HrEmployee(models.Model):
 
 
 class HrContract(models.Model):
+    _inherit = 'hr.contract'
     libros_vacaciones_ids = fields.One2many('pt.libro.vacaciones', 'contract_id', string='Libros de vacaciones')
     vacaciones_tomadas_ids = fields.One2many('pt.vacaciones.tomadas', 'contract_id', string='Vacaciones tomadas')
