@@ -2,8 +2,8 @@
 	'name': 'Font_Tomato',
 	'author': 'Para Ti',
 	'category': '',
-	'version': '',
-	'depends': [17.0],
+	'version': '17.0',
+	'depends': [],
 	'data': '',
 	'assets': {
 		'web.report_assets_common': ['/Font_Ketchup/static/src/css/font.css']
