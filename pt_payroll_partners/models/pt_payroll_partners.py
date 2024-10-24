@@ -26,60 +26,60 @@ class HrSalaryRule(models.Model):
 class HrPayslipLine(models.Model):
     _inherit = 'hr.payslip'
 
-    def _prepare_line_values(self, line, account_id, date, debit, credit):
+    def _prepare_line_values(self, selfline, account_id, date, debit, credit):
         encontro = False
         if line.salary_rule_id.tipo_entidad_asociada:
             if line.salary_rule_id.tipo_entidad_asociada == 'arl':
-                partner_id = self.slip_id.contract_id.arl_id.id
+                partner_id = self.contract_id.arl_id.id
                 encontro = True
             elif line.salary_rule_id.tipo_entidad_asociada == 'afp':
-                partner_id = self.slip_id.contract_id.afp_id.id
+                partner_id = self.contract_id.afp_id.id
                 encontro = True
             elif line.salary_rule_id.tipo_entidad_asociada == 'afc':
-                partner_id = self.slip_id.contract_id.afc_id.id
+                partner_id = self.contract_id.afc_id.id
                 encontro = True
             elif line.salary_rule_id.tipo_entidad_asociada == 'eps':
-                partner_id = self.slip_id.contract_id.eps_id.id
+                partner_id = self.contract_id.eps_id.id
                 encontro = True
             elif line.salary_rule_id.tipo_entidad_asociada == 'ccf':
-                partner_id = self.slip_id.contract_id.ccf_id.id
+                partner_id = self.contract_id.ccf_id.id
                 encontro = True
 
         if line.salary_rule_id.tercero and encontro is False:
             if line.salary_rule_id.campo_contrato == 'pension_id':
-                partner_id = line.slip_id.contract_id.pension_id.id
+                partner_id = self.contract_id.pension_id.id
             elif line.salary_rule_id.campo_contrato == 'eps_id':
-                partner_id = line.slip_id.contract_id.eps_id.id
+                partner_id = self.contract_id.eps_id.id
             elif line.salary_rule_id.campo_contrato == 'cesantias_id':
-                partner_id = line.slip_id.contract_id.cesantias_id.id
+                partner_id = self.contract_id.cesantias_id.id
             elif line.salary_rule_id.campo_contrato == 'arl_id':
-                partner_id = line.slip_id.contract_id.arl_id.id
+                partner_id = self.contract_id.arl_id.id
             elif line.salary_rule_id.campo_contrato == 'caja_id':
-                partner_id = line.slip_id.contract_id.caja_id.id
+                partner_id = self.contract_id.caja_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_uno_id':
-                partner_id = line.slip_id.contract_id.otros_uno_id.id
+                partner_id = self.contract_id.otros_uno_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_dos_id':
-                partner_id = line.slip_id.contract_id.otros_dos_id.id
+                partner_id = self.contract_id.otros_dos_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_tres_id':
-                partner_id = line.slip_id.contract_id.otros_tres_id.id
+                partner_id = self.contract_id.otros_tres_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_cuatro_id':
-                partner_id = line.slip_id.contract_id.otros_cuatro_id.id
+                partner_id = self.contract_id.otros_cuatro_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_cinco_id':
-                partner_id = line.slip_id.contract_id.otros_cinco_id.id
+                partner_id = self.contract_id.otros_cinco_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_seis_id':
-                partner_id = line.slip_id.contract_id.otros_seis_id.id
+                partner_id = self.contract_id.otros_seis_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_siete_id':
-                partner_id = line.slip_id.contract_id.otros_siete_id.id
+                partner_id = self.contract_id.otros_siete_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_ocho_id':
-                partner_id = line.slip_id.contract_id.otros_ocho_id.id
+                partner_id = self.contract_id.otros_ocho_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_nueve_id':
-                partner_id = line.slip_id.contract_id.otros_nueve_id.id
+                partner_id = self.contract_id.otros_nueve_id.id
             elif line.salary_rule_id.campo_contrato == 'otros_diez_id':
-                partner_id = line.slip_id.contract_id.otros_diez_id.id
+                partner_id = self.contract_id.otros_diez_id.id
             else:
                 partner_id = line.partner_id.id
         elif line.salary_rule_id.empleado and encontro is False:
-            partner_id = line.slip_id.employee_id.related_partner_id.id
+            partner_id = self.employee_id.related_partner_id.id
         else:
             if encontro is False:
                 partner_id = line.partner_id.id
@@ -93,7 +93,7 @@ class HrPayslipLine(models.Model):
             'name': line.name,
             'partner_id': partner_id,   #partner.id,
             'account_id': account_id,
-            'journal_id': line.slip_id.struct_id.journal_id.id,
+            'journal_id': self.struct_id.journal_id.id,
             'date': date,
             'debit': debit,
             'credit': credit,
