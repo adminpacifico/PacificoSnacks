@@ -79,7 +79,7 @@ class HrPayslipLine(models.Model):
             else:
                 partner_id = line.partner_id.id
         elif line.salary_rule_id.empleado and encontro is False:
-            partner_id = line.slip_id.employee_id.address_home_id.id
+            partner_id = line.slip_id.employee_id.related_partner_id.id
         else:
             if encontro is False:
                 partner_id = line.partner_id.id
