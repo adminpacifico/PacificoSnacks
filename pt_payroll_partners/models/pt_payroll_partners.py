@@ -28,20 +28,20 @@ class HrPayslipLine(models.Model):
 
     def _prepare_line_values(self, line, account_id, date, debit, credit):
         encontro = False
-        if self.salary_rule_id.tipo_entidad_asociada:
-            if self.salary_rule_id.tipo_entidad_asociada == 'arl':
+        if line.salary_rule_id.tipo_entidad_asociada:
+            if line.salary_rule_id.tipo_entidad_asociada == 'arl':
                 partner_id = self.slip_id.contract_id.arl_id.id
                 encontro = True
-            elif self.salary_rule_id.tipo_entidad_asociada == 'afp':
+            elif line.salary_rule_id.tipo_entidad_asociada == 'afp':
                 partner_id = self.slip_id.contract_id.afp_id.id
                 encontro = True
-            elif self.salary_rule_id.tipo_entidad_asociada == 'afc':
+            elif line.salary_rule_id.tipo_entidad_asociada == 'afc':
                 partner_id = self.slip_id.contract_id.afc_id.id
                 encontro = True
-            elif self.salary_rule_id.tipo_entidad_asociada == 'eps':
+            elif line.salary_rule_id.tipo_entidad_asociada == 'eps':
                 partner_id = self.slip_id.contract_id.eps_id.id
                 encontro = True
-            elif self.salary_rule_id.tipo_entidad_asociada == 'ccf':
+            elif line.salary_rule_id.tipo_entidad_asociada == 'ccf':
                 partner_id = self.slip_id.contract_id.ccf_id.id
                 encontro = True
 
