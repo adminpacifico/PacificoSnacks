@@ -26,7 +26,7 @@ class HrSalaryRule(models.Model):
 class HrPayslipLine(models.Model):
     _inherit = 'hr.payslip'
 
-    def _prepare_line_values(self, selfline, account_id, date, debit, credit):
+    def _prepare_line_values(self, line, account_id, date, debit, credit):
         encontro = False
         if line.salary_rule_id.tipo_entidad_asociada:
             if line.salary_rule_id.tipo_entidad_asociada == 'arl':
