@@ -58,3 +58,9 @@ class PtHrContract(models.Model):
     monto_diez = fields.Float(string='Monto Diez', help="En caso que sea un monto fijo para el proveedor diez - campo - monto_diez")
     tipo_retencion = fields.Selection([('1', 'Método Uno'), ('2', 'Método Dos'), ('3', 'No aplica')], string='Tipo de Retención', help="Tipo de retención salarial", default='3')
     procentaje_metodo_dos = fields.Float(string='Porcentaje Método Dos', help="Porcentaje de retención para el método dos - campo - procentaje_metodo_dos")
+    intereses_vivienda = fields.Float(string='Intereses Vivienda', help="Intereses de Vivienda")
+    prepagada = fields.Float(string='Prepagada', help="Medicina Prepagada")
+    dependiente = fields.Float(string='Dependiente', help="Dependiente Económico")
+    excentas = fields.Float(string='Renta excenta', help="Rentas Excentas")
+    tipo_incapacidad = fields.Selection([('1', 'Normal'), ('2', 'Todo .5'), ('3', 'Todo .66') ,('4', 'Todo 100')], string='Tipo de Retención', help="Tipo de Incapacidad", default='1')
+    
