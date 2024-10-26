@@ -62,4 +62,4 @@ class PtHrContract(models.Model):
     prepagada = fields.Float(string='Prepagada', help="Medicina Prepagada")
     dependiente = fields.Boolean(string='Dependiente', help="Dependiente Económico")
     excentas = fields.Float(string='Renta excenta', help="Rentas Excentas")
-    tipo_incapacidad = fields.Selection([('1', 'Normal'), ('2', 'Todo .5'), ('3', 'Todo .66') ,('4', 'Todo 100')], string='Tipo de Retención', help="Tipo de Incapacidad", default='1')
+    tipo_incapacidad = fields.Selection([('1', 'Normal'), ('2', 'Todo .5'), ('3', 'Todo .66') ,('4', 'Todo 100')], string='Tipo de Incapacidad', help="Tipo de Incapacidad", default='1')
