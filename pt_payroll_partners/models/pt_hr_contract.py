@@ -58,3 +58,6 @@ class PtHrContract(models.Model):
     monto_diez = fields.Float(string='Monto Diez', help="En caso que sea un monto fijo para el proveedor diez - campo - monto_diez")
     tipo_retencion = fields.Selection([('1', 'Método Uno'), ('2', 'Método Dos'), ('3', 'No aplica')], string='Tipo de Retención', help="Tipo de retención salarial", default='3')
     procentaje_metodo_dos = fields.Float(string='Porcentaje Método Dos', help="Porcentaje de retención para el método dos - campo - procentaje_metodo_dos")
+    liquidar = fields.Boolean(string="Liquidar", default=False)
+    justa_causa = fields.Boolean(string="Justa Causa", default=True)
+    
