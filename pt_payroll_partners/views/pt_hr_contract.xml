@@ -13,6 +13,11 @@
 				<xpath expr="//field[@name='wage_type']" position="after">
 					<field name="tipo_retencion"/>
 					<field name="procentaje_metodo_dos" invisible="tipo_retencion != '2'"/>
+					<field name="intereses_vivienda" />
+					<field name="prepagada" />
+					<field name="dependiente" />
+					<field name="excentas" />
+					<field name="tipo_incapacidad"/>
 				</xpath>
 				<xpath expr="//page[@name='information']" position="after">
 					<page name="Proveedores" string="Proveedores">

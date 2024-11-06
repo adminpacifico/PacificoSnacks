@@ -60,4 +60,8 @@ class PtHrContract(models.Model):
     procentaje_metodo_dos = fields.Float(string='Porcentaje Método Dos', help="Porcentaje de retención para el método dos - campo - procentaje_metodo_dos")
     liquidar = fields.Boolean(string="Liquidar", default=False)
     justa_causa = fields.Boolean(string="Justa Causa", default=True)
-    
+    intereses_vivienda = fields.Float(string='Intereses Vivienda', help="Intereses de Vivienda")
+    prepagada = fields.Float(string='Prepagada', help="Medicina Prepagada")
+    dependiente = fields.Boolean(string='Dependiente', help="Dependiente Económico")
+    excentas = fields.Float(string='Renta excenta', help="Rentas Excentas")
+    tipo_incapacidad = fields.Selection([('1', 'Normal'), ('2', 'Todo .5'), ('3', 'Todo .66') ,('4', 'Todo 100')], string='Tipo de Incapacidad', help="Tipo de Incapacidad", default='1') 
