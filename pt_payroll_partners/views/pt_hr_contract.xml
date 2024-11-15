@@ -6,9 +6,18 @@
             <field name="model">hr.contract</field>
             <field name="inherit_id" ref="hr_contract.hr_contract_view_form"/>
             <field name="arch" type="xml">
+			    <xpath expr="//field[@name='work_entry_source']" position="after">
+					<field name="liquidar"/>
+					<field name="justa_causa" invisible="not liquidar"/>
+				</xpath>
 				<xpath expr="//field[@name='wage_type']" position="after">
 					<field name="tipo_retencion"/>
 					<field name="procentaje_metodo_dos" invisible="tipo_retencion != '2'"/>
+					<field name="intereses_vivienda" />
+					<field name="prepagada" />
+					<field name="dependiente" />
+					<field name="excentas" />
+					<field name="tipo_incapacidad"/>
 				</xpath>
 				<xpath expr="//page[@name='information']" position="after">
 					<page name="Proveedores" string="Proveedores">

@@ -64,6 +64,7 @@ class HrEmployee(models.Model):
 
     libro_vacaciones_ids = fields.One2many('pt.libro.vacaciones', 'empleado_id', string='Libro de vacaciones')
     vacaciones_tomadas_ids = fields.One2many('pt.vacaciones.tomadas', 'empleado_id', string='Vacaciones tomadas')
+    payroll_tercero_id = fields.Many2one('res.partner', string='Contacto')
 
 
 class HrContract(models.Model):
