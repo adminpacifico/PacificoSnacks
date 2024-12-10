@@ -47,6 +47,20 @@
 								<field name="monto_diez"/>
 							</group>
 						</group>
+						<group>
+						    <group>
+								<field name="monto_once"/>
+								<field name="monto_doce"/>
+								<field name="monto_trece"/>
+								<field name="monto_catorce"/>
+								<field name="monto_quince"/>
+								<field name="monto_dieciseis"/>
+								<field name="monto_diecisiete"/>
+								<field name="monto_dieciocho"/>
+								<field name="monto_diecinueve"/>
+								<field name="monto_veinte"/>
+							</group>
+						</group>
 					</page>
 					<page name="Vacaciones Tomadas" string="Vacaciones Tomadas">
 						<group>
