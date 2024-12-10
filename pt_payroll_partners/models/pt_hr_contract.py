@@ -56,25 +56,25 @@ class PtHrContract(models.Model):
     monto_ocho = fields.Float(string='Monto Ocho', help="En caso que sea un monto fijo para el proveedor ocho - campo - monto_ocho")
     monto_nueve = fields.Float(string='Monto Nueve', help="En caso que sea un monto fijo para el proveedor nueve - campo - monto_nueve")
     monto_diez = fields.Float(string='Monto Diez', help="En caso que sea un monto fijo para el proveedor diez - campo - monto_diez")
-    monto_once = fields.Float(string='Monto Uno',
+    monto_once = fields.Float(string='Monto Once',
                              help="En caso que sea un monto fijo para el proveedor uno - campo - monto_once")
-    monto_doce = fields.Float(string='Monto Dos',
+    monto_doce = fields.Float(string='Monto Doce',
                              help="En caso que sea un monto fijo para el proveedor dos - campo - monto_doce")
-    monto_trece = fields.Float(string='Monto Tres',
+    monto_trece = fields.Float(string='Monto Trece',
                               help="En caso que sea un monto fijo para el proveedor tres - campo - monto_trece")
-    monto_catorce = fields.Float(string='Monto Cuatro',
+    monto_catorce = fields.Float(string='Monto Catorce',
                                 help="En caso que sea un monto fijo para el proveedor cuatro - campo - monto_catorce")
-    monto_quince = fields.Float(string='Monto Cinco',
+    monto_quince = fields.Float(string='Monto Quince',
                                help="En caso que sea un monto fijo para el proveedor cinco - campo - monto_quince")
-    monto_dieciseis = fields.Float(string='Monto Seis',
+    monto_dieciseis = fields.Float(string='Monto Dieciseis',
                               help="En caso que sea un monto fijo para el proveedor seis - campo - monto_dieciseis")
-    monto_diecisiete = fields.Float(string='Monto Siete',
+    monto_diecisiete = fields.Float(string='Monto Diecisiete',
                                help="En caso que sea un monto fijo para el proveedor siete - campo - monto_diecisiete")
-    monto_dieciocho = fields.Float(string='Monto Ocho',
+    monto_dieciocho = fields.Float(string='Monto Diesiocho',
                               help="En caso que sea un monto fijo para el proveedor ocho - campo - monto_dieciocho")
-    monto_diecinueve = fields.Float(string='Monto Nueve',
+    monto_diecinueve = fields.Float(string='Monto Diecinueve',
                                help="En caso que sea un monto fijo para el proveedor nueve - campo - monto_diecinueve")
-    monto_veinte = fields.Float(string='Monto Diez',
+    monto_veinte = fields.Float(string='Monto Veinte',
                               help="En caso que sea un monto fijo para el proveedor diez - campo - monto_veinte")
     tipo_retencion = fields.Selection([('1', 'Método Uno'), ('2', 'Método Dos'), ('3', 'No aplica')], string='Tipo de Retención', help="Tipo de retención salarial", default='3')
     procentaje_metodo_dos = fields.Float(string='Porcentaje Método Dos', help="Porcentaje de retención para el método dos - campo - procentaje_metodo_dos")
